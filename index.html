@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab # 6 - Biol226</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+  font-family: Arial;
+  padding: 20px;
+  background: #f7f7f7;
+}
+
+h1 {
+  font-size: 36px;
+  text-align: center;
+}
+
+button {
+  font-size: 22px;
+  padding: 15px;
+  margin-top: 10px;
+  width: 100%;
+  border-radius: 10px;
+  border: none;
+  background: #2f6fed;
+  color: white;
+}
+
+#generateButton {
+  font-size: 28px;
+  padding: 25px;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+td, th {
+  border: 1px solid #ccc;
+  padding: 8px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  font-size: 18px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Lab # 6 - Biol226</h1>
+
+<button id="generateButton" onclick="generateData()">Generate Dataset</button>
+
+<div id="output"></div>
+<div id="expected"></div>
+<div id="results"></div>
+<div class="card"><canvas id="chart"></canvas></div>
+
+<script>
+let observed = [];
+let phenotypes = [];
+let expectedVals = [];
+let chart;
+
+const organisms = {
+  "Tomato plants": {
+    phenotypes: [
+      "Tall resistant",
+      "Tall susceptible",
+      "Short resistant",
+      "Short susceptible"
+    ],
+    dominance: "Tall and resistant are dominant."
+  },
+
+  "Wheat plants": {
+    phenotypes: [
+      "Solid high yield",
+      "Solid low yield",
+      "Hollow high yield",
+      "Hollow low yield"
+    ],
+    dominance: "Solid and high yield are dominant."
+  },
+
+  "Dairy cattle": {
+    phenotypes: [
+      "High production resistant",
+      "High production susceptible",
+      "Low production resistant",
+      "Low production susceptible"
+    ],
+    dominance: "High production and virus resistance are dominant."
+  },
+
+  "Drosophila": {
+    phenotypes: [
+      "Normal body normal wing",
+      "Normal body vestigial wing",
+      "Black body normal wing",
+      "Black body vestigial wing"
+    ],
+    dominance: "Normal body and normal wing are dominant."
+  }
+};
+
+function generateData() {
+  const keys = Object.keys(organisms);
+  const org = keys[Math.floor(Math.random() * keys.length)];
+  const total = Math.floor(Math.random() * 201) + 300;
+
+  observed = [0, 0, 0, 0];
+  phenotypes = organisms[org].phenotypes;
+
+  for (let i = 0; i < total; i++) {
+    let r = Math.random();
+
+    if (r < 9 / 16) {
+      observed[0]++;
+    } else if (r < 12 / 16) {
+      observed[1]++;
+    } else if (r < 15 / 16) {
+      observed[2]++;
+    } else {
+      observed[3]++;
+    }
+  }
+
+  let html = `
+    <div class="card">
+      <h2>${org}</h2>
+      <p><b>Total:</b> ${total}</p>
+      <p><b>Dominance:</b> ${organisms[org].dominance}</p>
+
+      <table>
+        <tr>
+          <th>Phenotype</th>
+          <th>Observed</th>
+        </tr>
+  `;
+
+  for (let i = 0; i < 4; i++) {
+    html += `
+      <tr>
+        <td>${phenotypes[i]}</td>
+        <td>${observed[i]}</td>
+      </tr>
+    `;
+  }
+
+  html += `
+      </table>
+    </div>
+  `;
+
+  document.getElementById("output").innerHTML = html;
+
+  createInputs();
+
+  document.getElementById("results").innerHTML = "";
+
+  if (chart) {
+    chart.destroy();
+  }
+}
+
+function createInputs() {
+  let html = `
+    <div class="card">
+      <h2>Enter Expected Numbers</h2>
+      <p>Enter the expected number for each phenotypic class.</p>
+  `;
+
+  for (let i = 0; i < 4; i++) {
+    html += `
+      <p>${phenotypes[i]}</p>
+      <input type="number" id="e${i}" placeholder="Expected">
+    `;
+  }
+
+  html += `
+      <button onclick="runTest()">Run χ² Test</button>
+    </div>
+  `;
+
+  document.getElementById("expected").innerHTML = html;
+}
+
+function runTest() {
+  expectedVals = [];
+
+  for (let i = 0; i < 4; i++) {
+    let v = parseFloat(document.getElementById("e" + i).value);
+
+    if (isNaN(v) || v <= 0) {
+      alert("Please enter valid positive expected numbers.");
+      return;
+    }
+
+    expectedVals.push(v);
+  }
+
+  let chi = 0;
+
+  let table = `
+    <div class="card">
+      <h2>χ² Results</h2>
+
+      <table>
+        <tr>
+          <th>Phenotype</th>
+          <th>Observed</th>
+          <th>Expected</th>
+          <th>(O - E)² / E</th>
+        </tr>
+  `;
+
+  for (let i = 0; i < 4; i++) {
+    let component = Math.pow(observed[i] - expectedVals[i], 2) / expectedVals[i];
+    chi += component;
+
+    table += `
+      <tr>
+        <td>${phenotypes[i]}</td>
+        <td>${observed[i]}</td>
+        <td>${expectedVals[i]}</td>
+        <td>${component.toFixed(4)}</td>
+      </tr>
+    `;
+  }
+
+  let p = chiP(chi);
+
+  table += `
+      </table>
+
+      <p><b>χ² value:</b> ${chi.toFixed(4)}</p>
+      <p><b>Degrees of freedom:</b> 3</p>
+      <p><b>p-value:</b> ${p.toFixed(6)}</p>
+      <p><b>Conclusion:</b> ${
+        p < 0.05
+          ? "Reject H₀. The observed data do not fit the expected values."
+          : "Fail to reject H₀. The observed data fit the expected values."
+      }</p>
+    </div>
+  `;
+
+  document.getElementById("results").innerHTML = table;
+
+  drawChart();
+}
+
+function drawChart() {
+  const ctx = document.getElementById("chart");
+
+  if (chart) {
+    chart.destroy();
+  }
+
+  chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: phenotypes,
+      datasets: [
+        {
+          label: "Observed",
+          data: observed,
+          backgroundColor: "rgba(54, 162, 235, 0.6)"
+        },
+        {
+          label: "Expected",
+          data: expectedVals,
+          backgroundColor: "rgba(255, 159, 64, 0.6)"
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: "Observed vs Expected Phenotypic Counts"
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+
+/* Correct p-value for chi-square with df = 3 */
+function chiP(x) {
+  let t = Math.sqrt(x / 2);
+  return erfc(t) + Math.sqrt((2 * x) / Math.PI) * Math.exp(-x / 2);
+}
+
+function erfc(x) {
+  let z = Math.abs(x);
+  let t = 1 / (1 + z / 2);
+
+  let r = t * Math.exp(
+    -z * z - 1.26551223 +
+    t * (1.00002368 +
+    t * (0.37409196 +
+    t * (0.09678418 +
+    t * (-0.18628806 +
+    t * (0.27886807 +
+    t * (-1.13520398 +
+    t * (1.48851587 +
+    t * (-0.82215223 +
+    t * 0.17087277))))))))
+  );
+
+  return x >= 0 ? r : 2 - r;
+}
+</script>
+
+</body>
+</html>

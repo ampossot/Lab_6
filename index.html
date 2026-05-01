@@ -2,9 +2,11 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lab # 6 - Biol226</title>
+<title>Dataset Generator - Biol226 - USask</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 body {
@@ -14,7 +16,7 @@ body {
 }
 
 h1 {
-  font-size: 36px;
+  font-size: 34px;
   text-align: center;
 }
 
@@ -29,9 +31,13 @@ button {
   color: white;
 }
 
-#generateButton {
-  font-size: 28px;
+.generateButton {
+  font-size: 26px;
   padding: 25px;
+}
+
+.exportButton {
+  background: #198754;
 }
 
 .card {
@@ -57,95 +63,130 @@ input {
   padding: 10px;
   font-size: 18px;
 }
+
+.credit {
+  text-align: center;
+  font-size: 24px;
+  margin-top: 20px;
+  color: #555;
+}
 </style>
 </head>
 
 <body>
 
-<h1>Lab # 6 - Biol226</h1>
+<h1>Dataset Generator - Biol226 - USask</h1>
 
-<button id="generateButton" onclick="generateData()">Generate Dataset</button>
+<button class="generateButton" onclick="generateDihybridData()">Generate Dihybrid Cross Dataset</button>
+<button class="generateButton" onclick="generateTestCrossData()">Generate Test-Cross Dataset</button>
+
+<div class="credit">Dr. Andres Posso-Terranova. 2026. ©</div>
 
 <div id="output"></div>
 <div id="expected"></div>
+<div id="check"></div>
 <div id="results"></div>
 <div class="card"><canvas id="chart"></canvas></div>
+<div id="finalCredit"></div>
 
 <script>
 let observed = [];
 let phenotypes = [];
 let expectedVals = [];
+let currentMode = "";
 let chart;
+let datasetLocked = false;
+let currentDatasetTitle = "";
+let currentOrganism = "";
 
-const organisms = {
+const dihybridOrganisms = {
   "Tomato plants": {
-    phenotypes: [
-      "Tall resistant",
-      "Tall susceptible",
-      "Short resistant",
-      "Short susceptible"
-    ],
+    phenotypes: ["Tall resistant", "Tall susceptible", "Short resistant", "Short susceptible"],
     dominance: "Tall and resistant are dominant."
   },
-
   "Wheat plants": {
-    phenotypes: [
-      "Solid high yield",
-      "Solid low yield",
-      "Hollow high yield",
-      "Hollow low yield"
-    ],
+    phenotypes: ["Solid high yield", "Solid low yield", "Hollow high yield", "Hollow low yield"],
     dominance: "Solid and high yield are dominant."
   },
-
   "Dairy cattle": {
-    phenotypes: [
-      "High production resistant",
-      "High production susceptible",
-      "Low production resistant",
-      "Low production susceptible"
-    ],
+    phenotypes: ["High production resistant", "High production susceptible", "Low production resistant", "Low production susceptible"],
     dominance: "High production and virus resistance are dominant."
   },
-
   "Drosophila": {
-    phenotypes: [
-      "Normal body normal wing",
-      "Normal body vestigial wing",
-      "Black body normal wing",
-      "Black body vestigial wing"
-    ],
+    phenotypes: ["Normal body normal wing", "Normal body vestigial wing", "Black body normal wing", "Black body vestigial wing"],
     dominance: "Normal body and normal wing are dominant."
   }
 };
 
-function generateData() {
-  const keys = Object.keys(organisms);
+const testCrossOrganisms = {
+  "Tomato plants": {
+    phenotypes: ["Tall resistant", "Short susceptible", "Tall susceptible", "Short resistant"],
+    dominance: "Tall and resistant are dominant.",
+    parental: "Tall resistant and short susceptible are the parental phenotypes."
+  },
+  "Wheat plants": {
+    phenotypes: ["Solid high yield", "Hollow low yield", "Solid low yield", "Hollow high yield"],
+    dominance: "Solid and high yield are dominant.",
+    parental: "Solid high yield and hollow low yield are the parental phenotypes."
+  },
+  "Dairy cattle": {
+    phenotypes: ["High production resistant", "Low production susceptible", "High production susceptible", "Low production resistant"],
+    dominance: "High production and virus resistance are dominant.",
+    parental: "High production resistant and low production susceptible are the parental phenotypes."
+  },
+  "Drosophila": {
+    phenotypes: ["Normal body normal wing", "Black body vestigial wing", "Normal body vestigial wing", "Black body normal wing"],
+    dominance: "Normal body and normal wing are dominant.",
+    parental: "Normal body normal wing and black body vestigial wing are the parental phenotypes."
+  }
+};
+
+function clearPrevious() {
+  document.getElementById("output").innerHTML = "";
+  document.getElementById("expected").innerHTML = "";
+  document.getElementById("check").innerHTML = "";
+  document.getElementById("results").innerHTML = "";
+  document.getElementById("finalCredit").innerHTML = "";
+
+  if (chart) {
+    chart.destroy();
+  }
+}
+
+function generateDihybridData() {
+  if (datasetLocked) {
+    alert("Refresh Browser for New Dataset");
+    return;
+  }
+
+  datasetLocked = true;
+  clearPrevious();
+  currentMode = "dihybrid";
+  currentDatasetTitle = "Dihybrid Cross Dataset";
+
+  const keys = Object.keys(dihybridOrganisms);
   const org = keys[Math.floor(Math.random() * keys.length)];
+  currentOrganism = org;
   const total = Math.floor(Math.random() * 201) + 300;
 
   observed = [0, 0, 0, 0];
-  phenotypes = organisms[org].phenotypes;
+  phenotypes = dihybridOrganisms[org].phenotypes;
 
   for (let i = 0; i < total; i++) {
     let r = Math.random();
 
-    if (r < 9 / 16) {
-      observed[0]++;
-    } else if (r < 12 / 16) {
-      observed[1]++;
-    } else if (r < 15 / 16) {
-      observed[2]++;
-    } else {
-      observed[3]++;
-    }
+    if (r < 9 / 16) observed[0]++;
+    else if (r < 12 / 16) observed[1]++;
+    else if (r < 15 / 16) observed[2]++;
+    else observed[3]++;
   }
 
   let html = `
     <div class="card">
-      <h2>${org}</h2>
+      <h2>Dihybrid Cross Dataset</h2>
+      <h3>${org}</h3>
       <p><b>Total:</b> ${total}</p>
-      <p><b>Dominance:</b> ${organisms[org].dominance}</p>
+      <p><b>Dominance:</b> ${dihybridOrganisms[org].dominance}</p>
 
       <table>
         <tr>
@@ -169,21 +210,92 @@ function generateData() {
   `;
 
   document.getElementById("output").innerHTML = html;
-
   createInputs();
+}
 
-  document.getElementById("results").innerHTML = "";
-
-  if (chart) {
-    chart.destroy();
+function generateTestCrossData() {
+  if (datasetLocked) {
+    alert("Refresh Browser for New Dataset");
+    return;
   }
+
+  datasetLocked = true;
+  clearPrevious();
+  currentMode = "testcross";
+  currentDatasetTitle = "Test-Cross Dataset";
+
+  const keys = Object.keys(testCrossOrganisms);
+  const org = keys[Math.floor(Math.random() * keys.length)];
+  currentOrganism = org;
+  const total = Math.floor(Math.random() * 201) + 300;
+
+  observed = [0, 0, 0, 0];
+  phenotypes = testCrossOrganisms[org].phenotypes;
+
+  let recombinationFrequency = Math.floor(Math.random() * 26) + 10;
+  let rf = recombinationFrequency / 100;
+
+  let p1 = (1 - rf) / 2;
+  let p2 = (1 - rf) / 2;
+  let r1 = rf / 2;
+
+  for (let i = 0; i < total; i++) {
+    let r = Math.random();
+
+    if (r < p1) observed[0]++;
+    else if (r < p1 + p2) observed[1]++;
+    else if (r < p1 + p2 + r1) observed[2]++;
+    else observed[3]++;
+  }
+
+  let html = `
+    <div class="card">
+      <h2>Test-Cross Dataset</h2>
+      <h3>${org}</h3>
+      <p><b>Cross:</b> AaBb × aabb</p>
+      <p><b>Total offspring:</b> ${total}</p>
+      <p><b>Dominance:</b> ${testCrossOrganisms[org].dominance}</p>
+      <p><b>Parental classes:</b> ${testCrossOrganisms[org].parental}</p>
+
+      <table>
+        <tr>
+          <th>Phenotype</th>
+          <th>Class</th>
+          <th>Observed</th>
+        </tr>
+  `;
+
+  for (let i = 0; i < 4; i++) {
+    html += `
+      <tr>
+        <td>${phenotypes[i]}</td>
+        <td>${i < 2 ? "Parental" : "Recombinant"}</td>
+        <td>${observed[i]}</td>
+      </tr>
+    `;
+  }
+
+  html += `
+      </table>
+    </div>
+  `;
+
+  document.getElementById("output").innerHTML = html;
+  createInputs();
 }
 
 function createInputs() {
+  let ratioText = currentMode === "dihybrid" ? "9 : 3 : 3 : 1" : "1 : 1 : 1 : 1";
+  let explanation = currentMode === "dihybrid"
+    ? "Example: First class = total × 9/16"
+    : "Each class = total ÷ 4";
+
   let html = `
     <div class="card">
       <h2>Enter Expected Numbers</h2>
-      <p>Enter the expected number for each phenotypic class.</p>
+      <p>Expected phenotypic ratio:</p>
+      <p><b>${ratioText}</b></p>
+      <p>${explanation}</p>
   `;
 
   for (let i = 0; i < 4; i++) {
@@ -194,11 +306,61 @@ function createInputs() {
   }
 
   html += `
-      <button onclick="runTest()">Run χ² Test</button>
+      <button onclick="checkExpected()">Check Expected</button>
     </div>
   `;
 
   document.getElementById("expected").innerHTML = html;
+}
+
+function checkExpected() {
+  let total = observed.reduce((a, b) => a + b, 0);
+  let title = "";
+  let correctExpected = [];
+
+  if (currentMode === "dihybrid") {
+    title = "Correct Expected Values (9:3:3:1)";
+    let ratios = [9, 3, 3, 1];
+
+    for (let i = 0; i < 4; i++) {
+      correctExpected.push(total * ratios[i] / 16);
+    }
+  } else {
+    title = "Correct Expected Values (1:1:1:1)";
+
+    for (let i = 0; i < 4; i++) {
+      correctExpected.push(total / 4);
+    }
+  }
+
+  let html = `
+    <div class="card">
+      <h2>${title}</h2>
+
+      <table>
+        <tr>
+          <th>Phenotype</th>
+          <th>Correct Expected</th>
+        </tr>
+  `;
+
+  for (let i = 0; i < 4; i++) {
+    html += `
+      <tr>
+        <td>${phenotypes[i]}</td>
+        <td>${correctExpected[i].toFixed(2)}</td>
+      </tr>
+    `;
+  }
+
+  html += `
+      </table>
+
+      <button onclick="runTest()">Run χ² Test</button>
+    </div>
+  `;
+
+  document.getElementById("check").innerHTML = html;
 }
 
 function runTest() {
@@ -224,6 +386,7 @@ function runTest() {
       <table>
         <tr>
           <th>Phenotype</th>
+          ${currentMode === "testcross" ? "<th>Class</th>" : ""}
           <th>Observed</th>
           <th>Expected</th>
           <th>(O - E)² / E</th>
@@ -237,6 +400,7 @@ function runTest() {
     table += `
       <tr>
         <td>${phenotypes[i]}</td>
+        ${currentMode === "testcross" ? `<td>${i < 2 ? "Parental" : "Recombinant"}</td>` : ""}
         <td>${observed[i]}</td>
         <td>${expectedVals[i]}</td>
         <td>${component.toFixed(4)}</td>
@@ -246,23 +410,61 @@ function runTest() {
 
   let p = chiP(chi);
 
+  let h0 = currentMode === "dihybrid"
+    ? "The genes assort independently; therefore, the expected phenotypic ratio is 9:3:3:1."
+    : "The genes assort independently; therefore, the expected phenotypic ratio is 1:1:1:1.";
+
+  let conclusion = "";
+
+  if (currentMode === "dihybrid") {
+    conclusion = p < 0.05
+      ? "Reject H₀. The observed data do not fit the expected 9:3:3:1 ratio."
+      : "Fail to reject H₀. The observed data fit the expected 9:3:3:1 ratio.";
+  } else {
+    conclusion = p < 0.05
+      ? "Reject H₀. The data do not fit a 1:1:1:1 ratio. The genes are likely linked."
+      : "Fail to reject H₀. The data fit a 1:1:1:1 ratio. There is no strong evidence of linkage.";
+  }
+
   table += `
       </table>
 
       <p><b>χ² value:</b> ${chi.toFixed(4)}</p>
       <p><b>Degrees of freedom:</b> 3</p>
       <p><b>p-value:</b> ${p.toFixed(6)}</p>
-      <p><b>Conclusion:</b> ${
-        p < 0.05
-          ? "Reject H₀. The observed data do not fit the expected values."
-          : "Fail to reject H₀. The observed data fit the expected values."
-      }</p>
+
+      <p><b>H₀:</b> ${h0}</p>
+
+      <p><b>Conclusion:</b> ${conclusion}</p>
+  `;
+
+  if (currentMode === "testcross") {
+    table += `
+      <p><b>Estimated recombination frequency from observed data:</b> ${estimateRF().toFixed(2)}%</p>
+    `;
+  }
+
+  table += `
     </div>
   `;
 
   document.getElementById("results").innerHTML = table;
 
   drawChart();
+
+  document.getElementById("finalCredit").innerHTML = `
+  <div class="credit">
+    Dr. Andres Posso-Terranova. 2026. ©
+  </div>
+  <button class="exportButton" onclick="exportPDF()">Export Report as PDF</button>
+  <button onclick="exitApp()">Exit</button>
+`;
+}
+
+function estimateRF() {
+  let total = observed.reduce((a, b) => a + b, 0);
+  let recombinants = observed[2] + observed[3];
+  return (recombinants / total) * 100;
 }
 
 function drawChart() {
@@ -271,6 +473,10 @@ function drawChart() {
   if (chart) {
     chart.destroy();
   }
+
+  let chartTitle = currentMode === "dihybrid"
+    ? "Observed vs Expected Dihybrid Cross Counts"
+    : "Observed vs Expected Test-Cross Counts";
 
   chart = new Chart(ctx, {
     type: "bar",
@@ -294,7 +500,7 @@ function drawChart() {
       plugins: {
         title: {
           display: true,
-          text: "Observed vs Expected Phenotypic Counts"
+          text: chartTitle
         }
       },
       scales: {
@@ -306,7 +512,88 @@ function drawChart() {
   });
 }
 
-/* Correct p-value for chi-square with df = 3 */
+function exportPDF() {
+  let studentName = prompt("Enter Student Name:");
+  if (!studentName) {
+    alert("Student Name is required.");
+    return;
+  }
+
+  let nsid = prompt("Enter NSID:");
+  if (!nsid) {
+    alert("NSID is required.");
+    return;
+  }
+
+  const chartImage = document.getElementById("chart").toDataURL("image/png");
+
+  let report = document.createElement("div");
+  report.style.background = "white";
+  report.style.padding = "25px";
+  report.style.fontFamily = "Arial";
+  report.style.width = "900px";
+  report.style.position = "absolute";
+  report.style.left = "-9999px";
+  report.style.top = "0";
+
+  report.innerHTML = `
+    <h1 style="text-align:center;">Dataset Generator - Biol226 - USask</h1>
+
+    <p><b>Student Name:</b> ${studentName}</p>
+    <p><b>NSID:</b> ${nsid}</p>
+    <p><b>Dataset Type:</b> ${currentDatasetTitle}</p>
+    <p><b>Organism:</b> ${currentOrganism}</p>
+
+    <hr>
+
+    ${document.getElementById("output").innerHTML}
+    ${document.getElementById("check").innerHTML}
+    ${document.getElementById("results").innerHTML}
+
+    <div class="card">
+      <h2>Graph</h2>
+      <img src="${chartImage}" style="width:100%;">
+    </div>
+
+    <div style="text-align:center; font-size:24px; margin-top:25px; color:#555;">
+      Dr. Andres Posso-Terranova. 2026. ©
+    </div>
+  `;
+
+  document.body.appendChild(report);
+
+  html2canvas(report, { scale: 2 }).then(canvas => {
+    const imgData = canvas.toDataURL("image/png");
+    const { jsPDF } = window.jspdf;
+
+    let pdf = new jsPDF("p", "mm", "a4");
+    let pageWidth = pdf.internal.pageSize.getWidth();
+    let pageHeight = pdf.internal.pageSize.getHeight();
+
+    let imgWidth = pageWidth - 20;
+    let imgHeight = canvas.height * imgWidth / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 10;
+
+    pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight + 10;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    let cleanName = studentName.replace(/\s+/g, "_");
+    pdf.save(`${cleanName}_${nsid}_Biol226_Report.pdf`);
+
+    document.body.removeChild(report);
+  });
+}
+
+/* p-value for chi-square with df = 3 */
 function chiP(x) {
   let t = Math.sqrt(x / 2);
   return erfc(t) + Math.sqrt((2 * x) / Math.PI) * Math.exp(-x / 2);
@@ -330,6 +617,12 @@ function erfc(x) {
   );
 
   return x >= 0 ? r : 2 - r;
+}
+
+function exitApp() {
+  if (confirm("Are you sure you want to exit?")) {
+    location.reload();
+  }
 }
 </script>
 

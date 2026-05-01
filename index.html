@@ -495,20 +495,77 @@ function drawChart() {
         }
       ]
     },
-    options: {
-      responsive: true,
-      plugins: {
-        title: {
-          display: true,
-          text: chartTitle
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true
-        }
+options: {
+
+  responsive: true,
+
+  plugins: {
+
+    title: {
+
+      display: true,
+
+      text: chartTitle,
+
+      font: {
+
+        size: 26   // title bigger
+
       }
+
+    },
+
+    legend: {
+
+      labels: {
+
+        font: {
+
+          size: 20   // legend text
+
+        }
+
+      }
+
     }
+
+  },
+
+  scales: {
+
+    x: {
+
+      ticks: {
+
+        font: {
+
+          size: 18   // x-axis labels
+
+        }
+
+      }
+
+    },
+
+    y: {
+
+      beginAtZero: true,
+
+      ticks: {
+
+        font: {
+
+          size: 18   // y-axis numbers
+
+        }
+
+      }
+
+    }
+
+  }
+
+}
   });
 }
 

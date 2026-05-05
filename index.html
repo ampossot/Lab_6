@@ -347,53 +347,109 @@ function createInputs() {
 }
 
 function checkExpected() {
+
   let total = observed.reduce((a, b) => a + b, 0);
-  let title = "";
+
   let correctExpected = [];
 
   if (currentMode === "dihybrid") {
-    title = "Correct Expected Values (9:3:3:1)";
+
     let ratios = [9, 3, 3, 1];
 
     for (let i = 0; i < 4; i++) {
+
       correctExpected.push(total * ratios[i] / 16);
+
     }
+
   } else {
-    title = "Correct Expected Values (1:1:1:1)";
 
     for (let i = 0; i < 4; i++) {
+
       correctExpected.push(total / 4);
+
     }
+
   }
 
-  let html = `
-    <div class="card">
-      <h2>${title}</h2>
-
-      <table>
-        <tr>
-          <th>Phenotype</th>
-          <th>Correct Expected</th>
-        </tr>
-  `;
+  let allCorrect = true;
 
   for (let i = 0; i < 4; i++) {
-    html += `
-      <tr>
-        <td>${phenotypes[i]}</td>
-        <td>${correctExpected[i].toFixed(2)}</td>
-      </tr>
-    `;
+
+    let input = document.getElementById("e" + i);
+
+    let student = parseFloat(input.value);
+
+    input.style.backgroundColor = "white";
+
+    if (isNaN(student)) {
+
+      allCorrect = false;
+
+      input.style.backgroundColor = "#ffd6d6";
+
+      continue;
+
+    }
+
+    let exact = correctExpected[i];
+
+    let rounded = Math.round(exact);
+
+    let tolerance = exact * 0.01;
+
+    if (
+
+      student !== rounded &&
+
+      Math.abs(student - exact) > tolerance
+
+    ) {
+
+      allCorrect = false;
+
+      input.style.backgroundColor = "#ffd6d6";
+
+    }
+
   }
 
-  html += `
-      </table>
+  if (!allCorrect) {
+
+    document.getElementById("check").innerHTML = `
+
+      <div class="card" style="background:#ffe5e5;">
+
+        <h2>⚠️ Check Your Expected Values</h2>
+
+        <p>Some expected values are not correct yet.</p>
+
+        <p>Incorrect fields are highlighted in red.</p>
+
+        <p>Whole numbers or values within 1% of the correct expected value are accepted.</p>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+  document.getElementById("check").innerHTML = `
+
+    <div class="card" style="background:#e6ffe6;">
+
+      <h2>✅ Expected Values Correct</h2>
+
+      <p>You may now proceed to the χ² test.</p>
 
       <button onclick="runTest()">Run χ² Test</button>
+
     </div>
+
   `;
 
-  document.getElementById("check").innerHTML = html;
 }
 
 function runTest() {

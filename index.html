@@ -70,7 +70,12 @@ input {
   margin-top: 20px;
   color: #555;
 }
-
+.warning {
+  background: #fff3cd;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
 .download-link {
   display: block;
   text-align: center;
@@ -226,6 +231,10 @@ function generateDihybridData() {
 
   html += `
       </table>
+
+      <div class="warning">
+        <b>Student task:</b> Calculate expected offspring numbers, run a χ² test, and determine whether the observed data fit the expected 9:3:3:1 ratio.
+      </div>
     </div>
   `;
 
@@ -297,6 +306,10 @@ function generateTestCrossData() {
 
   html += `
       </table>
+
+      <div class="warning">
+        <b>Student task:</b> Calculate expected offspring numbers, run a χ² test, and determine whether the observed data fit the expected 1:1:1:1 ratio. If there is evidence of linkage, estimate the recombination frequency.
+      </div>
     </div>
   `;
 

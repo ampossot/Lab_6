@@ -691,7 +691,7 @@ function exportPDF() {
 
   let report = document.createElement("div");
   report.style.background = "white";
-  report.style.padding = "25px";
+  report.style.padding = "45px";
   report.style.fontFamily = "Arial";
   report.style.width = "900px";
   report.style.position = "absolute";
@@ -699,7 +699,7 @@ function exportPDF() {
   report.style.top = "0";
 
   report.innerHTML = `
-    <h1 style="text-align:center;">Dataset Generator - Biol226 - USask</h1>
+    <h1 style="text-align:center; margin-bottom:25px;">Dataset Generator - Biol226 - USask</h1>
 
     <p><b>Student Name:</b> ${studentName}</p>
     <p><b>NSID:</b> ${nsid}</p>
@@ -707,7 +707,7 @@ function exportPDF() {
     <p><b>Organism:</b> ${currentOrganism}</p>
     <p><b>Timestamp:</b> ${timestamp}</p>
 
-    <hr>
+    <hr style="margin-top:20px; margin-bottom:20px;">
 
     ${document.getElementById("output").innerHTML}
     ${document.getElementById("check").innerHTML}
@@ -721,32 +721,61 @@ function exportPDF() {
     <div style="text-align:center; font-size:24px; margin-top:25px; color:#555;">
       Dr. Andres Posso-Terranova. 2026. ©
     </div>
+
+    <div style="height:80px;"></div>
   `;
 
   document.body.appendChild(report);
 
-  html2canvas(report, { scale: 2 }).then(canvas => {
-    const imgData = canvas.toDataURL("image/png");
+  html2canvas(report, { scale: 1 }).then(canvas => {
     const { jsPDF } = window.jspdf;
 
     let pdf = new jsPDF("p", "mm", "a4");
     let pageWidth = pdf.internal.pageSize.getWidth();
     let pageHeight = pdf.internal.pageSize.getHeight();
 
-    let imgWidth = pageWidth - 20;
-    let imgHeight = canvas.height * imgWidth / canvas.width;
+    let marginLeft = 15;
+    let marginTop = 15;
+    let marginBottom = 20;
 
-    let heightLeft = imgHeight;
-    let position = 10;
+    let imgWidth = pageWidth - 30;
+    let usablePageHeight = pageHeight - marginTop - marginBottom;
 
-    pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
+    let pageCanvasHeight = Math.floor(canvas.width * usablePageHeight / imgWidth);
+    let sourceY = 0;
+    let pageNumber = 0;
 
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight + 10;
-      pdf.addPage();
-      pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+    while (sourceY < canvas.height) {
+      let sliceHeight = Math.min(pageCanvasHeight, canvas.height - sourceY);
+
+      let pageCanvas = document.createElement("canvas");
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sliceHeight;
+
+      let pageContext = pageCanvas.getContext("2d");
+      pageContext.drawImage(
+        canvas,
+        0,
+        sourceY,
+        canvas.width,
+        sliceHeight,
+        0,
+        0,
+        canvas.width,
+        sliceHeight
+      );
+
+      let pageImgData = pageCanvas.toDataURL("image/jpeg", 0.72);
+      let pageImgHeight = sliceHeight * imgWidth / canvas.width;
+
+      if (pageNumber > 0) {
+        pdf.addPage();
+      }
+
+      pdf.addImage(pageImgData, "JPEG", marginLeft, marginTop, imgWidth, pageImgHeight);
+
+      sourceY += pageCanvasHeight;
+      pageNumber++;
     }
 
     let cleanName = studentName.replace(/\s+/g, "_");

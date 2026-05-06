@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Genetic Drift Simulator</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body {
+  font-family: Arial;
+  padding: 20px;
+  background: #f7f7f7;
+}
+
+h1 {
+  font-size: 34px;
+  text-align: center;
+}
+
+button {
+  font-size: 22px;
+  padding: 15px;
+  margin-top: 10px;
+  width: 100%;
+  border-radius: 10px;
+  border: none;
+  background: #2f6fed;
+  color: white;
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+button:hover {
+  background: #1f5ad1;
+  transform: scale(1.03);
+  box-shadow: 0 8px 18px rgba(47,111,237,0.35);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+.generateButton {
+  font-size: 26px;
+  padding: 25px;
+}
+
+.exportButton {
+  background: #198754;
+}
+
+.backButton {
+  width: auto;
+  font-size: 16px;
+  padding: 10px 18px;
+  background: #6c757d;
+  margin-bottom: 15px;
+}
+
+.backButton:hover {
+  background: #5a6268;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+td, th {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  font-size: 18px;
+}
+
+.credit {
+  text-align: center;
+  font-size: 15px;
+  margin-top: 20px;
+  color: #555;
+}
+
+.warning {
+  background: #fff3cd;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.success {
+  background: #e6ffe6;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.danger {
+  background: #ffe5e5;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.sliderValue {
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e9ecef;
+  margin: 4px;
+  font-weight: bold;
+}
+
+.smallNote {
+  color: #555;
+  font-size: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Genetic Drift Simulator</h1>
+
+<button class="backButton" onclick="window.location.href='index.html'">
+← Back to Main Menu
+</button>
+
+<button class="generateButton" onclick="generateDriftSetup()">Generate Drift Simulation</button>
+<button onclick="exitApp()">Exit / Refresh</button>
+
+<div class="credit">Dr. Andres Posso-Terranova. 2026. ©</div>
+
+<div id="setup"></div>
+<div id="controls"></div>
+<div id="results"></div>
+<div class="card"><canvas id="trajectoryChart"></canvas></div>
+<div class="card"><canvas id="qTrajectoryChart"></canvas></div>
+<div class="card"><canvas id="finalChart"></canvas></div>
+<div id="actions"></div>
+<div id="finalCredit"></div>
+
+<script>
+let datasetLocked = false;
+
+let populationSize = 100;
+let numberOfReplicates = 5;
+let maxGenerations = 20;
+let currentGeneration = 0;
+let startingP = 0.5;
+let bottleneckApplied = false;
+let bottleneckGeneration = 0;
+let bottleneckSize = 20;
+
+let replicateHistories = [];
+let replicateCounts = [];
+let finalAlleleFrequencies = [];
+
+let trajectoryChart;
+let qTrajectoryChart;
+let finalChart;
+
+function clearPrevious() {
+  document.getElementById("setup").innerHTML = "";
+  document.getElementById("controls").innerHTML = "";
+  document.getElementById("results").innerHTML = "";
+  document.getElementById("actions").innerHTML = "";
+  document.getElementById("finalCredit").innerHTML = "";
+
+  if (trajectoryChart) {
+    trajectoryChart.destroy();
+  }
+
+  if (qTrajectoryChart) {
+    qTrajectoryChart.destroy();
+  }
+
+  if (finalChart) {
+    finalChart.destroy();
+  }
+}
+
+function generateDriftSetup() {
+  if (datasetLocked) {
+    alert("Refresh Browser for New Dataset");
+    return;
+  }
+
+  datasetLocked = true;
+  clearPrevious();
+
+  let html = `
+    <div class="card">
+      <h2>Genetic Drift Setup</h2>
+      <p>This simulation will show how <b>p</b> and <b>q</b> change over time due to genetic drift. Genetic drift is random change in allele frequencies from one generation to the next, and it is strongest in small populations.</p>
+
+      <p><b>Population size per replicate</b></p>
+      <select id="population_size">
+        <option value="25">Small population: N = 25</option>
+        <option value="50">N = 50</option>
+        <option value="100" selected>Medium population: N = 100</option>
+        <option value="500">Large population: N = 500</option>
+      </select>
+
+      <p><b>Number of replicate populations</b></p>
+      <select id="replicates">
+        <option value="1">1 replicate population</option>
+        <option value="3">3 replicate populations</option>
+        <option value="5" selected>5 replicate populations</option>
+      </select>
+
+      <p><b>Starting frequency of allele A (p)</b></p>
+      <input type="range" id="starting_p_slider" min="0.1" max="0.9" value="0.5" step="0.1" oninput="updateStartingPLabel()">
+      <p>Starting p for allele A: <span id="starting_p_label" class="sliderValue">0.5</span></p>
+
+      <p><b>Starting frequency of allele a (q)</b></p>
+      <input type="range" id="starting_q_slider" min="0.1" max="0.9" value="0.5" step="0.1" oninput="updateStartingQLabel()">
+      <p>Starting q for allele a: <span id="starting_q_label" class="sliderValue">0.5</span></p>
+
+      <p><b>Maximum generations</b></p>
+      <select id="max_generations">
+        <option value="10">10 generations</option>
+        <option value="20" selected>20 generations</option>
+        <option value="50">50 generations</option>
+      </select>
+
+      <p><b>Optional surprise event</b></p>
+      <select id="bottleneck_option">
+        <option value="none" selected>No bottleneck</option>
+        <option value="1">Apply bottleneck at generation 1</option>
+        <option value="5">Apply bottleneck at generation 5</option>
+        <option value="10">Apply bottleneck at generation 10</option>
+      </select>
+
+      <div class="warning">
+        <b>Student task:</b> Predict which replicate population will lose allele A, which one will fix allele A, and how both allele frequencies change through drift.
+      </div>
+
+      <button onclick="startDriftSimulation()">Start Drift Simulation</button>
+    </div>
+  `;
+
+  document.getElementById("setup").innerHTML = html;
+}
+
+function updateStartingPLabel() {
+  let p = parseFloat(document.getElementById("starting_p_slider").value);
+  let q = 1 - p;
+
+  document.getElementById("starting_q_slider").value = q.toFixed(1);
+
+  document.getElementById("starting_p_label").innerHTML = p.toFixed(1);
+  document.getElementById("starting_q_label").innerHTML = q.toFixed(1);
+}
+
+function updateStartingQLabel() {
+  let q = parseFloat(document.getElementById("starting_q_slider").value);
+  let p = 1 - q;
+
+  document.getElementById("starting_p_slider").value = p.toFixed(1);
+
+  document.getElementById("starting_q_label").innerHTML = q.toFixed(1);
+  document.getElementById("starting_p_label").innerHTML = p.toFixed(1);
+}
+
+function startDriftSimulation() {
+  populationSize = parseInt(document.getElementById("population_size").value);
+  numberOfReplicates = parseInt(document.getElementById("replicates").value);
+  startingP = parseFloat(document.getElementById("starting_p_slider").value);
+  maxGenerations = parseInt(document.getElementById("max_generations").value);
+  bottleneckGeneration = document.getElementById("bottleneck_option").value === "none" ? 0 : parseInt(document.getElementById("bottleneck_option").value);
+  bottleneckApplied = bottleneckGeneration > 0;
+
+  document.getElementById("population_size").disabled = true;
+  document.getElementById("replicates").disabled = true;
+  document.getElementById("starting_p_slider").disabled = true;
+  document.getElementById("starting_q_slider").disabled = true;
+  document.getElementById("max_generations").disabled = true;
+  document.getElementById("bottleneck_option").disabled = true;
+
+  currentGeneration = 0;
+  replicateHistories = [];
+  replicateCounts = [];
+  finalAlleleFrequencies = [];
+
+  for (let i = 0; i < numberOfReplicates; i++) {
+    let countA = Math.round(startingP * 2 * populationSize);
+    replicateCounts.push(countA);
+    replicateHistories.push([countA / (2 * populationSize)]);
+  }
+
+  showLockedSetup();
+  drawTrajectoryChart();
+  drawQTrajectoryChart();
+  drawFinalChart();
+  showAdvanceButton();
+}
+
+function showLockedSetup() {
+  let html = `
+    <div class="card" style="background:#e6ffe6;">
+      <h2>✅ Drift Simulation Locked</h2>
+      <p><b>Population size:</b> N = ${populationSize}</p>
+      <p><b>Replicate populations:</b> ${numberOfReplicates}</p>
+      <p><b>Starting allele frequency:</b> p = ${startingP}</p>
+      <p><b>Starting allele frequency:</b> q = ${(1 - startingP).toFixed(1)}</p>
+      <p><b>Maximum generations:</b> ${maxGenerations}</p>
+      <p><b>Bottleneck:</b> ${bottleneckApplied ? "Yes, at generation " + bottleneckGeneration : "No"}</p>
+    </div>
+  `;
+
+  document.getElementById("controls").innerHTML = html;
+}
+
+function binomialSample(trials, probability) {
+  let successes = 0;
+
+  for (let i = 0; i < trials; i++) {
+    if (Math.random() < probability) {
+      successes++;
+    }
+  }
+
+  return successes;
+}
+
+function advanceOneGeneration() {
+  if (currentGeneration >= maxGenerations) {
+    alert("Maximum number of generations reached.");
+    return;
+  }
+
+  currentGeneration++;
+
+  let effectiveN = populationSize;
+
+  if (bottleneckApplied && currentGeneration === bottleneckGeneration) {
+    effectiveN = bottleneckSize;
+  }
+
+  for (let i = 0; i < numberOfReplicates; i++) {
+    let previousP = replicateCounts[i] / (2 * populationSize);
+
+    if (replicateCounts[i] === 0) {
+      replicateHistories[i].push(0);
+      continue;
+    }
+
+    if (replicateCounts[i] === 2 * populationSize) {
+      replicateHistories[i].push(1);
+      continue;
+    }
+
+    let sampledCountA = binomialSample(2 * effectiveN, previousP);
+
+    if (bottleneckApplied && currentGeneration === bottleneckGeneration) {
+      let bottleneckP = sampledCountA / (2 * effectiveN);
+      sampledCountA = binomialSample(2 * populationSize, bottleneckP);
+    }
+
+    replicateCounts[i] = sampledCountA;
+    replicateHistories[i].push(sampledCountA / (2 * populationSize));
+  }
+
+  showResultsTable();
+  drawTrajectoryChart();
+  drawQTrajectoryChart();
+  drawFinalChart();
+  showAdvanceButton();
+  showExportButtons();
+}
+
+function runToEnd() {
+  while (currentGeneration < maxGenerations) {
+    advanceOneGeneration();
+  }
+}
+
+function showAdvanceButton() {
+  if (currentGeneration >= maxGenerations) {
+    document.getElementById("actions").innerHTML = `
+      <div class="card" style="background:#e6ffe6;">
+        <h2>✅ Simulation Complete</h2>
+        <p>You have simulated ${maxGenerations} generations.</p>
+      </div>
+    `;
+    return;
+  }
+
+  document.getElementById("actions").innerHTML = `
+    <div class="card">
+      <h2>Next Step</h2>
+      <p><b>Current generation:</b> ${currentGeneration} / ${maxGenerations}</p>
+      <button onclick="advanceOneGeneration()">Advance One Generation</button>
+      <button onclick="runToEnd()">Run to Final Generation</button>
+    </div>
+  `;
+}
+
+function showResultsTable() {
+  let fixed = 0;
+  let lost = 0;
+
+  for (let i = 0; i < numberOfReplicates; i++) {
+    let p = replicateHistories[i][replicateHistories[i].length - 1];
+
+    if (p === 1) fixed++;
+    if (p === 0) lost++;
+  }
+
+  let html = `
+    <div class="card">
+      <h2>Genetic Drift Results</h2>
+      <p><b>Current generation:</b> ${currentGeneration}</p>
+
+      <span class="badge">Fixed for A: ${fixed}</span>
+      <span class="badge">Lost A: ${lost}</span>
+      <span class="badge">Still variable: ${numberOfReplicates - fixed - lost}</span>
+
+      <table>
+        <tr>
+          <th>Replicate</th>
+          <th>Current p</th>
+          <th>Current q</th>
+          <th>Status</th>
+        </tr>
+  `;
+
+  for (let i = 0; i < numberOfReplicates; i++) {
+    let p = replicateHistories[i][replicateHistories[i].length - 1];
+    let q = 1 - p;
+    let status = "Variable";
+
+    if (p === 1) status = "A fixed; a lost";
+    if (p === 0) status = "A lost; a fixed";
+
+    html += `
+      <tr>
+        <td>Population ${i + 1}</td>
+        <td>${p.toFixed(4)}</td>
+        <td>${q.toFixed(4)}</td>
+        <td>${status}</td>
+      </tr>
+    `;
+  }
+
+  html += `
+      </table>
+
+      <div class="warning">
+        <b>Interpretation prompt:</b> Explain why replicate populations with the same starting allele frequencies do not follow the same evolutionary path. When p increases, what happens to q?
+      </div>
+    </div>
+  `;
+
+  if (bottleneckApplied && currentGeneration >= bottleneckGeneration) {
+    html += `
+      <div class="danger">
+        <b>Bottleneck event:</b> At generation ${bottleneckGeneration}, the population temporarily dropped to N = ${bottleneckSize}. This increases random sampling error and can strongly change allele frequencies.
+      </div>
+    `;
+  }
+
+  document.getElementById("results").innerHTML = html;
+}
+
+function drawTrajectoryChart() {
+  const ctx = document.getElementById("trajectoryChart");
+
+  if (trajectoryChart) {
+    trajectoryChart.destroy();
+  }
+
+  let labels = [];
+
+  for (let g = 0; g <= currentGeneration; g++) {
+    labels.push(g);
+  }
+
+  let datasets = [];
+
+  for (let i = 0; i < numberOfReplicates; i++) {
+    datasets.push({
+      label: "Population " + (i + 1),
+      data: replicateHistories[i],
+      fill: false,
+      tension: 0.2
+    });
+  }
+
+  trajectoryChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: datasets
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: "Allele Frequency Trajectories Under Genetic Drift",
+          font: {
+            size: 28
+          }
+        },
+        legend: {
+          labels: {
+            font: {
+              size: 16
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: "Generation"
+          },
+          ticks: {
+            font: {
+              size: 18
+            }
+          }
+        },
+        y: {
+          beginAtZero: true,
+          max: 1,
+          title: {
+            display: true,
+            text: "Allele A frequency (p)"
+          },
+          ticks: {
+            font: {
+              size: 18
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function drawQTrajectoryChart() {
+  const ctx = document.getElementById("qTrajectoryChart");
+
+  if (qTrajectoryChart) {
+    qTrajectoryChart.destroy();
+  }
+
+  let labels = [];
+
+  for (let g = 0; g <= currentGeneration; g++) {
+    labels.push(g);
+  }
+
+  let datasets = [];
+
+  for (let i = 0; i < numberOfReplicates; i++) {
+    let qValues = replicateHistories[i].map(p => 1 - p);
+
+    datasets.push({
+      label: "Population " + (i + 1),
+      data: qValues,
+      fill: false,
+      tension: 0.2
+    });
+  }
+
+  qTrajectoryChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: datasets
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: "Allele a Frequency Trajectories Under Genetic Drift",
+          font: {
+            size: 28
+          }
+        },
+        legend: {
+          labels: {
+            font: {
+              size: 16
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: "Generation"
+          },
+          ticks: {
+            font: {
+              size: 18
+            }
+          }
+        },
+        y: {
+          beginAtZero: true,
+          max: 1,
+          title: {
+            display: true,
+            text: "Allele a frequency (q)"
+          },
+          ticks: {
+            font: {
+              size: 18
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function drawFinalChart() {
+  const ctx = document.getElementById("finalChart");
+
+  if (finalChart) {
+    finalChart.destroy();
+  }
+
+  finalAlleleFrequencies = [];
+
+  for (let i = 0; i < numberOfReplicates; i++) {
+    finalAlleleFrequencies.push(replicateHistories[i][replicateHistories[i].length - 1]);
+  }
+
+  let finalQFrequencies = finalAlleleFrequencies.map(p => 1 - p);
+
+  finalChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: finalAlleleFrequencies.map((_, i) => "Pop " + (i + 1)),
+      datasets: [
+        {
+          label: "Allele A frequency (p)",
+          data: finalAlleleFrequencies,
+          backgroundColor: "rgba(54, 162, 235, 0.6)"
+        },
+        {
+          label: "Allele a frequency (q)",
+          data: finalQFrequencies,
+          backgroundColor: "rgba(255, 159, 64, 0.6)"
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: "Current Distribution of Both Alleles by Replicate Population",
+          font: {
+            size: 28
+          }
+        },
+        legend: {
+          labels: {
+            font: {
+              size: 18
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 1,
+          title: {
+            display: true,
+            text: "Allele frequency"
+          },
+          ticks: {
+            font: {
+              size: 18
+            }
+          }
+        },
+        x: {
+          ticks: {
+            font: {
+              size: 18
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function showExportButtons() {
+  document.getElementById("finalCredit").innerHTML = `
+    <div class="credit">
+      Dr. Andres Posso-Terranova. 2026. ©
+    </div>
+    <button class="exportButton" onclick="exportPDF()">Export Report as PDF</button>
+    <button onclick="exitApp()">Exit</button>
+  `;
+}
+
+function exportPDF() {
+  let studentName = prompt("Enter Student Name:");
+  if (!studentName) {
+    alert("Student Name is required.");
+    return;
+  }
+
+  let nsid = prompt("Enter NSID:");
+  if (!nsid) {
+    alert("NSID is required.");
+    return;
+  }
+
+  const now = new Date();
+
+  const timestamp = now.toLocaleString("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+
+  const trajectoryChartImage = document.getElementById("trajectoryChart").toDataURL("image/png");
+  const qTrajectoryChartImage = document.getElementById("qTrajectoryChart").toDataURL("image/png");
+  const finalChartImage = document.getElementById("finalChart").toDataURL("image/png");
+
+  let report = document.createElement("div");
+  report.style.background = "white";
+  report.style.padding = "45px";
+  report.style.fontFamily = "Arial";
+  report.style.width = "900px";
+  report.style.position = "absolute";
+  report.style.left = "-9999px";
+  report.style.top = "0";
+
+  report.innerHTML = `
+    <div style="line-height:1.5;">
+
+    <h1 style="text-align:center; margin-bottom:25px;">Genetic Drift Simulator</h1>
+
+    <p><b>Student Name:</b> ${studentName}</p>
+    <p><b>NSID:</b> ${nsid}</p>
+    <p><b>Population size:</b> ${populationSize}</p>
+    <p><b>Replicate populations:</b> ${numberOfReplicates}</p>
+    <p><b>Starting p:</b> ${startingP}</p>
+    <p><b>Starting q:</b> ${(1 - startingP).toFixed(4)}</p>
+    <p><b>Current generation:</b> ${currentGeneration}</p>
+    <p><b>Timestamp:</b> ${timestamp}</p>
+
+    <hr style="margin-top:20px; margin-bottom:20px;">
+
+    ${document.getElementById("controls").innerHTML}
+    ${document.getElementById("results").innerHTML}
+
+    <div class="card">
+      <h2>Allele A Frequency Trajectories</h2>
+      <img src="${trajectoryChartImage}" style="width:100%;">
+    </div>
+
+    <div class="card">
+      <h2>Allele a Frequency Trajectories</h2>
+      <img src="${qTrajectoryChartImage}" style="width:100%;">
+    </div>
+
+    <div class="card">
+      <h2>Final Distribution of Both Alleles</h2>
+      <img src="${finalChartImage}" style="width:100%;">
+    </div>
+
+    <div style="text-align:center; font-size:15px; margin-top:25px; color:#555;">
+      Dr. Andres Posso-Terranova. 2026. ©
+    </div>
+
+    <div style="height:80px;"></div>
+
+    </div>
+  `;
+
+  document.body.appendChild(report);
+
+  html2canvas(report, { scale: 1 }).then(canvas => {
+    const { jsPDF } = window.jspdf;
+
+    let pdf = new jsPDF("p", "mm", "a4");
+    let pageWidth = pdf.internal.pageSize.getWidth();
+    let pageHeight = pdf.internal.pageSize.getHeight();
+
+    let marginLeft = 15;
+    let marginTop = 15;
+    let marginBottom = 35;
+
+    let imgWidth = pageWidth - 30;
+    let usablePageHeight = pageHeight - marginTop - marginBottom;
+
+    let pageCanvasHeight = Math.floor(canvas.width * usablePageHeight / imgWidth);
+    let sourceY = 0;
+    let pageNumber = 0;
+
+    while (sourceY < canvas.height) {
+      let sliceHeight = Math.min(pageCanvasHeight, canvas.height - sourceY);
+
+      let pageCanvas = document.createElement("canvas");
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sliceHeight;
+
+      let pageContext = pageCanvas.getContext("2d");
+      pageContext.drawImage(
+        canvas,
+        0,
+        sourceY,
+        canvas.width,
+        sliceHeight,
+        0,
+        0,
+        canvas.width,
+        sliceHeight
+      );
+
+      let pageImgData = pageCanvas.toDataURL("image/jpeg", 0.72);
+      let pageImgHeight = sliceHeight * imgWidth / canvas.width;
+
+      if (pageNumber > 0) {
+        pdf.addPage();
+      }
+
+      pdf.addImage(pageImgData, "JPEG", marginLeft, marginTop, imgWidth, pageImgHeight);
+
+      sourceY += pageCanvasHeight;
+      pageNumber++;
+    }
+
+    let cleanName = studentName.replace(/\s+/g, "_");
+    pdf.save(`${cleanName}_${nsid}_Genetic_Drift_Report.pdf`);
+
+    document.body.removeChild(report);
+  });
+}
+
+function exitApp() {
+  if (confirm("Are you sure you want to exit?")) {
+    location.reload();
+  }
+}
+</script>
+
+</body>
+</html>

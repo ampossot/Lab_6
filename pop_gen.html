@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Genetics Dataset Generator</title>
+<title>Population Genetics Simulator</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -22,7 +22,7 @@ h1 {
 
 button {
   font-size: 22px;
-  padding: 22px;
+  padding: 15px;
   margin-top: 10px;
   width: 100%;
   border-radius: 10px;
@@ -74,6 +74,7 @@ table {
 td, th {
   border: 1px solid #ccc;
   padding: 8px;
+  text-align: center;
 }
 
 input {
@@ -88,43 +89,50 @@ input {
   margin-top: 20px;
   color: #555;
 }
+
 .warning {
   background: #fff3cd;
   padding: 12px;
   border-radius: 8px;
   margin-top: 10px;
 }
-.download-link {
-  display: block;
-  text-align: center;
-  font-size: 20px;
-  font-weight: bold;
-  margin: 20px auto;
-  color: #2f6fed;
-  text-decoration: none;
+
+.backButton {
+  width: auto;
+  font-size: 16px;
+  padding: 10px 18px;
+  background: #6c757d;
+  margin-bottom: 15px;
 }
 
-.download-link:hover {
-  text-decoration: underline;
+.backButton:hover {
+  background: #5a6268;
 }
 </style>
 </head>
 
 <body>
 
-<h1>Genetics Dataset Generator</h1>
+<h1>Population Genetics Simulator</h1>
 
+<button class="backButton" onclick="window.location.href='index.html'">
+← Back to Main Menu
+</button>
 
+<button class="generateButton" onclick="generateHWPopulation()">Generate Population in Hardy-Weinberg Equilibrium</button>
+<button class="generateButton" onclick="generateNonHWPopulation()">Generate Population NOT in Hardy-Weinberg Equilibrium</button>
+<button class="generateButton" onclick="generateRandomPopulation()">Generate a Random Population</button>
 
-<a href="Lab_6_Fillable_Form.pdf" target="_blank" rel="noopener noreferrer" class="download-link">
-  Download Fillable Lab Assignment # 6 PDF
-</a>
+<button class="generateButton" onclick="goToSelectionSimulator()">
+Selection Simulator
+</button>
 
-<button class="generateButton" onclick="generateDihybridData()">Generate Dihybrid Cross Dataset</button>
-<button class="generateButton" onclick="generateTestCrossData()">Generate Test-Cross Dataset</button>
+<button class="generateButton" onclick="goToSelectionAcrossGenerations()">
+Selection Across Generations
+</button>
 
-<button class="generateButton" onclick="goToPopulationGenetics()">
-Population Genetics Generator
+<button class="generateButton" onclick="goToGeneticDriftSimulator()">
+Genetic Drift Simulator
 </button>
 
 <button onclick="exitApp()">Exit / Refresh</button>
@@ -132,6 +140,7 @@ Population Genetics Generator
 <div class="credit">Dr. Andres Posso-Terranova. 2026. ©</div>
 
 <div id="output"></div>
+<div id="alleles"></div>
 <div id="expected"></div>
 <div id="check"></div>
 <div id="results"></div>
@@ -140,67 +149,45 @@ Population Genetics Generator
 
 <script>
 let observed = [];
-let phenotypes = [];
 let expectedVals = [];
-let currentMode = "";
+let genotypes = ["AA", "Aa", "aa"];
+let pValueObserved = 0;
+let qValueObserved = 0;
+let total = 0;
 let chart;
 let datasetLocked = false;
-let currentDatasetTitle = "";
-let currentOrganism = "";
+let realMode = "";
 
-const dihybridOrganisms = {
-  "Tomato plants": {
-    phenotypes: ["Tall resistant", "Tall susceptible", "Short resistant", "Short susceptible"],
-    dominance: "Tall and resistant are dominant."
-  },
-  "Wheat plants": {
-    phenotypes: ["Solid high yield", "Solid low yield", "Hollow high yield", "Hollow low yield"],
-    dominance: "Solid and high yield are dominant."
-  },
-  "Dairy cattle": {
-    phenotypes: ["High production resistant", "High production susceptible", "Low production resistant", "Low production susceptible"],
-    dominance: "High production and virus resistance are dominant."
-  },
-  "Drosophila": {
-    phenotypes: ["Normal body normal wing", "Normal body vestigial wing", "Black body normal wing", "Black body vestigial wing"],
-    dominance: "Normal body and normal wing are dominant."
-  }
-};
-
-const testCrossOrganisms = {
-  "Tomato plants": {
-    phenotypes: ["Tall resistant", "Short susceptible", "Tall susceptible", "Short resistant"],
-    dominance: "Tall and resistant are dominant.",
-    parental: "Tall resistant and short susceptible are the parental phenotypes."
-  },
-  "Wheat plants": {
-    phenotypes: ["Solid high yield", "Hollow low yield", "Solid low yield", "Hollow high yield"],
-    dominance: "Solid and high yield are dominant.",
-    parental: "Solid high yield and hollow low yield are the parental phenotypes."
-  },
-  "Dairy cattle": {
-    phenotypes: ["High production resistant", "Low production susceptible", "High production susceptible", "Low production resistant"],
-    dominance: "High production and virus resistance are dominant.",
-    parental: "High production resistant and low production susceptible are the parental phenotypes."
-  },
-  "Drosophila": {
-    phenotypes: ["Normal body normal wing", "Black body vestigial wing", "Normal body vestigial wing", "Black body normal wing"],
-    dominance: "Normal body and normal wing are dominant.",
-    parental: "Normal body normal wing and black body vestigial wing are the parental phenotypes."
-  }
-};
-
-function goToPopulationGenetics() {
+function goToSelectionSimulator() {
   if (datasetLocked) {
     alert("Refresh Browser for New Dataset");
     return;
   }
 
-  window.location.href = "pop_gen.html";
+  window.location.href = "selection_simulator.html";
+}
+
+function goToSelectionAcrossGenerations() {
+  if (datasetLocked) {
+    alert("Refresh Browser for New Dataset");
+    return;
+  }
+
+  window.location.href = "sel_generations.html";
+}
+
+function goToGeneticDriftSimulator() {
+  if (datasetLocked) {
+    alert("Refresh Browser for New Dataset");
+    return;
+  }
+
+  window.location.href = "genetic_drift_simulator.html";
 }
 
 function clearPrevious() {
   document.getElementById("output").innerHTML = "";
+  document.getElementById("alleles").innerHTML = "";
   document.getElementById("expected").innerHTML = "";
   document.getElementById("check").innerHTML = "";
   document.getElementById("results").innerHTML = "";
@@ -211,52 +198,109 @@ function clearPrevious() {
   }
 }
 
-function generateDihybridData() {
+function generateRandomPopulation() {
+  if (datasetLocked) {
+    alert("Refresh Browser for New Dataset");
+    return;
+  }
+
+  let randomChoice = Math.random();
+
+  if (randomChoice < 0.5) {
+    generateHWPopulation();
+  } else {
+    generateNonHWPopulation();
+  }
+}
+
+function generateHWPopulation() {
   if (datasetLocked) {
     alert("Refresh Browser for New Dataset");
     return;
   }
 
   datasetLocked = true;
+  realMode = "Hardy-Weinberg equilibrium";
   clearPrevious();
-  currentMode = "dihybrid";
-  currentDatasetTitle = "Dihybrid Cross Dataset";
 
-  const keys = Object.keys(dihybridOrganisms);
-  const org = keys[Math.floor(Math.random() * keys.length)];
-  currentOrganism = org;
-  const total = Math.floor(Math.random() * 201) + 300;
+  total = Math.floor(Math.random() * 301) + 300; // 300 to 600
 
-  observed = [0, 0, 0, 0];
-  phenotypes = dihybridOrganisms[org].phenotypes;
+  let p = Math.random() * 0.5 + 0.25; // 0.25 to 0.75
+  let q = 1 - p;
 
-  for (let i = 0; i < total; i++) {
+  let probs = [
+    p * p,
+    2 * p * q,
+    q * q
+  ];
+
+  observed = sampleMultinomial(total, probs);
+
+  showPopulation("Population Dataset");
+}
+
+function generateNonHWPopulation() {
+  if (datasetLocked) {
+    alert("Refresh Browser for New Dataset");
+    return;
+  }
+
+  datasetLocked = true;
+  realMode = "Not in Hardy-Weinberg equilibrium";
+  clearPrevious();
+
+  total = Math.floor(Math.random() * 301) + 300; // 300 to 600
+
+  let p = Math.random() * 0.5 + 0.25;
+  let q = 1 - p;
+
+  // Inbreeding model: heterozygote deficiency
+  let F = Math.random() * 0.35 + 0.25; // 0.25 to 0.60
+
+  let probs = [
+    (p * p) + (F * p * q),
+    (2 * p * q) * (1 - F),
+    (q * q) + (F * p * q)
+  ];
+
+  observed = sampleMultinomial(total, probs);
+
+  showPopulation("Population Dataset");
+}
+
+function sampleMultinomial(n, probs) {
+  let counts = [0, 0, 0];
+
+  for (let i = 0; i < n; i++) {
     let r = Math.random();
 
-    if (r < 9 / 16) observed[0]++;
-    else if (r < 12 / 16) observed[1]++;
-    else if (r < 15 / 16) observed[2]++;
-    else observed[3]++;
+    if (r < probs[0]) counts[0]++;
+    else if (r < probs[0] + probs[1]) counts[1]++;
+    else counts[2]++;
   }
+
+  return counts;
+}
+
+function showPopulation(title) {
+  total = observed.reduce((a, b) => a + b, 0);
 
   let html = `
     <div class="card">
-      <h2>Dihybrid Cross Dataset</h2>
-      <h3>${org}</h3>
-      <p><b>Total:</b> ${total}</p>
-      <p><b>Dominance:</b> ${dihybridOrganisms[org].dominance}</p>
+      <h2>${title}</h2>
+      <p><b>Total individuals:</b> ${total}</p>
 
       <table>
         <tr>
-          <th>Phenotype</th>
-          <th>Observed</th>
+          <th>Genotype</th>
+          <th>Observed number</th>
         </tr>
   `;
 
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 3; i++) {
     html += `
       <tr>
-        <td>${phenotypes[i]}</td>
+        <td>${genotypes[i]}</td>
         <td>${observed[i]}</td>
       </tr>
     `;
@@ -266,108 +310,100 @@ function generateDihybridData() {
       </table>
 
       <div class="warning">
-        <b>Student task:</b> Calculate expected offspring numbers, run a χ² test, and determine whether the observed data fit the expected 9:3:3:1 ratio.
+        <b>Student task:</b> Calculate allele frequencies, expected Hardy-Weinberg numbers, and run a χ² test.
       </div>
     </div>
   `;
 
   document.getElementById("output").innerHTML = html;
-  createInputs();
+
+  createAlleleInputs();
 }
 
-function generateTestCrossData() {
-  if (datasetLocked) {
-    alert("Refresh Browser for New Dataset");
+function createAlleleInputs() {
+  let html = `
+    <div class="card">
+      <h2>Step 1: Calculate Allele Frequencies</h2>
+      <p>Use the observed genotype counts to calculate p and q.</p>
+
+      <p><b>p = frequency of allele A</b></p>
+      <input type="number" step="0.0001" id="student_p" placeholder="Enter p">
+
+      <p><b>q = frequency of allele a</b></p>
+      <input type="number" step="0.0001" id="student_q" placeholder="Enter q">
+
+      <button onclick="checkAlleles()">Check p and q</button>
+    </div>
+  `;
+
+  document.getElementById("alleles").innerHTML = html;
+}
+
+function checkAlleles() {
+  total = observed.reduce((a, b) => a + b, 0);
+
+  pValueObserved = ((2 * observed[0]) + observed[1]) / (2 * total);
+  qValueObserved = ((2 * observed[2]) + observed[1]) / (2 * total);
+
+  let pInput = document.getElementById("student_p");
+  let qInput = document.getElementById("student_q");
+
+  let studentP = parseFloat(pInput.value);
+  let studentQ = parseFloat(qInput.value);
+
+  pInput.style.backgroundColor = "white";
+  qInput.style.backgroundColor = "white";
+
+  let allCorrect = true;
+  let tolerance = 0.01;
+
+  if (isNaN(studentP) || Math.abs(studentP - pValueObserved) > tolerance) {
+    allCorrect = false;
+    pInput.style.backgroundColor = "#ffd6d6";
+  }
+
+  if (isNaN(studentQ) || Math.abs(studentQ - qValueObserved) > tolerance) {
+    allCorrect = false;
+    qInput.style.backgroundColor = "#ffd6d6";
+  }
+
+  if (!allCorrect) {
+    document.getElementById("check").innerHTML = `
+      <div class="card" style="background:#ffe5e5;">
+        <h2>⚠️ Check Your Allele Frequencies</h2>
+        <p>Some allele frequency values are not correct yet.</p>
+        <p>Incorrect fields are highlighted in red.</p>
+        <p>Values within 0.01 of the correct allele frequency are accepted.</p>
+      </div>
+    `;
     return;
   }
 
-  datasetLocked = true;
-  clearPrevious();
-  currentMode = "testcross";
-  currentDatasetTitle = "Test-Cross Dataset";
-
-  const keys = Object.keys(testCrossOrganisms);
-  const org = keys[Math.floor(Math.random() * keys.length)];
-  currentOrganism = org;
-  const total = Math.floor(Math.random() * 201) + 300;
-
-  observed = [0, 0, 0, 0];
-  phenotypes = testCrossOrganisms[org].phenotypes;
-
-  let recombinationFrequency = Math.floor(Math.random() * 26) + 10;
-  let rf = recombinationFrequency / 100;
-
-  let p1 = (1 - rf) / 2;
-  let p2 = (1 - rf) / 2;
-  let r1 = rf / 2;
-
-  for (let i = 0; i < total; i++) {
-    let r = Math.random();
-
-    if (r < p1) observed[0]++;
-    else if (r < p1 + p2) observed[1]++;
-    else if (r < p1 + p2 + r1) observed[2]++;
-    else observed[3]++;
-  }
-
-  let html = `
-    <div class="card">
-      <h2>Test-Cross Dataset</h2>
-      <h3>${org}</h3>
-      <p><b>Cross:</b> AaBb × aabb</p>
-      <p><b>Total offspring:</b> ${total}</p>
-      <p><b>Dominance:</b> ${testCrossOrganisms[org].dominance}</p>
-      <p><b>Parental classes:</b> ${testCrossOrganisms[org].parental}</p>
-
-      <table>
-        <tr>
-          <th>Phenotype</th>
-          <th>Class</th>
-          <th>Observed</th>
-        </tr>
-  `;
-
-  for (let i = 0; i < 4; i++) {
-    html += `
-      <tr>
-        <td>${phenotypes[i]}</td>
-        <td>${i < 2 ? "Parental" : "Recombinant"}</td>
-        <td>${observed[i]}</td>
-      </tr>
-    `;
-  }
-
-  html += `
-      </table>
-
-      <div class="warning">
-        <b>Student task:</b> Calculate expected offspring numbers, run a χ² test, and determine whether the observed data fit the expected 1:1:1:1 ratio. If there is evidence of linkage, estimate the recombination frequency.
-      </div>
+  document.getElementById("check").innerHTML = `
+    <div class="card" style="background:#e6ffe6;">
+      <h2>✅ Allele Frequencies Correct</h2>
+      <p>You may now proceed to calculate the expected Hardy-Weinberg numbers.</p>
     </div>
   `;
 
-  document.getElementById("output").innerHTML = html;
-  createInputs();
+  createExpectedInputs();
 }
 
-function createInputs() {
-  let ratioText = currentMode === "dihybrid" ? "9 : 3 : 3 : 1" : "1 : 1 : 1 : 1";
-  let explanation = currentMode === "dihybrid"
-    ? "Example: First class = total × 9/16"
-    : "Each class = total ÷ 4";
-
+function createExpectedInputs() {
   let html = `
     <div class="card">
-      <h2>Enter Expected Numbers</h2>
-      <p>Expected phenotypic ratio:</p>
-      <p><b>${ratioText}</b></p>
-      <p>${explanation}</p>
+      <h2>Step 2: Enter Expected Numbers Under Hardy-Weinberg Equilibrium</h2>
+
+      <p>Expected genotype frequencies:</p>
+      <p><b>AA = p²</b></p>
+      <p><b>Aa = 2pq</b></p>
+      <p><b>aa = q²</b></p>
   `;
 
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 3; i++) {
     html += `
-      <p>${phenotypes[i]}</p>
-      <input type="number" id="e${i}" placeholder="Expected">
+      <p>${genotypes[i]}</p>
+      <input type="number" id="e${i}" placeholder="Expected number">
     `;
   }
 
@@ -380,115 +416,65 @@ function createInputs() {
 }
 
 function checkExpected() {
-
-  let total = observed.reduce((a, b) => a + b, 0);
-
-  let correctExpected = [];
-
-  if (currentMode === "dihybrid") {
-
-    let ratios = [9, 3, 3, 1];
-
-    for (let i = 0; i < 4; i++) {
-
-      correctExpected.push(total * ratios[i] / 16);
-
-    }
-
-  } else {
-
-    for (let i = 0; i < 4; i++) {
-
-      correctExpected.push(total / 4);
-
-    }
-
-  }
+  let correctExpected = [
+    total * pValueObserved * pValueObserved,
+    total * 2 * pValueObserved * qValueObserved,
+    total * qValueObserved * qValueObserved
+  ];
 
   let allCorrect = true;
 
-  for (let i = 0; i < 4; i++) {
-
+  for (let i = 0; i < 3; i++) {
     let input = document.getElementById("e" + i);
-
     let student = parseFloat(input.value);
 
     input.style.backgroundColor = "white";
 
     if (isNaN(student)) {
-
       allCorrect = false;
-
       input.style.backgroundColor = "#ffd6d6";
-
       continue;
-
     }
 
     let exact = correctExpected[i];
-
     let rounded = Math.round(exact);
-
     let tolerance = exact * 0.01;
 
     if (
-
       student !== rounded &&
-
       Math.abs(student - exact) > tolerance
-
     ) {
-
       allCorrect = false;
-
       input.style.backgroundColor = "#ffd6d6";
-
     }
-
   }
 
   if (!allCorrect) {
-
     document.getElementById("check").innerHTML = `
-
       <div class="card" style="background:#ffe5e5;">
-
         <h2>⚠️ Check Your Expected Values</h2>
-
         <p>Some expected values are not correct yet.</p>
-
         <p>Incorrect fields are highlighted in red.</p>
-
         <p>Whole numbers or values within 1% of the correct expected value are accepted.</p>
-
       </div>
-
     `;
-
     return;
-
   }
 
   document.getElementById("check").innerHTML = `
-
     <div class="card" style="background:#e6ffe6;">
-
       <h2>✅ Expected Values Correct</h2>
-
       <p>You may now proceed to the χ² test.</p>
 
       <button onclick="runTest()">Run χ² Test</button>
-
     </div>
-
   `;
-
 }
 
 function runTest() {
   expectedVals = [];
 
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 3; i++) {
     let v = parseFloat(document.getElementById("e" + i).value);
 
     if (isNaN(v) || v <= 0) {
@@ -507,22 +493,20 @@ function runTest() {
 
       <table>
         <tr>
-          <th>Phenotype</th>
-          ${currentMode === "testcross" ? "<th>Class</th>" : ""}
+          <th>Genotype</th>
           <th>Observed</th>
           <th>Expected</th>
           <th>(O - E)² / E</th>
         </tr>
   `;
 
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 3; i++) {
     let component = Math.pow(observed[i] - expectedVals[i], 2) / expectedVals[i];
     chi += component;
 
     table += `
       <tr>
-        <td>${phenotypes[i]}</td>
-        ${currentMode === "testcross" ? `<td>${i < 2 ? "Parental" : "Recombinant"}</td>` : ""}
+        <td>${genotypes[i]}</td>
         <td>${observed[i]}</td>
         <td>${expectedVals[i]}</td>
         <td>${component.toFixed(4)}</td>
@@ -530,43 +514,22 @@ function runTest() {
     `;
   }
 
-  let p = chiP(chi);
+  let p = chiSquareP_df1(chi);
 
-  let h0 = currentMode === "dihybrid"
-    ? "The genes assort independently; therefore, the expected phenotypic ratio is 9:3:3:1."
-    : "The genes assort independently; therefore, the expected phenotypic ratio is 1:1:1:1.";
-
-  let conclusion = "";
-
-  if (currentMode === "dihybrid") {
-    conclusion = p < 0.05
-      ? "Reject H₀. The observed data do not fit the expected 9:3:3:1 ratio."
-      : "Fail to reject H₀. The observed data fit the expected 9:3:3:1 ratio.";
-  } else {
-    conclusion = p < 0.05
-      ? "Reject H₀. The data do not fit a 1:1:1:1 ratio. The genes are likely linked."
-      : "Fail to reject H₀. The data fit a 1:1:1:1 ratio. There is no strong evidence of linkage.";
-  }
+  let conclusion = p < 0.05
+    ? "Reject H₀. The observed genotype counts do not fit Hardy-Weinberg expectations."
+    : "Fail to reject H₀. The observed genotype counts fit Hardy-Weinberg expectations.";
 
   table += `
       </table>
 
       <p><b>χ² value:</b> ${chi.toFixed(4)}</p>
-      <p><b>Degrees of freedom:</b> 3</p>
+      <p><b>Degrees of freedom:</b> 1</p>
       <p><b>p-value:</b> ${p.toFixed(6)}</p>
 
-      <p><b>H₀:</b> ${h0}</p>
-
+      <p><b>H₀:</b> The population is in Hardy-Weinberg equilibrium for this locus.</p>
       <p><b>Conclusion:</b> ${conclusion}</p>
-  `;
 
-  if (currentMode === "testcross") {
-    table += `
-      <p><b>Estimated recombination frequency from observed data:</b> ${estimateRF().toFixed(2)}%</p>
-    `;
-  }
-
-  table += `
     </div>
   `;
 
@@ -583,12 +546,6 @@ function runTest() {
 `;
 }
 
-function estimateRF() {
-  let total = observed.reduce((a, b) => a + b, 0);
-  let recombinants = observed[2] + observed[3];
-  return (recombinants / total) * 100;
-}
-
 function drawChart() {
   const ctx = document.getElementById("chart");
 
@@ -596,14 +553,10 @@ function drawChart() {
     chart.destroy();
   }
 
-  let chartTitle = currentMode === "dihybrid"
-    ? "Observed vs Expected Dihybrid Cross Counts"
-    : "Observed vs Expected Test-Cross Counts";
-
   chart = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: phenotypes,
+      labels: genotypes,
       datasets: [
         {
           label: "Observed",
@@ -611,85 +564,51 @@ function drawChart() {
           backgroundColor: "rgba(54, 162, 235, 0.6)"
         },
         {
-          label: "Expected",
+          label: "Expected under HW",
           data: expectedVals,
           backgroundColor: "rgba(255, 159, 64, 0.6)"
         }
       ]
     },
     options: {
-
       responsive: true,
-
       plugins: {
-
         title: {
-
           display: true,
-
-          text: chartTitle,
-
+          text: "Observed vs Expected Genotype Counts",
           font: {
-
-            size: 28   // title bigger
-
+            size: 28
           }
-
         },
-
         legend: {
-
           labels: {
-
             font: {
-
-              size: 20   // legend text
-
+              size: 20
             }
-
           }
-
         }
-
       },
-
       scales: {
-
         x: {
-
           ticks: {
-
             font: {
-
-              size: 20   // x-axis labels
-
+              size: 22
             }
-
           }
-
         },
-
         y: {
-
           beginAtZero: true,
-
           ticks: {
-
             font: {
-
-              size: 18   // y-axis numbers
-
+              size: 18
             }
-
           }
-
         }
-
       }
-
     }
   });
 }
+
 
 function exportPDF() {
   let studentName = prompt("Enter Student Name:");
@@ -703,23 +622,18 @@ function exportPDF() {
     alert("NSID is required.");
     return;
   }
+
   const now = new Date();
 
   const timestamp = now.toLocaleString("en-CA", {
-
     year: "numeric",
-
     month: "2-digit",
-
     day: "2-digit",
-
     hour: "2-digit",
-
     minute: "2-digit",
-
     second: "2-digit"
-
   });
+
   const chartImage = document.getElementById("chart").toDataURL("image/png");
 
   let report = document.createElement("div");
@@ -734,12 +648,11 @@ function exportPDF() {
   report.innerHTML = `
     <div style="line-height:1.5;">
 
-    <h1 style="text-align:center; margin-bottom:25px;">Genetics Dataset Generator</h1>
+    <h1 style="text-align:center; margin-bottom:25px;">Population Genetics Simulator</h1>
 
     <p><b>Student Name:</b> ${studentName}</p>
     <p><b>NSID:</b> ${nsid}</p>
-    <p><b>Dataset Type:</b> ${currentDatasetTitle}</p>
-    <p><b>Organism:</b> ${currentOrganism}</p>
+    <p><b>Total individuals:</b> ${total}</p>
     <p><b>Timestamp:</b> ${timestamp}</p>
 
     <hr style="margin-top:20px; margin-bottom:20px;">
@@ -753,7 +666,7 @@ function exportPDF() {
       <img src="${chartImage}" style="width:100%;">
     </div>
 
-    <div style="text-align:center; font-size:24px; margin-top:25px; color:#555;">
+    <div style="text-align:center; font-size:15px; margin-top:25px; color:#555;">
       Dr. Andres Posso-Terranova. 2026. ©
     </div>
 
@@ -816,16 +729,16 @@ function exportPDF() {
     }
 
     let cleanName = studentName.replace(/\s+/g, "_");
-    pdf.save(`${cleanName}_${nsid}_Genetics_Report.pdf`);
+    pdf.save(`${cleanName}_${nsid}_Population_Genetics_Report.pdf`);
 
     document.body.removeChild(report);
   });
 }
 
-/* p-value for chi-square with df = 3 */
-function chiP(x) {
-  let t = Math.sqrt(x / 2);
-  return erfc(t) + Math.sqrt((2 * x) / Math.PI) * Math.exp(-x / 2);
+
+/* Chi-square p-value for df = 1 */
+function chiSquareP_df1(x) {
+  return erfc(Math.sqrt(x / 2));
 }
 
 function erfc(x) {

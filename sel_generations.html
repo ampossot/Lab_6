@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Selection Simulator Across Generations</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body {
+  font-family: Arial;
+  padding: 20px;
+  background: #f7f7f7;
+}
+
+h1 {
+  font-size: 34px;
+  text-align: center;
+}
+
+button {
+  font-size: 22px;
+  padding: 15px;
+  margin-top: 10px;
+  width: 100%;
+  border-radius: 10px;
+  border: none;
+  background: #2f6fed;
+  color: white;
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+button:hover {
+  background: #1f5ad1;
+
+  transform: scale(1.03);
+
+  box-shadow: 0 8px 18px rgba(47,111,237,0.35);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+.generateButton {
+  font-size: 26px;
+  padding: 25px;
+}
+
+.exportButton {
+  background: #198754;
+}
+
+.backButton {
+  width: auto;
+  font-size: 16px;
+  padding: 10px 18px;
+  background: #6c757d;
+  margin-bottom: 15px;
+}
+
+.backButton:hover {
+  background: #5a6268;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+td, th {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  font-size: 18px;
+}
+
+.credit {
+  text-align: center;
+  font-size: 15px;
+  margin-top: 20px;
+  color: #555;
+}
+
+.warning {
+  background: #fff3cd;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.sliderValue {
+  font-weight: bold;
+  font-size: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Selection Simulator Across Generations</h1>
+
+<button class="backButton" onclick="window.location.href='index.html'">
+← Back to Main Menu
+</button>
+
+<button class="generateButton" onclick="generateStartingPopulation()">Generate Starting Population</button>
+<button onclick="exitApp()">Exit / Refresh</button>
+
+<div class="credit">Dr. Andres Posso-Terranova. 2026. ©</div>
+
+<div id="output"></div>
+<div id="controls"></div>
+<div id="results"></div>
+<div class="card"><canvas id="alleleChart"></canvas></div>
+<div class="card"><canvas id="genotypeChart"></canvas></div>
+<div id="generationActions"></div>
+<div id="finalCredit"></div>
+
+<script>
+let genotypes = ["AA", "Aa", "aa"];
+let total = 0;
+let datasetLocked = false;
+let selectionApplied = false;
+
+let startingObserved = [];
+let currentObserved = [];
+
+let startingP = 0;
+let startingQ = 0;
+
+let generations = [];
+let pHistory = [];
+let qHistory = [];
+let aaHistory = [];
+let AaHistory = [];
+let AAHistory = [];
+
+let selectedSelectionType = "";
+let selectedGenotype = "";
+let selectionStrength = 0.5;
+let generationNumber = 0;
+
+let alleleChart;
+let genotypeChart;
+
+function clearPrevious() {
+  document.getElementById("output").innerHTML = "";
+  document.getElementById("controls").innerHTML = "";
+  document.getElementById("results").innerHTML = "";
+  document.getElementById("finalCredit").innerHTML = "";
+  document.getElementById("generationActions").innerHTML = "";
+
+  if (alleleChart) {
+    alleleChart.destroy();
+  }
+
+  if (genotypeChart) {
+    genotypeChart.destroy();
+  }
+}
+
+function generateStartingPopulation() {
+  if (datasetLocked) {
+    alert("Refresh Browser for New Dataset");
+    return;
+  }
+
+  datasetLocked = true;
+  clearPrevious();
+
+  total = Math.floor(Math.random() * 301) + 300;
+
+  let p = Math.random() * 0.5 + 0.25;
+  let q = 1 - p;
+
+  startingP = p;
+  startingQ = q;
+
+  let probs = [
+    p * p,
+    2 * p * q,
+    q * q
+  ];
+
+  startingObserved = sampleMultinomial(total, probs);
+  currentObserved = startingObserved.slice();
+
+  generationNumber = 0;
+
+  generations = [0];
+  pHistory = [calculateP(currentObserved)];
+  qHistory = [calculateQ(currentObserved)];
+  AAHistory = [currentObserved[0]];
+  AaHistory = [currentObserved[1]];
+  aaHistory = [currentObserved[2]];
+
+  showStartingPopulation();
+  createSelectionControls();
+}
+
+function sampleMultinomial(n, probs) {
+  let counts = [0, 0, 0];
+
+  for (let i = 0; i < n; i++) {
+    let r = Math.random();
+
+    if (r < probs[0]) counts[0]++;
+    else if (r < probs[0] + probs[1]) counts[1]++;
+    else counts[2]++;
+  }
+
+  return counts;
+}
+
+function calculateP(counts) {
+  return ((2 * counts[0]) + counts[1]) / (2 * total);
+}
+
+function calculateQ(counts) {
+  return ((2 * counts[2]) + counts[1]) / (2 * total);
+}
+
+function showStartingPopulation() {
+  let html = `
+    <div class="card">
+      <h2>Starting Population</h2>
+      <p><b>Total individuals:</b> ${total}</p>
+      <p>This starting population was generated under Hardy-Weinberg expectations.</p>
+
+      <table>
+        <tr>
+          <th>Generation</th>
+          <th>AA</th>
+          <th>Aa</th>
+          <th>aa</th>
+          <th>p</th>
+          <th>q</th>
+        </tr>
+        <tr>
+          <td>0</td>
+          <td>${currentObserved[0]}</td>
+          <td>${currentObserved[1]}</td>
+          <td>${currentObserved[2]}</td>
+          <td>${calculateP(currentObserved).toFixed(4)}</td>
+          <td>${calculateQ(currentObserved).toFixed(4)}</td>
+        </tr>
+      </table>
+
+      <div class="warning">
+        <b>Student task:</b> Choose a selection model, set the selection strength, and simulate allele-frequency change across generations.
+      </div>
+    </div>
+  `;
+
+  document.getElementById("output").innerHTML = html;
+}
+
+function createSelectionControls() {
+  let html = `
+    <div class="card">
+      <h2>Selection Settings</h2>
+
+      <p><b>Selection type</b></p>
+      <select id="selection_type" onchange="handleSelectionTypeChange()">
+        <option value="">Select one option</option>
+        <option value="positive">Positive selection for one genotype</option>
+        <option value="against">Selection against one genotype</option>
+        <option value="balancing">Balancing selection / heterozygote advantage</option>
+      </select>
+
+      <p><b>Target genotype</b></p>
+      <select id="selection_genotype">
+        <option value="">Select one option</option>
+        <option value="AA">AA</option>
+        <option value="Aa">Aa</option>
+        <option value="aa">aa</option>
+      </select>
+
+      <div id="balancing_note"></div>
+
+      <p><b>Selection strength</b></p>
+      <input type="range" id="strength_slider" min="0.1" max="1.0" value="0.5" step="0.1" oninput="updateStrengthLabel()">
+      <p>Strength: <span id="strength_label" class="sliderValue">0.5</span></p>
+
+      <button onclick="applyInitialSelectionSettings()">Lock Selection Settings</button>
+    </div>
+  `;
+
+  document.getElementById("controls").innerHTML = html;
+}
+
+function handleSelectionTypeChange() {
+  let selectionType = document.getElementById("selection_type").value;
+  let genotypeSelect = document.getElementById("selection_genotype");
+  let balancingNote = document.getElementById("balancing_note");
+
+  if (selectionType === "balancing") {
+    genotypeSelect.value = "Aa";
+    genotypeSelect.disabled = true;
+
+    balancingNote.innerHTML = `
+      <div class="warning">
+        <b>Balancing selection:</b> Heterozygotes are automatically favored, so Aa is selected as the target genotype.
+      </div>
+    `;
+  } else {
+    genotypeSelect.disabled = false;
+    genotypeSelect.value = "";
+
+    balancingNote.innerHTML = "";
+  }
+}
+
+function updateStrengthLabel() {
+  document.getElementById("strength_label").innerHTML = document.getElementById("strength_slider").value;
+}
+
+function applyInitialSelectionSettings() {
+  let selectionType = document.getElementById("selection_type").value;
+  let genotypeTarget = document.getElementById("selection_genotype").value;
+
+  if (!selectionType) {
+    alert("Please select a type of selection.");
+    return;
+  }
+
+  if (selectionType !== "balancing" && !genotypeTarget) {
+    alert("Please select the target genotype.");
+    return;
+  }
+
+  selectedSelectionType = selectionType;
+  selectedGenotype = genotypeTarget;
+  selectionStrength = parseFloat(document.getElementById("strength_slider").value);
+
+  if (selectionType === "balancing") {
+    selectedGenotype = "Aa";
+  }
+
+  document.getElementById("selection_type").disabled = true;
+  document.getElementById("selection_genotype").disabled = true;
+  document.getElementById("strength_slider").disabled = true;
+
+  selectionApplied = true;
+
+  let selectionDescription = "";
+
+  if (selectedSelectionType === "positive") {
+    selectionDescription = `Positive selection for ${selectedGenotype}`;
+  } else if (selectedSelectionType === "against") {
+    selectionDescription = `Selection against ${selectedGenotype}`;
+  } else {
+    selectionDescription = "Balancing selection / heterozygote advantage";
+  }
+
+  document.getElementById("controls").innerHTML += `
+    <div class="card" style="background:#e6ffe6;">
+      <h2>✅ Selection Settings Locked</h2>
+      <p><b>Selection model:</b> ${selectionDescription}</p>
+      <p><b>Selection strength:</b> ${selectionStrength}</p>
+      <p>You may now simulate selection one generation at a time, up to 10 generations.</p>
+    </div>
+  `;
+
+  showGenerationButton();
+}
+
+function getFitnessValues() {
+  let wAA = 1.0;
+  let wAa = 1.0;
+  let waa = 1.0;
+
+  let advantage = 1.0 + selectionStrength;
+  let penalty = Math.max(0.05, 1.0 - selectionStrength);
+
+  if (selectedSelectionType === "positive") {
+    wAA = selectedGenotype === "AA" ? advantage : penalty;
+    wAa = selectedGenotype === "Aa" ? advantage : penalty;
+    waa = selectedGenotype === "aa" ? advantage : penalty;
+  }
+
+  if (selectedSelectionType === "against") {
+    wAA = selectedGenotype === "AA" ? penalty : 1.0;
+    wAa = selectedGenotype === "Aa" ? penalty : 1.0;
+    waa = selectedGenotype === "aa" ? penalty : 1.0;
+  }
+
+  if (selectedSelectionType === "balancing") {
+    wAA = penalty;
+    wAa = advantage;
+    waa = penalty;
+  }
+
+  return [wAA, wAa, waa];
+}
+
+function advanceOneGeneration() {
+  if (!selectionApplied) {
+    alert("Please lock selection settings first.");
+    return;
+  }
+
+  if (generationNumber >= 10) {
+    alert("Maximum of 10 generations reached.");
+    return;
+  }
+
+  let fitness = getFitnessValues();
+
+  let fAA = currentObserved[0] / total;
+  let fAa = currentObserved[1] / total;
+  let faa = currentObserved[2] / total;
+
+  let meanFitness = (fAA * fitness[0]) + (fAa * fitness[1]) + (faa * fitness[2]);
+
+  let selectedProbs = [
+    (fAA * fitness[0]) / meanFitness,
+    (fAa * fitness[1]) / meanFitness,
+    (faa * fitness[2]) / meanFitness
+  ];
+
+  currentObserved = sampleMultinomial(total, selectedProbs);
+
+  generationNumber++;
+
+  generations.push(generationNumber);
+  pHistory.push(calculateP(currentObserved));
+  qHistory.push(calculateQ(currentObserved));
+  AAHistory.push(currentObserved[0]);
+  AaHistory.push(currentObserved[1]);
+  aaHistory.push(currentObserved[2]);
+
+  showResultsTable();
+  drawAlleleChart();
+  drawGenotypeChart();
+  showGenerationButton();
+  showExportButtons();
+}
+
+function showGenerationButton() {
+  if (!selectionApplied) {
+    return;
+  }
+
+  if (generationNumber >= 10) {
+    document.getElementById("generationActions").innerHTML = `
+      <div class="card" style="background:#e6ffe6;">
+        <h2>✅ Maximum Reached</h2>
+        <p>You have simulated 10 generations.</p>
+      </div>
+    `;
+    return;
+  }
+
+  document.getElementById("generationActions").innerHTML = `
+    <div class="card">
+      <h2>Next Step</h2>
+      <p><b>Current generation:</b> ${generationNumber} / 10</p>
+      <button onclick="advanceOneGeneration()">Advance One Generation</button>
+    </div>
+  `;
+}
+
+function showResultsTable() {
+  let selectionDescription = "";
+
+  if (selectedSelectionType === "positive") {
+    selectionDescription = `Positive selection for ${selectedGenotype}`;
+  } else if (selectedSelectionType === "against") {
+    selectionDescription = `Selection against ${selectedGenotype}`;
+  } else {
+    selectionDescription = "Balancing selection / heterozygote advantage";
+  }
+
+  let html = `
+    <div class="card">
+      <h2>Selection Across Generations</h2>
+      <p><b>Selection model:</b> ${selectionDescription}</p>
+      <p><b>Selection strength:</b> ${selectionStrength}</p>
+      <p><b>Total individuals per generation:</b> ${total}</p>
+
+      <table>
+        <tr>
+          <th>Generation</th>
+          <th>AA</th>
+          <th>Aa</th>
+          <th>aa</th>
+          <th>p</th>
+          <th>q</th>
+        </tr>
+  `;
+
+  for (let i = 0; i < generations.length; i++) {
+    html += `
+      <tr>
+        <td>${generations[i]}</td>
+        <td>${AAHistory[i]}</td>
+        <td>${AaHistory[i]}</td>
+        <td>${aaHistory[i]}</td>
+        <td>${pHistory[i].toFixed(4)}</td>
+        <td>${qHistory[i].toFixed(4)}</td>
+      </tr>
+    `;
+  }
+
+  html += `
+      </table>
+
+      <div class="warning">
+        <b>Interpretation prompt:</b> Describe how selection changed allele frequencies across generations. Did one allele move toward fixation, decline, or stabilize?
+      </div>
+    </div>
+  `;
+
+  document.getElementById("results").innerHTML = html;
+}
+
+function drawAlleleChart() {
+  const ctx = document.getElementById("alleleChart");
+
+  if (alleleChart) {
+    alleleChart.destroy();
+  }
+
+  alleleChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: generations,
+      datasets: [
+        {
+          label: "Allele A (p)",
+          data: pHistory,
+          fill: false,
+          tension: 0.2
+        },
+        {
+          label: "Allele a (q)",
+          data: qHistory,
+          fill: false,
+          tension: 0.2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: "Allele Frequency Change Across Generations",
+          font: {
+            size: 28
+          }
+        },
+        legend: {
+          labels: {
+            font: {
+              size: 20
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: "Generation"
+          },
+          ticks: {
+            font: {
+              size: 18
+            }
+          }
+        },
+        y: {
+          beginAtZero: true,
+          max: 1,
+          title: {
+            display: true,
+            text: "Allele frequency"
+          },
+          ticks: {
+            font: {
+              size: 18
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function drawGenotypeChart() {
+  const ctx = document.getElementById("genotypeChart");
+
+  if (genotypeChart) {
+    genotypeChart.destroy();
+  }
+
+  genotypeChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: generations,
+      datasets: [
+        {
+          label: "AA",
+          data: AAHistory,
+          fill: false,
+          tension: 0.2
+        },
+        {
+          label: "Aa",
+          data: AaHistory,
+          fill: false,
+          tension: 0.2
+        },
+        {
+          label: "aa",
+          data: aaHistory,
+          fill: false,
+          tension: 0.2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: "Genotype Counts Across Generations",
+          font: {
+            size: 28
+          }
+        },
+        legend: {
+          labels: {
+            font: {
+              size: 20
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: "Generation"
+          },
+          ticks: {
+            font: {
+              size: 18
+            }
+          }
+        },
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: "Genotype count"
+          },
+          ticks: {
+            font: {
+              size: 18
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function showExportButtons() {
+  document.getElementById("finalCredit").innerHTML = `
+    <div class="credit">
+      Dr. Andres Posso-Terranova. 2026. ©
+    </div>
+    <button class="exportButton" onclick="exportPDF()">Export Report as PDF</button>
+    <button onclick="exitApp()">Exit</button>
+  `;
+}
+
+function exportPDF() {
+  let studentName = prompt("Enter Student Name:");
+  if (!studentName) {
+    alert("Student Name is required.");
+    return;
+  }
+
+  let nsid = prompt("Enter NSID:");
+  if (!nsid) {
+    alert("NSID is required.");
+    return;
+  }
+
+  const now = new Date();
+
+  const timestamp = now.toLocaleString("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+
+  const alleleChartImage = document.getElementById("alleleChart").toDataURL("image/png");
+  const genotypeChartImage = document.getElementById("genotypeChart").toDataURL("image/png");
+
+  let report = document.createElement("div");
+  report.style.background = "white";
+  report.style.padding = "45px";
+  report.style.fontFamily = "Arial";
+  report.style.width = "900px";
+  report.style.position = "absolute";
+  report.style.left = "-9999px";
+  report.style.top = "0";
+
+  report.innerHTML = `
+    <div style="line-height:1.5;">
+
+    <h1 style="text-align:center; margin-bottom:25px;">Selection Simulator Across Generations</h1>
+
+    <p><b>Student Name:</b> ${studentName}</p>
+    <p><b>NSID:</b> ${nsid}</p>
+    <p><b>Total individuals:</b> ${total}</p>
+    <p><b>Timestamp:</b> ${timestamp}</p>
+
+    <hr style="margin-top:20px; margin-bottom:20px;">
+
+    ${document.getElementById("output").innerHTML}
+    ${document.getElementById("results").innerHTML}
+
+    <div class="card">
+      <h2>Allele Frequency Graph</h2>
+      <img src="${alleleChartImage}" style="width:100%;">
+    </div>
+
+    <div class="card">
+      <h2>Genotype Count Graph</h2>
+      <img src="${genotypeChartImage}" style="width:100%;">
+    </div>
+
+    <div style="text-align:center; font-size:15px; margin-top:25px; color:#555;">
+      Dr. Andres Posso-Terranova. 2026. ©
+    </div>
+
+    <div style="height:80px;"></div>
+
+    </div>
+  `;
+
+  document.body.appendChild(report);
+
+  html2canvas(report, { scale: 1 }).then(canvas => {
+    const { jsPDF } = window.jspdf;
+
+    let pdf = new jsPDF("p", "mm", "a4");
+    let pageWidth = pdf.internal.pageSize.getWidth();
+    let pageHeight = pdf.internal.pageSize.getHeight();
+
+    let marginLeft = 15;
+    let marginTop = 15;
+    let marginBottom = 35;
+
+    let imgWidth = pageWidth - 30;
+    let usablePageHeight = pageHeight - marginTop - marginBottom;
+
+    let pageCanvasHeight = Math.floor(canvas.width * usablePageHeight / imgWidth);
+    let sourceY = 0;
+    let pageNumber = 0;
+
+    while (sourceY < canvas.height) {
+      let sliceHeight = Math.min(pageCanvasHeight, canvas.height - sourceY);
+
+      let pageCanvas = document.createElement("canvas");
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sliceHeight;
+
+      let pageContext = pageCanvas.getContext("2d");
+      pageContext.drawImage(
+        canvas,
+        0,
+        sourceY,
+        canvas.width,
+        sliceHeight,
+        0,
+        0,
+        canvas.width,
+        sliceHeight
+      );
+
+      let pageImgData = pageCanvas.toDataURL("image/jpeg", 0.72);
+      let pageImgHeight = sliceHeight * imgWidth / canvas.width;
+
+      if (pageNumber > 0) {
+        pdf.addPage();
+      }
+
+      pdf.addImage(pageImgData, "JPEG", marginLeft, marginTop, imgWidth, pageImgHeight);
+
+      sourceY += pageCanvasHeight;
+      pageNumber++;
+    }
+
+    let cleanName = studentName.replace(/\s+/g, "_");
+    pdf.save(`${cleanName}_${nsid}_Selection_Across_Generations_Report.pdf`);
+
+    document.body.removeChild(report);
+  });
+}
+
+function exitApp() {
+  if (confirm("Are you sure you want to exit?")) {
+    location.reload();
+  }
+}
+</script>
+
+</body>
+</html>

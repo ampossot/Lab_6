@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dataset Generator - Biol226 - USask</title>
+<title>Genetics Dataset Generator</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -22,13 +22,31 @@ h1 {
 
 button {
   font-size: 22px;
-  padding: 15px;
+  padding: 22px;
   margin-top: 10px;
   width: 100%;
   border-radius: 10px;
   border: none;
   background: #2f6fed;
   color: white;
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+button:hover {
+  background: #1f5ad1;
+
+  transform: scale(1.03);
+
+  box-shadow: 0 8px 18px rgba(47,111,237,0.35);
+}
+
+button:active {
+  transform: scale(0.98);
 }
 
 .generateButton {
@@ -94,7 +112,7 @@ input {
 
 <body>
 
-<h1>Dataset Generator - Biol226 - USask</h1>
+<h1>Genetics Dataset Generator</h1>
 
 
 
@@ -699,7 +717,9 @@ function exportPDF() {
   report.style.top = "0";
 
   report.innerHTML = `
-    <h1 style="text-align:center; margin-bottom:25px;">Dataset Generator - Biol226 - USask</h1>
+    <div style="line-height:1.5;">
+
+    <h1 style="text-align:center; margin-bottom:25px;">Genetics Dataset Generator</h1>
 
     <p><b>Student Name:</b> ${studentName}</p>
     <p><b>NSID:</b> ${nsid}</p>
@@ -723,6 +743,8 @@ function exportPDF() {
     </div>
 
     <div style="height:80px;"></div>
+
+    </div>
   `;
 
   document.body.appendChild(report);
@@ -736,7 +758,7 @@ function exportPDF() {
 
     let marginLeft = 15;
     let marginTop = 15;
-    let marginBottom = 20;
+    let marginBottom = 35;
 
     let imgWidth = pageWidth - 30;
     let usablePageHeight = pageHeight - marginTop - marginBottom;
@@ -779,7 +801,7 @@ function exportPDF() {
     }
 
     let cleanName = studentName.replace(/\s+/g, "_");
-    pdf.save(`${cleanName}_${nsid}_Biol226_Report.pdf`);
+    pdf.save(`${cleanName}_${nsid}_Genetics_Report.pdf`);
 
     document.body.removeChild(report);
   });

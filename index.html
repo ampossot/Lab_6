@@ -107,6 +107,36 @@ input {
 .download-link:hover {
   text-decoration: underline;
 }
+
+.chartWrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.chartWrapper canvas {
+  min-width: 700px;
+}
+
+@media (max-width: 600px) {
+
+  h1 {
+    font-size: 28px;
+  }
+
+  button {
+    font-size: 18px;
+    padding: 14px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .chartWrapper canvas {
+    min-width: 900px;
+  }
+
+}
 </style>
 </head>
 
@@ -131,11 +161,23 @@ Population Genetics Generator
 
 <div class="credit">Dr. Andres Posso-Terranova. 2026. ©</div>
 
+<div style="text-align:center; margin-top:15px;">
+  <a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer">
+    <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
+  </a>
+</div>
+
 <div id="output"></div>
 <div id="expected"></div>
 <div id="check"></div>
 <div id="results"></div>
-<div class="card"><canvas id="chart"></canvas></div>
+
+<div class="card">
+  <div class="chartWrapper">
+    <canvas id="chart"></canvas>
+  </div>
+</div>
+
 <div id="finalCredit"></div>
 
 <script>
@@ -659,9 +701,13 @@ function drawChart() {
 
           ticks: {
 
+            maxRotation: window.innerWidth < 600 ? 45 : 0,
+
+            minRotation: window.innerWidth < 600 ? 45 : 0,
+
             font: {
 
-              size: 20   // x-axis labels
+              size: window.innerWidth < 600 ? 12 : 20
 
             }
 
@@ -677,7 +723,7 @@ function drawChart() {
 
             font: {
 
-              size: 18   // y-axis numbers
+              size: window.innerWidth < 600 ? 12 : 18
 
             }
 

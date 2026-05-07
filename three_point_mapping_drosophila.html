@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Three-Point Mapping Exercise - Fruit Fly</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body {
+  font-family: Arial;
+  padding: 20px;
+  background: #f7f7f7;
+}
+
+h1 {
+  font-size: 34px;
+  text-align: center;
+}
+
+button {
+  font-size: 22px;
+  padding: 15px;
+  margin-top: 10px;
+  width: 100%;
+  border-radius: 10px;
+  border: none;
+  background: #2f6fed;
+  color: white;
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+button:hover {
+  background: #1f5ad1;
+  transform: scale(1.03);
+  box-shadow: 0 8px 18px rgba(47,111,237,0.35);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.generateButton {
+  font-size: 26px;
+  padding: 25px;
+}
+
+.exportButton {
+  background: #198754;
+}
+
+.backButton {
+  width: auto;
+  font-size: 16px;
+  padding: 10px 18px;
+  background: #6c757d;
+  margin-bottom: 15px;
+}
+
+.backButton:hover {
+  background: #5a6268;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+td, th {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 18px;
+  box-sizing: border-box;
+}
+
+textarea {
+  min-height: 120px;
+}
+
+.credit {
+  text-align: center;
+  font-size: 15px;
+  margin-top: 20px;
+  color: #555;
+}
+
+.warning {
+  background: #fff3cd;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.success {
+  background: #e6ffe6;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.danger {
+  background: #ffe5e5;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.info {
+  background: #eef4ff;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+  border-left: 6px solid #2f6fed;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e9ecef;
+  margin: 4px;
+  font-weight: bold;
+}
+
+.chromosomeBox {
+  background: #f8fafc;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 18px;
+  margin-top: 15px;
+}
+
+.chromosomeLine {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.geneMarker {
+  background: #2f6fed;
+  color: white;
+  padding: 10px;
+  border-radius: 10px;
+  font-weight: bold;
+  text-align: center;
+  min-width: 110px;
+}
+
+.mapSegment {
+  flex: 1;
+  height: 8px;
+  background: #94a3b8;
+  border-radius: 999px;
+  position: relative;
+}
+
+.segmentLabel {
+  text-align: center;
+  font-weight: bold;
+  margin-top: 8px;
+  color: #333;
+}
+
+.smallText {
+  font-size: 14px;
+  color: #555;
+}
+
+@media (max-width: 600px) {
+  h1 {
+    font-size: 28px;
+  }
+
+  button {
+    font-size: 18px;
+    padding: 14px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  table {
+    font-size: 13px;
+  }
+
+  input, select, textarea {
+    font-size: 16px;
+  }
+
+  .chromosomeLine {
+    flex-direction: column;
+  }
+
+  .mapSegment {
+    width: 8px;
+    height: 45px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<h1>Three-Point Mapping Exercise - Fruit Fly</h1>
+
+<button class="backButton" onclick="window.location.href='index.html'">
+← Back to Main Menu
+</button>
+
+<button id="start_button" class="generateButton" onclick="startMappingLab()">Start Three-Point Mapping Lab</button>
+<button onclick="exitApp()">Exit / Refresh</button>
+
+<div class="credit">Dr. Andres Posso-Terranova. 2026. ©</div>
+
+<div style="text-align:center; margin-top:15px;">
+  <a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer">
+    <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
+  </a>
+</div>
+
+<div id="intro"></div>
+<div id="dataEntry"></div>
+<div id="geneOrder"></div>
+<div id="classificationStep"></div>
+<div id="distanceStep"></div>
+<div id="interferenceStep"></div>
+<div id="conclusionStep"></div>
+<div id="finalCredit"></div>
+
+<script>
+let labLocked = false;
+
+const genes = [
+  { key: "body", symbol: "y", name: "Body color", mutant: "yellow", wildtype: "wild type body" },
+  { key: "eye", symbol: "w", name: "Eye color", mutant: "white", wildtype: "wild type eyes" },
+  { key: "wing", symbol: "m", name: "Wing size", mutant: "miniature", wildtype: "wild type wings" }
+];
+
+const phenotypeClasses = [
+  { code: "+++", bits: [0,0,0], label: "wild type body, wild type eyes, wild type wings" },
+  { code: "y++", bits: [1,0,0], label: "yellow body, wild type eyes, wild type wings" },
+  { code: "+w+", bits: [0,1,0], label: "wild type body, white eyes, wild type wings" },
+  { code: "++m", bits: [0,0,1], label: "wild type body, wild type eyes, miniature wings" },
+  { code: "yw+", bits: [1,1,0], label: "yellow body, white eyes, wild type wings" },
+  { code: "y+m", bits: [1,0,1], label: "yellow body, wild type eyes, miniature wings" },
+  { code: "+wm", bits: [0,1,1], label: "wild type body, white eyes, miniature wings" },
+  { code: "ywm", bits: [1,1,1], label: "yellow body, white eyes, miniature wings" }
+];
+
+let enteredData = [];
+let totalProgeny = 0;
+
+let parentalClasses = [];
+let dcoClasses = [];
+let correctOrder = [];
+let correctOrderText = "";
+let orderOptions = [];
+
+let distanceLeftMiddle = 0;
+let distanceMiddleRight = 0;
+let distanceOuterGenes = 0;
+let observedDCO = 0;
+let expectedDCO = 0;
+let coefficientCoincidence = 0;
+let interference = 0;
+
+let studentConclusionText = "";
+
+function clearAll() {
+  document.getElementById("intro").innerHTML = "";
+  document.getElementById("dataEntry").innerHTML = "";
+  document.getElementById("geneOrder").innerHTML = "";
+  document.getElementById("classificationStep").innerHTML = "";
+  document.getElementById("distanceStep").innerHTML = "";
+  document.getElementById("interferenceStep").innerHTML = "";
+  document.getElementById("conclusionStep").innerHTML = "";
+  document.getElementById("finalCredit").innerHTML = "";
+}
+
+function startMappingLab() {
+  if (labLocked) {
+    alert("Refresh Browser for New Dataset");
+    return;
+  }
+
+  labLocked = true;
+  document.getElementById("start_button").disabled = true;
+  clearAll();
+  showIntro();
+  showDataEntryTable();
+}
+
+function showIntro() {
+  document.getElementById("intro").innerHTML = `
+    <div class="card">
+      <h2>Three-Point Mapping Scenario</h2>
+      <p>You are analyzing three genetically linked X-linked genes in <i>Drosophila melanogaster</i>.</p>
+
+      <table>
+        <tr>
+          <th>Gene</th>
+          <th>Mutant phenotype</th>
+          <th>Wild type phenotype</th>
+        </tr>
+        <tr>
+          <td>Body color</td>
+          <td>yellow</td>
+          <td>wild type body</td>
+        </tr>
+        <tr>
+          <td>Eye color</td>
+          <td>white</td>
+          <td>wild type eyes</td>
+        </tr>
+        <tr>
+          <td>Wing size</td>
+          <td>miniature</td>
+          <td>wild type wings</td>
+        </tr>
+      </table>
+
+      <div class="warning">
+        <b>Cross:</b> yellow, white, miniature females × wild type males.
+        The genes are on the X chromosome and are genetically linked.
+      </div>
+
+      <div class="info">
+        <b>Student goal:</b> Enter the observed progeny data, infer the gene order, classify crossover classes, calculate map distances, calculate coincidence and interference, and write a biological conclusion.
+      </div>
+    </div>
+  `;
+}
+
+function showDataEntryTable() {
+  let html = `
+    <div class="card">
+      <h2>Step 1: Record Observed Progeny Data</h2>
+      <p>Enter the observed number of males and females for each phenotype class. The total column updates automatically.</p>
+
+      <table>
+        <tr>
+          <th>Class</th>
+          <th>Body color</th>
+          <th>Eye color</th>
+          <th>Wing size</th>
+          <th>Males</th>
+          <th>Females</th>
+          <th>Total</th>
+        </tr>
+  `;
+
+  for (let i = 0; i < phenotypeClasses.length; i++) {
+    let ph = phenotypeClasses[i];
+
+    html += `
+      <tr>
+        <td><b>${formatClassCode(ph.code)}</b></td>
+        <td>${ph.bits[0] === 1 ? "yellow" : "wild type"}</td>
+        <td>${ph.bits[1] === 1 ? "white" : "wild type"}</td>
+        <td>${ph.bits[2] === 1 ? "miniature" : "wild type"}</td>
+        <td><input type="number" min="0" id="male_${i}" oninput="updateRowTotal(${i})"></td>
+        <td><input type="number" min="0" id="female_${i}" oninput="updateRowTotal(${i})"></td>
+        <td id="total_${i}">0</td>
+      </tr>
+    `;
+  }
+
+  html += `
+      </table>
+
+      <p><b>Grand total:</b> <span id="grand_total">0</span></p>
+
+      <button id="save_data_button" onclick="saveObservedData()">Record and Save Observed Numbers</button>
+      <div id="data_feedback"></div>
+    </div>
+  `;
+
+  document.getElementById("dataEntry").innerHTML = html;
+}
+
+function updateRowTotal(i) {
+  let male = parseInt(document.getElementById("male_" + i).value) || 0;
+  let female = parseInt(document.getElementById("female_" + i).value) || 0;
+  let total = male + female;
+
+  document.getElementById("total_" + i).innerHTML = total;
+
+  updateGrandTotal();
+}
+
+function updateGrandTotal() {
+  let grand = 0;
+
+  for (let i = 0; i < phenotypeClasses.length; i++) {
+    let male = parseInt(document.getElementById("male_" + i).value) || 0;
+    let female = parseInt(document.getElementById("female_" + i).value) || 0;
+    grand += male + female;
+  }
+
+  document.getElementById("grand_total").innerHTML = grand;
+}
+
+function saveObservedData() {
+  enteredData = [];
+  totalProgeny = 0;
+
+  for (let i = 0; i < phenotypeClasses.length; i++) {
+    let male = parseInt(document.getElementById("male_" + i).value) || 0;
+    let female = parseInt(document.getElementById("female_" + i).value) || 0;
+    let total = male + female;
+
+    enteredData.push({
+      index: i,
+      code: phenotypeClasses[i].code,
+      bits: phenotypeClasses[i].bits,
+      label: phenotypeClasses[i].label,
+      male: male,
+      female: female,
+      total: total
+    });
+
+    totalProgeny += total;
+  }
+
+  if (totalProgeny <= 0) {
+    alert("Please enter observed progeny numbers before continuing.");
+    return;
+  }
+
+  let zeroClasses = enteredData.filter(row => row.total === 0).length;
+
+  if (zeroClasses > 2) {
+    alert("Several phenotype classes have zero counts. Check that all observed classes were entered correctly.");
+    return;
+  }
+
+  analyzeData();
+
+  document.getElementById("data_feedback").innerHTML = `
+    <div class="success">
+      <b>Observed data saved and locked.</b> Total progeny recorded: ${totalProgeny}.
+    </div>
+
+    <div class="card">
+      <h2>Recorded Progeny Counts</h2>
+      <table>
+        <tr>
+          <th>Class</th>
+          <th>Males</th>
+          <th>Females</th>
+          <th>Total</th>
+        </tr>
+        ${enteredData.map(row => `
+          <tr>
+            <td>${formatClassCode(row.code)}</td>
+            <td>${row.male}</td>
+            <td>${row.female}</td>
+            <td>${row.total}</td>
+          </tr>
+        `).join("")}
+      </table>
+    </div>
+  `;
+
+  lockDataInputs();
+  document.getElementById("save_data_button").disabled = true;
+  showGeneOrderStep();
+}
+
+function lockDataInputs() {
+  for (let i = 0; i < phenotypeClasses.length; i++) {
+    document.getElementById("male_" + i).disabled = true;
+    document.getElementById("female_" + i).disabled = true;
+  }
+}
+
+function analyzeData() {
+  let sorted = [...enteredData].sort((a, b) => b.total - a.total);
+
+  parentalClasses = [sorted[0], sorted[1]];
+
+  let ascending = [...enteredData].sort((a, b) => a.total - b.total);
+  dcoClasses = [ascending[0], ascending[1]];
+
+  let middleIndex = inferMiddleGene(parentalClasses, dcoClasses);
+
+  let remaining = [0,1,2].filter(i => i !== middleIndex);
+
+  correctOrder = [remaining[0], middleIndex, remaining[1]];
+  correctOrderText = orderToText(correctOrder);
+
+  classifyAndCalculate();
+  createGeneOrderOptions();
+}
+
+function inferMiddleGene(parentals, dcos) {
+  let bestMiddle = 1;
+  let bestScore = 999;
+
+  for (let d = 0; d < dcos.length; d++) {
+    for (let p = 0; p < parentals.length; p++) {
+      let diffs = [];
+
+      for (let g = 0; g < 3; g++) {
+        if (dcos[d].bits[g] !== parentals[p].bits[g]) {
+          diffs.push(g);
+        }
+      }
+
+      if (diffs.length < bestScore && diffs.length === 1) {
+        bestScore = diffs.length;
+        bestMiddle = diffs[0];
+      }
+    }
+  }
+
+  return bestMiddle;
+}
+
+function orderToText(order) {
+  return `${genes[order[0]].name} - ${genes[order[1]].name} - ${genes[order[2]].name}`;
+}
+
+function formatClassCode(code) {
+  return code;
+}
+
+function createGeneOrderOptions() {
+  let possibleOrders = [
+    [0,1,2],
+    [0,2,1],
+    [1,0,2]
+  ];
+
+  orderOptions = possibleOrders
+    .map(order => ({
+      order: order,
+      text: orderToText(order)
+    }))
+    .sort(() => Math.random() - 0.5);
+}
+
+function showGeneOrderStep() {
+  let options = "";
+
+  for (let i = 0; i < orderOptions.length; i++) {
+    options += `<option value="${i}">${orderOptions[i].text}</option>`;
+  }
+
+  document.getElementById("geneOrder").innerHTML = `
+    <div class="card">
+      <h2>Step 2: Estimate Gene Order</h2>
+      <p>Use the two most common classes as the parental classes and the two least common classes as the double-crossover classes.</p>
+
+      <div class="info">
+        <b>Hint:</b> In a three-point test cross, the double-crossover classes differ from the parental classes only at the middle gene.
+      </div>
+
+      <table>
+        <tr>
+          <th>Category</th>
+          <th>Class 1</th>
+          <th>Count</th>
+          <th>Class 2</th>
+          <th>Count</th>
+        </tr>
+        <tr>
+          <td>Most common: parentals</td>
+          <td>${formatClassCode(parentalClasses[0].code)}</td>
+          <td>${parentalClasses[0].total}</td>
+          <td>${formatClassCode(parentalClasses[1].code)}</td>
+          <td>${parentalClasses[1].total}</td>
+        </tr>
+        <tr>
+          <td>Least common: double crossovers</td>
+          <td>${formatClassCode(dcoClasses[0].code)}</td>
+          <td>${dcoClasses[0].total}</td>
+          <td>${formatClassCode(dcoClasses[1].code)}</td>
+          <td>${dcoClasses[1].total}</td>
+        </tr>
+      </table>
+
+      <p><b>Select the most likely gene order:</b></p>
+      <select id="gene_order_choice">
+        <option value="">Select one option</option>
+        ${options}
+      </select>
+
+      <button id="gene_order_button" onclick="checkGeneOrder()">Check Gene Order</button>
+      <div id="gene_order_feedback"></div>
+    </div>
+  `;
+}
+
+function checkGeneOrder() {
+  let choice = document.getElementById("gene_order_choice").value;
+
+  if (choice === "") {
+    alert("Please select a gene order.");
+    return;
+  }
+
+  let selectedOrder = orderOptions[parseInt(choice)].order;
+  let selectedMiddle = selectedOrder[1];
+  let correctMiddle = correctOrder[1];
+
+  if (selectedMiddle !== correctMiddle) {
+    document.getElementById("gene_order_feedback").innerHTML = `
+      <div class="danger">
+        <b>Check again.</b> Compare the parental and double-crossover classes. The gene that switches position is the middle gene.
+      </div>
+    `;
+    return;
+  }
+
+  document.getElementById("gene_order_choice").disabled = true;
+  document.getElementById("gene_order_button").disabled = true;
+
+  document.getElementById("gene_order_feedback").innerHTML = `
+    <div class="success">
+      <b>Gene order recorded and locked.</b> The inferred gene order is ${correctOrderText}.
+    </div>
+  `;
+
+  showClassificationStep();
+}
+
+function classifyAndCalculate() {
+  let p1 = parentalClasses[0].bits;
+  let order = correctOrder;
+
+  let interval1Total = 0;
+  let interval2Total = 0;
+  observedDCO = dcoClasses[0].total + dcoClasses[1].total;
+
+  for (let i = 0; i < enteredData.length; i++) {
+    let row = enteredData[i];
+    let pattern = order.map(g => row.bits[g] === p1[g] ? 0 : 1).join("");
+
+    row.pattern = pattern;
+    row.category = classifyPattern(pattern);
+    row.simpleCategory = simplifyCategory(row.category);
+
+    if (row.category === "SCO interval 1" || row.category === "DCO") {
+      interval1Total += row.total;
+    }
+
+    if (row.category === "SCO interval 2" || row.category === "DCO") {
+      interval2Total += row.total;
+    }
+  }
+
+  distanceLeftMiddle = (interval1Total / totalProgeny) * 100;
+  distanceMiddleRight = (interval2Total / totalProgeny) * 100;
+  distanceOuterGenes = distanceLeftMiddle + distanceMiddleRight;
+
+  expectedDCO = (distanceLeftMiddle / 100) * (distanceMiddleRight / 100) * totalProgeny;
+
+  if (expectedDCO > 0) {
+    coefficientCoincidence = observedDCO / expectedDCO;
+    interference = 1 - coefficientCoincidence;
+  } else {
+    coefficientCoincidence = 0;
+    interference = 0;
+  }
+}
+
+function classifyPattern(pattern) {
+  if (pattern === "000" || pattern === "111") {
+    return "Parental";
+  }
+
+  if (pattern === "100" || pattern === "011") {
+    return "SCO interval 1";
+  }
+
+  if (pattern === "001" || pattern === "110") {
+    return "SCO interval 2";
+  }
+
+  if (pattern === "010" || pattern === "101") {
+    return "DCO";
+  }
+
+  return "Unclassified";
+}
+
+function simplifyCategory(category) {
+  if (category === "Parental") {
+    return "Parental";
+  }
+
+  if (category === "DCO") {
+    return "Double R";
+  }
+
+  if (category === "SCO interval 1" || category === "SCO interval 2") {
+    return "Single Rec";
+  }
+
+  return "Unclassified";
+}
+
+function calculateDistanceBetweenGenes(geneA, geneB) {
+  let posA = correctOrder.indexOf(geneA);
+  let posB = correctOrder.indexOf(geneB);
+
+  if (posA > posB) {
+    let temp = posA;
+    posA = posB;
+    posB = temp;
+  }
+
+  if (posA === 0 && posB === 1) {
+    return distanceLeftMiddle;
+  }
+
+  if (posA === 1 && posB === 2) {
+    return distanceMiddleRight;
+  }
+
+  if (posA === 0 && posB === 2) {
+    return distanceLeftMiddle + distanceMiddleRight;
+  }
+
+  return 0;
+}
+
+function showClassificationStep() {
+  document.getElementById("classificationStep").innerHTML = `
+    <div class="card">
+      <h2>Step 3: Classify Crossover Classes</h2>
+      <p>For each phenotype class, select whether it is Parental, Single Recombinant, or Double Recombinant.</p>
+
+      <div class="info">
+        <b>Hint:</b> Parentals are the two most common classes. Double recombinants are the two least common classes. The remaining classes are single recombinants.
+      </div>
+
+      <table>
+        <tr>
+          <th>Phenotype class</th>
+          <th>Total</th>
+          <th>Select crossover category</th>
+        </tr>
+        ${enteredData.map((row, i) => `
+          <tr>
+            <td>${formatClassCode(row.code)}</td>
+            <td>${row.total}</td>
+            <td>
+              <select id="category_${i}">
+                <option value="">Select one</option>
+                <option value="Parental">Parental</option>
+                <option value="Single Rec">Single Rec</option>
+                <option value="Double R">Double R</option>
+              </select>
+            </td>
+          </tr>
+        `).join("")}
+      </table>
+
+      <button id="classify_button" onclick="checkClassifications()">Check Crossover Classifications</button>
+      <div id="classification_feedback"></div>
+    </div>
+  `;
+}
+
+function checkClassifications() {
+  let allCorrect = true;
+
+  for (let i = 0; i < enteredData.length; i++) {
+    let select = document.getElementById("category_" + i);
+    select.style.backgroundColor = "white";
+
+    if (select.value !== enteredData[i].simpleCategory) {
+      allCorrect = false;
+      select.style.backgroundColor = "#ffd6d6";
+    }
+  }
+
+  if (!allCorrect) {
+    document.getElementById("classification_feedback").innerHTML = `
+      <div class="danger">
+        <b>Check your crossover classifications.</b> Incorrect fields are highlighted in red. You must classify the classes correctly before calculating distances.
+      </div>
+    `;
+    return;
+  }
+
+  for (let i = 0; i < enteredData.length; i++) {
+    document.getElementById("category_" + i).disabled = true;
+  }
+
+  document.getElementById("classify_button").disabled = true;
+
+  document.getElementById("classification_feedback").innerHTML = `
+    <div class="success">
+      <b>Crossover classifications recorded and locked.</b> You may now calculate map distances.
+    </div>
+  `;
+
+  showDistanceStep();
+}
+
+function showDistanceStep() {
+  let leftGene = genes[correctOrder[0]].name;
+  let middleGene = genes[correctOrder[1]].name;
+  let rightGene = genes[correctOrder[2]].name;
+
+  document.getElementById("distanceStep").innerHTML = `
+    <div class="card">
+      <h2>Step 4: Calculate Map Distances</h2>
+      <p>Use the crossover classes to calculate recombination frequency for each interval.</p>
+
+      <div class="info">
+        <b>Formula:</b> Map distance = [(single crossovers in interval + double crossovers) / total progeny] × 100
+      </div>
+
+      <p><b>Distance between ${leftGene} and ${middleGene}</b></p>
+      <input type="number" step="0.01" id="distance_1" placeholder="map units / cM">
+
+      <p><b>Distance between ${middleGene} and ${rightGene}</b></p>
+      <input type="number" step="0.01" id="distance_2" placeholder="map units / cM">
+
+      <div class="info">
+        <b>Outside-gene distance hint:</b> Use the final gene order. To estimate the distance between the two outside genes, add the two interval distances.
+      </div>
+
+      <p><b>Distance between ${leftGene} and ${rightGene}</b></p>
+      <input type="number" step="0.01" id="distance_outer_genes" placeholder="map units / cM">
+
+      <button id="distance_button" onclick="checkDistances()">Check Map Distances</button>
+      <div id="distance_feedback"></div>
+    </div>
+  `;
+}
+
+function checkDistances() {
+  let d1Input = document.getElementById("distance_1");
+  let d2Input = document.getElementById("distance_2");
+  let dOuterInput = document.getElementById("distance_outer_genes");
+
+  let studentD1 = parseFloat(d1Input.value);
+  let studentD2 = parseFloat(d2Input.value);
+  let studentOuter = parseFloat(dOuterInput.value);
+
+  d1Input.style.backgroundColor = "white";
+  d2Input.style.backgroundColor = "white";
+  dOuterInput.style.backgroundColor = "white";
+
+  let tolerance = 0.5;
+  let allCorrect = true;
+
+  if (isNaN(studentD1) || Math.abs(studentD1 - distanceLeftMiddle) > tolerance) {
+    d1Input.style.backgroundColor = "#ffd6d6";
+    allCorrect = false;
+  }
+
+  if (isNaN(studentD2) || Math.abs(studentD2 - distanceMiddleRight) > tolerance) {
+    d2Input.style.backgroundColor = "#ffd6d6";
+    allCorrect = false;
+  }
+
+  if (isNaN(studentOuter) || Math.abs(studentOuter - distanceOuterGenes) > tolerance) {
+    dOuterInput.style.backgroundColor = "#ffd6d6";
+    allCorrect = false;
+  }
+
+  if (!allCorrect) {
+    document.getElementById("distance_feedback").innerHTML = `
+      <div class="danger">
+        <b>Check your map distances.</b> Values within 0.5 map units are accepted.
+      </div>
+    `;
+    return;
+  }
+
+  d1Input.disabled = true;
+  d2Input.disabled = true;
+  dOuterInput.disabled = true;
+  document.getElementById("distance_button").disabled = true;
+
+  let leftGene = genes[correctOrder[0]].name;
+  let middleGene = genes[correctOrder[1]].name;
+  let rightGene = genes[correctOrder[2]].name;
+
+  document.getElementById("distance_feedback").innerHTML = `
+    <div class="success">
+      <b>Map distances recorded and locked.</b>
+      <p>The estimated distance between <b>${leftGene}</b> and <b>${middleGene}</b> is <b>${distanceLeftMiddle.toFixed(2)} cM</b>.</p>
+      <p>The estimated distance between <b>${middleGene}</b> and <b>${rightGene}</b> is <b>${distanceMiddleRight.toFixed(2)} cM</b>.</p>
+      <p>The estimated distance between <b>${leftGene}</b> and <b>${rightGene}</b> is <b>${distanceOuterGenes.toFixed(2)} cM</b>.</p>
+      ${createChromosomeDiagram()}
+    </div>
+  `;
+
+  showInterferenceStep();
+}
+
+function createChromosomeDiagram() {
+  let leftGene = genes[correctOrder[0]].name;
+  let middleGene = genes[correctOrder[1]].name;
+  let rightGene = genes[correctOrder[2]].name;
+
+  return `
+    <div class="chromosomeBox">
+      <h3>Genetic Map Diagram</h3>
+      <div class="chromosomeLine">
+        <div class="geneMarker">${leftGene}</div>
+        <div style="flex:1;">
+          <div class="mapSegment"></div>
+          <div class="segmentLabel">${distanceLeftMiddle.toFixed(2)} cM</div>
+        </div>
+        <div class="geneMarker">${middleGene}</div>
+        <div style="flex:1;">
+          <div class="mapSegment"></div>
+          <div class="segmentLabel">${distanceMiddleRight.toFixed(2)} cM</div>
+        </div>
+        <div class="geneMarker">${rightGene}</div>
+      </div>
+      <p><b>${leftGene} ↔ ${rightGene}:</b> ${distanceOuterGenes.toFixed(2)} cM</p>
+    </div>
+  `;
+}
+
+function showInterferenceStep() {
+  document.getElementById("interferenceStep").innerHTML = `
+    <div class="card">
+      <h2>Step 5: Calculate Coincidence and Interference</h2>
+
+      <p><b>Observed double crossovers:</b> ${observedDCO}</p>
+
+      <div class="info">
+        <b>Expected DCO:</b> (recombination frequency interval 1) × (recombination frequency interval 2) × total progeny
+      </div>
+
+      <p><b>Expected double crossovers</b></p>
+      <input type="number" step="0.01" id="expected_dco" placeholder="Expected DCO">
+
+      <p><b>Coefficient of coincidence</b></p>
+      <input type="number" step="0.01" id="coincidence" placeholder="Observed DCO / Expected DCO">
+
+      <p><b>Interference</b></p>
+      <input type="number" step="0.01" id="interference" placeholder="1 - coefficient of coincidence">
+
+      <button id="interference_button" onclick="checkInterference()">Check Coincidence and Interference</button>
+      <div id="interference_feedback"></div>
+    </div>
+  `;
+}
+
+function checkInterference() {
+  let expInput = document.getElementById("expected_dco");
+  let cocInput = document.getElementById("coincidence");
+  let intInput = document.getElementById("interference");
+
+  let studentExp = parseFloat(expInput.value);
+  let studentCoc = parseFloat(cocInput.value);
+  let studentInt = parseFloat(intInput.value);
+
+  expInput.style.backgroundColor = "white";
+  cocInput.style.backgroundColor = "white";
+  intInput.style.backgroundColor = "white";
+
+  let allCorrect = true;
+
+  if (isNaN(studentExp) || Math.abs(studentExp - expectedDCO) > 1.0) {
+    expInput.style.backgroundColor = "#ffd6d6";
+    allCorrect = false;
+  }
+
+  if (isNaN(studentCoc) || Math.abs(studentCoc - coefficientCoincidence) > 0.05) {
+    cocInput.style.backgroundColor = "#ffd6d6";
+    allCorrect = false;
+  }
+
+  if (isNaN(studentInt) || Math.abs(studentInt - interference) > 0.05) {
+    intInput.style.backgroundColor = "#ffd6d6";
+    allCorrect = false;
+  }
+
+  if (!allCorrect) {
+    document.getElementById("interference_feedback").innerHTML = `
+      <div class="danger">
+        <b>Check your calculations.</b> Expected DCO is accepted within 1 progeny. Coincidence and interference are accepted within 0.05.
+      </div>
+    `;
+    return;
+  }
+
+  expInput.disabled = true;
+  cocInput.disabled = true;
+  intInput.disabled = true;
+  document.getElementById("interference_button").disabled = true;
+
+  document.getElementById("interference_feedback").innerHTML = `
+    <div class="success">
+      <b>Coincidence and interference recorded and locked.</b>
+      <p>Expected DCO = <b>${expectedDCO.toFixed(2)}</b>.</p>
+      <p>Coefficient of coincidence = <b>${coefficientCoincidence.toFixed(2)}</b>.</p>
+      <p>Interference = <b>${interference.toFixed(2)}</b>.</p>
+    </div>
+  `;
+
+  showConclusionStep();
+}
+
+function showConclusionStep() {
+  document.getElementById("conclusionStep").innerHTML = `
+    <div class="card">
+      <h2>Step 6: Final Genetic Map and Biological Conclusion</h2>
+
+      <table>
+        <tr>
+          <th>Gene order</th>
+          <th>Distance interval 1</th>
+          <th>Distance interval 2</th>
+          <th>Outside genes distance</th>
+          <th>Coefficient of coincidence</th>
+          <th>Interference</th>
+        </tr>
+        <tr>
+          <td>${correctOrderText}</td>
+          <td>${distanceLeftMiddle.toFixed(2)} cM</td>
+          <td>${distanceMiddleRight.toFixed(2)} cM</td>
+          <td>${distanceOuterGenes.toFixed(2)} cM</td>
+          <td>${coefficientCoincidence.toFixed(2)}</td>
+          <td>${interference.toFixed(2)}</td>
+        </tr>
+      </table>
+
+      ${createChromosomeDiagram()}
+
+      <div class="info">
+        <h3>Interference Hint</h3>
+        <p><b>I = 1</b>: complete interference; no double crossovers were observed.</p>
+        <p><b>I = 0</b>: no interference; observed DCO matches expected DCO.</p>
+        <p><b>I &gt; 0</b>: fewer double crossovers than expected.</p>
+        <p><b>I &lt; 0</b>: more double crossovers than expected.</p>
+      </div>
+
+      <p><b>Write a short conclusion:</b></p>
+      <textarea id="student_conclusion" placeholder="Write your conclusion here..."></textarea>
+
+      <button id="conclusion_button" onclick="saveConclusion()">Save Conclusion and Unlock Export</button>
+    </div>
+  `;
+}
+
+function saveConclusion() {
+  let text = document.getElementById("student_conclusion").value.trim();
+
+  if (text.length < 40) {
+    alert("Please write a more complete conclusion.");
+    return;
+  }
+
+  studentConclusionText = text;
+
+  document.getElementById("student_conclusion").disabled = true;
+  document.getElementById("conclusion_button").disabled = true;
+
+  document.getElementById("finalCredit").innerHTML = `
+    <div class="success">
+      <b>Conclusion saved and locked.</b> Your report is ready.
+    </div>
+
+    <div class="credit">
+      Dr. Andres Posso-Terranova. 2026. ©
+    </div>
+
+    <button class="exportButton" onclick="exportPDF()">Export Report as PDF</button>
+    <button onclick="exitApp()">Exit</button>
+
+    <div style="text-align:center; margin-top:15px;">
+      <a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer">
+        <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
+      </a>
+    </div>
+  `;
+}
+
+function exportPDF() {
+  let studentName = prompt("Enter Student Name:");
+  if (!studentName) {
+    alert("Student Name is required.");
+    return;
+  }
+
+  let nsid = prompt("Enter NSID:");
+  if (!nsid) {
+    alert("NSID is required.");
+    return;
+  }
+
+  if (typeof html2canvas === "undefined" || typeof window.jspdf === "undefined") {
+    alert("PDF export libraries did not load. Please check your internet connection and try again.");
+    return;
+  }
+
+  const now = new Date();
+
+  const timestamp = now.toLocaleString("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+
+  function cleanForReport(elementId) {
+    let source = document.getElementById(elementId);
+    let clone = source.cloneNode(true);
+
+    clone.querySelectorAll("input").forEach(input => {
+      let replacement = document.createElement("span");
+      replacement.innerHTML = input.value || "";
+      replacement.style.fontWeight = "bold";
+      input.parentNode.replaceChild(replacement, input);
+    });
+
+    clone.querySelectorAll("select").forEach(select => {
+      let replacement = document.createElement("span");
+      replacement.innerHTML = select.options[select.selectedIndex] ? select.options[select.selectedIndex].text : "";
+      replacement.style.fontWeight = "bold";
+      select.parentNode.replaceChild(replacement, select);
+    });
+
+    clone.querySelectorAll("textarea").forEach(textarea => {
+      let replacement = document.createElement("p");
+      replacement.innerHTML = textarea.value || "";
+      replacement.style.fontWeight = "bold";
+      textarea.parentNode.replaceChild(replacement, textarea);
+    });
+
+    clone.querySelectorAll("button").forEach(button => button.remove());
+
+    return clone.innerHTML;
+  }
+
+  let report = document.createElement("div");
+  report.style.background = "white";
+  report.style.padding = "45px";
+  report.style.fontFamily = "Arial";
+  report.style.width = "900px";
+  report.style.position = "absolute";
+  report.style.left = "-9999px";
+  report.style.top = "0";
+
+  report.innerHTML = `
+    <div style="line-height:1.5;">
+
+    <h1 style="text-align:center; margin-bottom:25px;">Three-Point Mapping Exercise - Fruit fly</h1>
+
+    <p><b>Student Name:</b> ${studentName}</p>
+    <p><b>NSID:</b> ${nsid}</p>
+    <p><b>Timestamp:</b> ${timestamp}</p>
+
+    <hr style="margin-top:20px; margin-bottom:20px;">
+
+    ${cleanForReport("intro")}
+    ${cleanForReport("dataEntry")}
+    ${cleanForReport("geneOrder")}
+    ${cleanForReport("classificationStep")}
+    ${cleanForReport("distanceStep")}
+    ${cleanForReport("interferenceStep")}
+    ${cleanForReport("conclusionStep")}
+
+    <div class="card">
+      <h2>Student Conclusion</h2>
+      <p>${studentConclusionText}</p>
+    </div>
+
+    <div style="text-align:center; font-size:15px; margin-top:25px; color:#555;">
+      Dr. Andres Posso-Terranova. 2026. ©
+    </div>
+
+    <div style="height:80px;"></div>
+
+    </div>
+  `;
+
+  document.body.appendChild(report);
+
+  html2canvas(report, { scale: 1 }).then(canvas => {
+    const { jsPDF } = window.jspdf;
+
+    let pdf = new jsPDF("p", "mm", "a4");
+    let pageWidth = pdf.internal.pageSize.getWidth();
+    let pageHeight = pdf.internal.pageSize.getHeight();
+
+    let marginLeft = 15;
+    let marginTop = 15;
+    let marginBottom = 35;
+
+    let imgWidth = pageWidth - 30;
+    let usablePageHeight = pageHeight - marginTop - marginBottom;
+
+    let pageCanvasHeight = Math.floor(canvas.width * usablePageHeight / imgWidth);
+    let sourceY = 0;
+    let pageNumber = 0;
+
+    while (sourceY < canvas.height) {
+      let sliceHeight = Math.min(pageCanvasHeight, canvas.height - sourceY);
+
+      let pageCanvas = document.createElement("canvas");
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sliceHeight;
+
+      let pageContext = pageCanvas.getContext("2d");
+      pageContext.drawImage(
+        canvas,
+        0,
+        sourceY,
+        canvas.width,
+        sliceHeight,
+        0,
+        0,
+        canvas.width,
+        sliceHeight
+      );
+
+      let pageImgData = pageCanvas.toDataURL("image/jpeg", 0.72);
+      let pageImgHeight = sliceHeight * imgWidth / canvas.width;
+
+      if (pageNumber > 0) {
+        pdf.addPage();
+      }
+
+      pdf.addImage(pageImgData, "JPEG", marginLeft, marginTop, imgWidth, pageImgHeight);
+
+      sourceY += pageCanvasHeight;
+      pageNumber++;
+    }
+
+    let cleanName = studentName.replace(/\s+/g, "_");
+    pdf.save(`${cleanName}_${nsid}_Three_Point_Mapping_Report.pdf`);
+
+    document.body.removeChild(report);
+  });
+}
+
+function exitApp() {
+  if (confirm("Are you sure you want to exit?")) {
+    location.reload();
+  }
+}
+</script>
+
+</body>
+</html>

@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Selection Simulator</title>
+<title>Random Population Generator</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -77,7 +77,7 @@ td, th {
   text-align: center;
 }
 
-input, select {
+input {
   width: 100%;
   padding: 10px;
   font-size: 18px;
@@ -92,6 +92,13 @@ input, select {
 
 .warning {
   background: #fff3cd;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.success {
+  background: #e6ffe6;
   padding: 12px;
   border-radius: 8px;
   margin-top: 10px;
@@ -113,13 +120,14 @@ input, select {
 
 <body>
 
-<h1>Selection Simulator</h1>
+<h1>Random Population Generator</h1>
 
 <button class="backButton" onclick="window.location.href='pop_gen.html'">
 ← Back to Population Genetics Menu
 </button>
 
-<button class="generateButton" onclick="generateSelectionSimulator()">Generate Starting Population</button>
+<button class="generateButton" onclick="generateRandomPopulation()">Generate a Random Population</button>
+
 <button onclick="exitApp()">Exit / Refresh</button>
 
 <div class="credit">Dr. Andres Posso-Terranova. 2026. ©</div>
@@ -137,10 +145,10 @@ input, select {
 <div id="check"></div>
 <div id="results"></div>
 <div class="card"><canvas id="chart"></canvas></div>
-<div class="card"><canvas id="genotypeChart"></canvas></div>
 <div id="finalCredit"></div>
 
 <script>
+
 let observed = [];
 let expectedVals = [];
 let genotypes = ["AA", "Aa", "aa"];
@@ -148,18 +156,36 @@ let pValueObserved = 0;
 let qValueObserved = 0;
 let total = 0;
 let chart;
-let genotypeChart;
 let datasetLocked = false;
+let realMode = "";
+let correctX2Conclusion = "";
 
-let beforeObserved = [];
-let afterObserved = [];
-let beforeP = 0;
-let beforeQ = 0;
-let afterP = 0;
-let afterQ = 0;
-let selectionApplied = false;
-let selectedSelectionType = "";
-let selectedGenotype = "";
+function goToSelectionSimulator() {
+  if (datasetLocked) {
+    alert("Refresh Browser for New Dataset");
+    return;
+  }
+
+  window.location.href = "selection_simulator.html";
+}
+
+function goToSelectionAcrossGenerations() {
+  if (datasetLocked) {
+    alert("Refresh Browser for New Dataset");
+    return;
+  }
+
+  window.location.href = "sel_generations.html";
+}
+
+function goToGeneticDriftSimulator() {
+  if (datasetLocked) {
+    alert("Refresh Browser for New Dataset");
+    return;
+  }
+
+  window.location.href = "genetic_drift_simulator.html";
+}
 
 function clearPrevious() {
   document.getElementById("output").innerHTML = "";
@@ -168,33 +194,41 @@ function clearPrevious() {
   document.getElementById("check").innerHTML = "";
   document.getElementById("results").innerHTML = "";
   document.getElementById("finalCredit").innerHTML = "";
-  selectionApplied = false;
 
   if (chart) {
     chart.destroy();
   }
+}
 
-  if (genotypeChart) {
-    genotypeChart.destroy();
+function generateRandomPopulation() {
+  if (datasetLocked) {
+    alert("Refresh Browser for New Dataset");
+    return;
+  }
+
+  let randomChoice = Math.random();
+
+  if (randomChoice < 0.5) {
+    generateHWPopulation();
+  } else {
+    generateNonHWPopulation();
   }
 }
 
-function generateSelectionSimulator() {
+function generateHWPopulation() {
   if (datasetLocked) {
     alert("Refresh Browser for New Dataset");
     return;
   }
 
   datasetLocked = true;
+  realMode = "Hardy-Weinberg equilibrium";
   clearPrevious();
 
-  total = Math.floor(Math.random() * 301) + 300;
+  total = Math.floor(Math.random() * 301) + 300; // 300 to 600
 
-  let p = Math.random() * 0.5 + 0.25;
+  let p = Math.random() * 0.5 + 0.25; // 0.25 to 0.75
   let q = 1 - p;
-
-  beforeP = p;
-  beforeQ = q;
 
   let probs = [
     p * p,
@@ -202,10 +236,38 @@ function generateSelectionSimulator() {
     q * q
   ];
 
-  beforeObserved = sampleMultinomial(total, probs);
-  observed = beforeObserved.slice();
+  observed = sampleMultinomial(total, probs);
 
-  showSelectionStart();
+  showPopulation("Population Dataset");
+}
+
+function generateNonHWPopulation() {
+  if (datasetLocked) {
+    alert("Refresh Browser for New Dataset");
+    return;
+  }
+
+  datasetLocked = true;
+  realMode = "Not in Hardy-Weinberg equilibrium";
+  clearPrevious();
+
+  total = Math.floor(Math.random() * 301) + 300; // 300 to 600
+
+  let p = Math.random() * 0.5 + 0.25;
+  let q = 1 - p;
+
+  // Inbreeding model: heterozygote deficiency
+  let F = Math.random() * 0.35 + 0.25; // 0.25 to 0.60
+
+  let probs = [
+    (p * p) + (F * p * q),
+    (2 * p * q) * (1 - F),
+    (q * q) + (F * p * q)
+  ];
+
+  observed = sampleMultinomial(total, probs);
+
+  showPopulation("Population Dataset");
 }
 
 function sampleMultinomial(n, probs) {
@@ -222,17 +284,18 @@ function sampleMultinomial(n, probs) {
   return counts;
 }
 
-function showSelectionStart() {
+function showPopulation(title) {
+  total = observed.reduce((a, b) => a + b, 0);
+
   let html = `
     <div class="card">
-      <h2>Selection Simulator: Starting Population</h2>
+      <h2>${title}</h2>
       <p><b>Total individuals:</b> ${total}</p>
-      <p>This starting population was generated under Hardy-Weinberg expectations.</p>
 
       <table>
         <tr>
           <th>Genotype</th>
-          <th>Initial number</th>
+          <th>Observed number</th>
         </tr>
   `;
 
@@ -240,7 +303,7 @@ function showSelectionStart() {
     html += `
       <tr>
         <td>${genotypes[i]}</td>
-        <td>${beforeObserved[i]}</td>
+        <td>${observed[i]}</td>
       </tr>
     `;
   }
@@ -249,156 +312,12 @@ function showSelectionStart() {
       </table>
 
       <div class="warning">
-        <b>Student task:</b> Select a type of selection and apply it to the starting population. Then compare allele frequencies before and after selection.
+        <b>Student task:</b> Calculate allele frequencies, expected Hardy-Weinberg numbers, and run a χ² test.
       </div>
-    </div>
-
-    <div class="card">
-      <h2>Apply Selection</h2>
-
-      <p><b>Selection type</b></p>
-      <select id="selection_type">
-        <option value="">Select one option</option>
-        <option value="positive">Positive selection for one genotype</option>
-        <option value="against">Selection against one genotype</option>
-        <option value="balancing">Balancing selection / heterozygote advantage</option>
-      </select>
-
-      <p><b>Target genotype</b></p>
-      <select id="selection_genotype">
-        <option value="">Select one option</option>
-        <option value="AA">AA</option>
-        <option value="Aa">Aa</option>
-        <option value="aa">aa</option>
-      </select>
-
-      <button onclick="applySelection()">Apply Selection</button>
     </div>
   `;
 
   document.getElementById("output").innerHTML = html;
-}
-
-function applySelection() {
-
-  if (selectionApplied) {
-    alert("Selection has already been applied. Refresh Browser for New Dataset");
-    return;
-  }
-
-  let selectionType = document.getElementById("selection_type").value;
-  let genotypeTarget = document.getElementById("selection_genotype").value;
-
-  if (!selectionType) {
-    alert("Please select a type of selection.");
-    return;
-  }
-
-  if (selectionType !== "balancing" && !genotypeTarget) {
-    alert("Please select the target genotype.");
-    return;
-  }
-
-  selectedSelectionType = selectionType;
-  selectedGenotype = genotypeTarget;
-
-  let wAA = 1.0;
-  let wAa = 1.0;
-  let waa = 1.0;
-
-  if (selectionType === "positive") {
-    wAA = genotypeTarget === "AA" ? 1.8 : 0.45;
-    wAa = genotypeTarget === "Aa" ? 1.8 : 0.45;
-    waa = genotypeTarget === "aa" ? 1.8 : 0.45;
-  }
-
-  if (selectionType === "against") {
-    wAA = genotypeTarget === "AA" ? 0.15 : 1.0;
-    wAa = genotypeTarget === "Aa" ? 0.15 : 1.0;
-    waa = genotypeTarget === "aa" ? 0.15 : 1.0;
-  }
-
-  if (selectionType === "balancing") {
-    wAA = 0.35;
-    wAa = 2.0;
-    waa = 0.35;
-    selectedGenotype = "Aa";
-  }
-
-  let fAA = beforeObserved[0] / total;
-  let fAa = beforeObserved[1] / total;
-  let faa = beforeObserved[2] / total;
-
-  let meanFitness = (fAA * wAA) + (fAa * wAa) + (faa * waa);
-
-  let probs = [
-    (fAA * wAA) / meanFitness,
-    (fAa * wAa) / meanFitness,
-    (faa * waa) / meanFitness
-  ];
-
-  afterObserved = sampleMultinomial(total, probs);
-  observed = afterObserved.slice();
-
-  beforeP = ((2 * beforeObserved[0]) + beforeObserved[1]) / (2 * total);
-  beforeQ = ((2 * beforeObserved[2]) + beforeObserved[1]) / (2 * total);
-
-  afterP = ((2 * afterObserved[0]) + afterObserved[1]) / (2 * total);
-  afterQ = ((2 * afterObserved[2]) + afterObserved[1]) / (2 * total);
-
-  selectionApplied = true;
-
-  document.getElementById("selection_type").disabled = true;
-  document.getElementById("selection_genotype").disabled = true;
-
-  showSelectionAfter();
-}
-
-function showSelectionAfter() {
-  let selectionDescription = "";
-
-  if (selectedSelectionType === "positive") {
-    selectionDescription = `Positive selection for ${selectedGenotype}`;
-  } else if (selectedSelectionType === "against") {
-    selectionDescription = `Selection against ${selectedGenotype}`;
-  } else {
-    selectionDescription = "Balancing selection / heterozygote advantage";
-  }
-
-  let html = `
-    <div class="card">
-      <h2>Selection Simulator: Results After One Generation</h2>
-      <p><b>Selection applied:</b> ${selectionDescription}</p>
-      <p><b>Total individuals:</b> ${total}</p>
-
-      <table>
-        <tr>
-          <th>Genotype</th>
-          <th>Before selection</th>
-          <th>After selection</th>
-        </tr>
-  `;
-
-  for (let i = 0; i < 3; i++) {
-    html += `
-      <tr>
-        <td>${genotypes[i]}</td>
-        <td>${beforeObserved[i]}</td>
-        <td>${afterObserved[i]}</td>
-      </tr>
-    `;
-  }
-
-  html += `
-      </table>
-
-      <div class="warning">
-        <b>Student task:</b> Calculate p and q after selection, calculate expected Hardy-Weinberg numbers for the new population, run a χ² test, and interpret how selection changed allele frequencies.
-      </div>
-    </div>
-  `;
-
-  document.getElementById("output").innerHTML += html;
 
   createAlleleInputs();
 }
@@ -406,8 +325,8 @@ function showSelectionAfter() {
 function createAlleleInputs() {
   let html = `
     <div class="card">
-      <h2>Step 1: Calculate Allele Frequencies After Selection</h2>
-      <p>Use the observed genotype counts after selection to calculate p and q.</p>
+      <h2>Step 1: Calculate Allele Frequencies</h2>
+      <p>Use the observed genotype counts to calculate p and q.</p>
 
       <p><b>p = frequency of allele A</b></p>
       <input type="number" step="0.0001" id="student_p" placeholder="Enter p">
@@ -423,8 +342,10 @@ function createAlleleInputs() {
 }
 
 function checkAlleles() {
-  pValueObserved = afterP;
-  qValueObserved = afterQ;
+  total = observed.reduce((a, b) => a + b, 0);
+
+  pValueObserved = ((2 * observed[0]) + observed[1]) / (2 * total);
+  qValueObserved = ((2 * observed[2]) + observed[1]) / (2 * total);
 
   let pInput = document.getElementById("student_p");
   let qInput = document.getElementById("student_q");
@@ -475,7 +396,7 @@ function createExpectedInputs() {
     <div class="card">
       <h2>Step 2: Enter Expected Numbers Under Hardy-Weinberg Equilibrium</h2>
 
-      <p>Expected genotype frequencies for the population after selection:</p>
+      <p>Expected genotype frequencies:</p>
       <p><b>AA = p²</b></p>
       <p><b>Aa = 2pq</b></p>
       <p><b>aa = q²</b></p>
@@ -575,8 +496,8 @@ function runTest() {
       <table>
         <tr>
           <th>Genotype</th>
-          <th>Observed after selection</th>
-          <th>Expected under HW</th>
+          <th>Observed</th>
+          <th>Expected</th>
           <th>(O - E)² / E</th>
         </tr>
   `;
@@ -598,44 +519,89 @@ function runTest() {
   let p = chiSquareP_df1(chi);
 
   let conclusion = p < 0.05
-    ? "Reject H₀. The observed genotype counts after selection do not fit Hardy-Weinberg expectations."
-    : "Fail to reject H₀. The observed genotype counts after selection fit Hardy-Weinberg expectations.";
+    ? "Reject H₀. The observed genotype counts do not fit Hardy-Weinberg expectations."
+    : "Fail to reject H₀. The observed genotype counts fit Hardy-Weinberg expectations.";
+
+  correctX2Conclusion = conclusion;
 
   table += `
-      </table>
-
-      <h2>Allele Frequency Change</h2>
-      <table>
-        <tr>
-          <th>Allele</th>
-          <th>Before selection</th>
-          <th>After selection</th>
-        </tr>
-        <tr>
-          <td>A (p)</td>
-          <td>${beforeP.toFixed(4)}</td>
-          <td>${afterP.toFixed(4)}</td>
-        </tr>
-        <tr>
-          <td>a (q)</td>
-          <td>${beforeQ.toFixed(4)}</td>
-          <td>${afterQ.toFixed(4)}</td>
-        </tr>
       </table>
 
       <p><b>χ² value:</b> ${chi.toFixed(4)}</p>
       <p><b>Degrees of freedom:</b> 1</p>
       <p><b>p-value:</b> ${p.toFixed(6)}</p>
 
-      <p><b>H₀:</b> The population after selection is in Hardy-Weinberg equilibrium for this locus.</p>
-      <p><b>Conclusion:</b> ${conclusion}</p>
+      <p><b>H₀:</b> The population is in Hardy-Weinberg equilibrium for this locus.</p>
+
     </div>
   `;
 
   document.getElementById("results").innerHTML = table;
 
-  drawSelectionAlleleChart();
+  drawChart();
 
+  showConclusionCheckpoint();
+}
+
+function showConclusionCheckpoint() {
+  document.getElementById("results").innerHTML += `
+    <div class="card">
+      <h2>Interpret the χ² Result</h2>
+
+      <p><b>Select the correct conclusion:</b></p>
+
+      <select id="x2_conclusion_choice" style="width:100%; padding:10px; font-size:18px;">
+        <option value="">Select one answer</option>
+        <option value="reject">Reject H₀. The observed genotype counts do not fit Hardy-Weinberg expectations.</option>
+        <option value="fail">Fail to reject H₀. The observed genotype counts fit Hardy-Weinberg expectations.</option>
+      </select>
+
+      <button id="x2_conclusion_button" onclick="checkX2Conclusion()">Check Conclusion</button>
+
+      <div id="x2_conclusion_feedback"></div>
+    </div>
+  `;
+}
+
+function checkX2Conclusion() {
+  let choice = document.getElementById("x2_conclusion_choice");
+
+  let selected = choice.value;
+
+  let correctChoice = correctX2Conclusion.startsWith("Reject")
+    ? "reject"
+    : "fail";
+
+  choice.style.backgroundColor = "white";
+
+  if (selected !== correctChoice) {
+
+    choice.style.backgroundColor = "#ffd6d6";
+
+    document.getElementById("x2_conclusion_feedback").innerHTML = `
+      <div class="card" style="background:#ffe5e5;">
+        <h2>⚠️ Check Your Conclusion</h2>
+        <p>Use the p-value to decide whether to reject or fail to reject H₀.</p>
+      </div>
+    `;
+
+    return;
+  }
+
+  choice.disabled = true;
+  document.getElementById("x2_conclusion_button").disabled = true;
+
+  document.getElementById("x2_conclusion_feedback").innerHTML = `
+    <div class="success">
+      <h2>✅ Conclusion Correct</h2>
+      <p><b>Conclusion:</b> ${correctX2Conclusion}</p>
+    </div>
+  `;
+
+  showFinalExportButtons();
+}
+
+function showFinalExportButtons() {
   document.getElementById("finalCredit").innerHTML = `
   <div class="credit">
     Dr. Andres Posso-Terranova. 2026. ©
@@ -653,30 +619,26 @@ function runTest() {
 `;
 }
 
-function drawSelectionAlleleChart() {
+function drawChart() {
   const ctx = document.getElementById("chart");
 
   if (chart) {
     chart.destroy();
   }
 
-  if (genotypeChart) {
-    genotypeChart.destroy();
-  }
-
   chart = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: ["Allele A (p)", "Allele a (q)"],
+      labels: genotypes,
       datasets: [
         {
-          label: "Before selection",
-          data: [beforeP, beforeQ],
+          label: "Observed",
+          data: observed,
           backgroundColor: "rgba(54, 162, 235, 0.6)"
         },
         {
-          label: "After selection",
-          data: [afterP, afterQ],
+          label: "Expected under HW",
+          data: expectedVals,
           backgroundColor: "rgba(255, 159, 64, 0.6)"
         }
       ]
@@ -686,138 +648,7 @@ function drawSelectionAlleleChart() {
       plugins: {
         title: {
           display: true,
-          text: "Allele Frequency Change After One Generation of Selection",
-          font: {
-            size: 28
-          }
-        },
-        legend: {
-          labels: {
-            font: {
-              size: 20
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          ticks: {
-            font: {
-              size: 20
-            }
-          }
-        },
-        y: {
-          beginAtZero: true,
-          max: 1,
-          ticks: {
-            font: {
-              size: 18
-            }
-          }
-        }
-      }
-    }
-  });
-
-  createVisibleGenotypeChart();
-}
-
-
-function createVisibleGenotypeChart() {
-  const genotypeCtx = document.getElementById("genotypeChart");
-
-  if (genotypeChart) {
-    genotypeChart.destroy();
-  }
-
-  genotypeChart = new Chart(genotypeCtx, {
-    type: "bar",
-    data: {
-      labels: genotypes,
-      datasets: [
-        {
-          label: "Before selection",
-          data: beforeObserved,
-          backgroundColor: "rgba(54, 162, 235, 0.6)"
-        },
-        {
-          label: "After selection",
-          data: afterObserved,
-          backgroundColor: "rgba(255, 159, 64, 0.6)"
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        title: {
-          display: true,
-          text: "Genotype Counts Before and After Selection",
-          font: {
-            size: 28
-          }
-        },
-        legend: {
-          labels: {
-            font: {
-              size: 20
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          ticks: {
-            font: {
-              size: 20
-            }
-          }
-        },
-        y: {
-          beginAtZero: true,
-          ticks: {
-            font: {
-              size: 18
-            }
-          }
-        }
-      }
-    }
-  });
-}
-
-function createGenotypeCountChartImage() {
-  let reportCanvas = document.createElement("canvas");
-  reportCanvas.width = 900;
-  reportCanvas.height = 520;
-
-  let reportCtx = reportCanvas.getContext("2d");
-
-  let reportGenotypeChart = new Chart(reportCtx, {
-    type: "bar",
-    data: {
-      labels: genotypes,
-      datasets: [
-        {
-          label: "Before selection",
-          data: beforeObserved,
-          backgroundColor: "rgba(54, 162, 235, 0.6)"
-        },
-        {
-          label: "After selection",
-          data: afterObserved,
-          backgroundColor: "rgba(255, 159, 64, 0.6)"
-        }
-      ]
-    },
-    options: {
-      responsive: false,
-      animation: false,
-      plugins: {
-        title: {
-          display: true,
-          text: "Genotype Counts Before and After Selection",
+          text: "Observed vs Expected Genotype Counts",
           font: {
             size: 28
           }
@@ -849,12 +680,8 @@ function createGenotypeCountChartImage() {
       }
     }
   });
-
-  let image = reportCanvas.toDataURL("image/png");
-  reportGenotypeChart.destroy();
-
-  return image;
 }
+
 
 function exportPDF() {
   let studentName = prompt("Enter Student Name:");
@@ -881,7 +708,6 @@ function exportPDF() {
   });
 
   const chartImage = document.getElementById("chart").toDataURL("image/png");
-  const genotypeChartImage = createGenotypeCountChartImage();
 
   let report = document.createElement("div");
   report.style.background = "white";
@@ -895,7 +721,7 @@ function exportPDF() {
   report.innerHTML = `
     <div style="line-height:1.5;">
 
-    <h1 style="text-align:center; margin-bottom:25px;">Selection Simulator</h1>
+    <h1 style="text-align:center; margin-bottom:25px;">Population Genetics Simulator</h1>
 
     <p><b>Student Name:</b> ${studentName}</p>
     <p><b>NSID:</b> ${nsid}</p>
@@ -909,13 +735,8 @@ function exportPDF() {
     ${document.getElementById("results").innerHTML}
 
     <div class="card">
-      <h2>Allele Frequency Graph</h2>
+      <h2>Graph</h2>
       <img src="${chartImage}" style="width:100%;">
-    </div>
-
-    <div class="card">
-      <h2>Genotype Count Graph</h2>
-      <img src="${genotypeChartImage}" style="width:100%;">
     </div>
 
     <div style="text-align:center; font-size:15px; margin-top:25px; color:#555;">
@@ -981,11 +802,12 @@ function exportPDF() {
     }
 
     let cleanName = studentName.replace(/\s+/g, "_");
-    pdf.save(`${cleanName}_${nsid}_Selection_Simulator_Report.pdf`);
+    pdf.save(`${cleanName}_${nsid}_Population_Genetics_Report.pdf`);
 
     document.body.removeChild(report);
   });
 }
+
 
 /* Chi-square p-value for df = 1 */
 function chiSquareP_df1(x) {
@@ -1017,6 +839,7 @@ function exitApp() {
     location.reload();
   }
 }
+
 </script>
 
 </body>

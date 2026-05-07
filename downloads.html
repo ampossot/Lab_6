@@ -16,6 +16,8 @@ h1 {
   font-size: 34px;
 }
 
+
+
 .card {
   background: white;
   padding: 20px;
@@ -38,13 +40,42 @@ h1 {
 }
 
 button {
-  font-size: 18px;
-  padding: 14px;
+  font-size: 22px;
+  padding: 15px;
+  margin-top: 10px;
+  width: 100%;
   border-radius: 10px;
   border: none;
   background: #2f6fed;
   color: white;
   cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+button:hover {
+  background: #1f5ad1;
+  transform: scale(1.03);
+  box-shadow: 0 8px 18px rgba(47,111,237,0.35);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+.backButton {
+  width: auto;
+  font-size: 16px;
+  padding: 10px 18px;
+  background: #6c757d;
+  margin-bottom: 15px;
+}
+
+.backButton:hover {
+  background: #5a6268;
 }
 
 .credit {
@@ -60,7 +91,7 @@ button {
 
 <h1>Downloads</h1>
 
-<button onclick="window.location.href='index.html'">
+<button class="backButton" onclick="window.location.href='index.html'">
 ← Back to Main Menu
 </button>
 

@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monohybrid Cross Inheritance Analyzer - Drosophila</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body {
+  font-family: Arial;
+  padding: 20px;
+  background: #f7f7f7;
+}
+
+h1 {
+  font-size: 34px;
+  text-align: center;
+}
+
+button {
+  font-size: 22px;
+  padding: 15px;
+  margin-top: 10px;
+  width: 100%;
+  border-radius: 10px;
+  border: none;
+  background: #2f6fed;
+  color: white;
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+button:hover {
+  background: #1f5ad1;
+  transform: scale(1.03);
+  box-shadow: 0 8px 18px rgba(47,111,237,0.35);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.generateButton {
+  font-size: 26px;
+  padding: 25px;
+}
+
+.exportButton {
+  background: #198754;
+}
+
+.backButton {
+  width: auto;
+  font-size: 16px;
+  padding: 10px 18px;
+  background: #6c757d;
+  margin-bottom: 15px;
+}
+
+.backButton:hover {
+  background: #5a6268;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 12px;
+}
+
+.crossGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.crossCard {
+  background: #f8fafc;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+td, th {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 18px;
+  box-sizing: border-box;
+}
+
+textarea {
+  min-height: 120px;
+}
+
+.credit {
+  text-align: center;
+  font-size: 15px;
+  margin-top: 20px;
+  color: #555;
+}
+
+.warning {
+  background: #fff3cd;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.success {
+  background: #e6ffe6;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.danger {
+  background: #ffe5e5;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.info {
+  background: #eef4ff;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+  border-left: 6px solid #2f6fed;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e9ecef;
+  margin: 4px;
+  font-weight: bold;
+}
+
+.resultBox {
+  background: #f8fafc;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 15px;
+}
+
+.ratioBox {
+  background: #eef4ff;
+  border-left: 6px solid #2f6fed;
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 12px;
+}
+
+@media (max-width: 800px) {
+  .crossGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  h1 {
+    font-size: 28px;
+  }
+
+  button {
+    font-size: 18px;
+    padding: 14px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  table {
+    font-size: 13px;
+  }
+
+  input, select, textarea {
+    font-size: 16px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<h1>Monohybrid Cross Inheritance Analyzer</h1>
+
+<button class="backButton" onclick="window.location.href='index.html'">
+← Back to Main Menu
+</button>
+
+<button id="start_button" class="generateButton" onclick="startLab()">Start Monohybrid Inheritance Lab</button>
+<button onclick="exitApp()">Exit / Refresh</button>
+
+<div class="credit">Dr. Andres Posso-Terranova. 2026. ©</div>
+
+<div style="text-align:center; margin-top:15px;">
+  <a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer">
+    <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
+  </a>
+</div>
+
+<div id="intro"></div>
+<div id="step1"></div>
+<div id="step2"></div>
+<div id="step3"></div>
+<div id="step4"></div>
+<div id="decision"></div>
+<div id="finalCredit"></div>
+
+<script>
+let labLocked = false;
+
+let dominantPhenotype = "";
+let recessivePhenotype = "";
+let dominanceScenario = "";
+
+let crossData = {
+  wt_wt: [],
+  wtFemale_vgMale: [],
+  vgFemale_wtMale: [],
+  vg_vg: []
+};
+
+let crossCounter = 1;
+
+let studentConclusionText = "";
+
+function startLab() {
+  if (labLocked) {
+    alert("Refresh Browser for New Dataset");
+    return;
+  }
+
+  labLocked = true;
+  document.getElementById("start_button").disabled = true;
+
+  crossCounter = 1;
+  assignDominance();
+  showIntro();
+  showStep1();
+}
+
+function assignDominance() {
+  if (Math.random() < 0.5) {
+    dominantPhenotype = "Wild type wings";
+    recessivePhenotype = "Vestigial wings";
+    dominanceScenario = "wildtype_dominant";
+  } else {
+    dominantPhenotype = "Vestigial wings";
+    recessivePhenotype = "Wild type wings";
+    dominanceScenario = "vestigial_dominant";
+  }
+}
+
+function phenotypeFromGenotype(genotype) {
+  let dominantAllele = dominanceScenario === "wildtype_dominant" ? "W" : "V";
+
+  if (genotype.includes(dominantAllele)) {
+    return dominantPhenotype;
+  }
+
+  return recessivePhenotype;
+}
+
+function possibleGenotypesForPhenotype(phenotype) {
+  if (dominanceScenario === "wildtype_dominant") {
+    if (phenotype === "Wild type wings") {
+      return ["WW", "Wv"];
+    } else {
+      return ["vv"];
+    }
+  } else {
+    if (phenotype === "Vestigial wings") {
+      return ["VV", "Vw"];
+    } else {
+      return ["ww"];
+    }
+  }
+}
+
+function normalizeGenotype(genotype) {
+  return genotype.split("").sort().join("");
+}
+
+function gametesFromGenotype(genotype) {
+  return genotype.split("");
+}
+
+function randomChoice(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+function simulateOffspring(motherGenotype, fatherGenotype, n) {
+  let motherGametes = gametesFromGenotype(motherGenotype);
+  let fatherGametes = gametesFromGenotype(fatherGenotype);
+
+  let counts = {
+    maleWild: 0,
+    maleVestigial: 0,
+    femaleWild: 0,
+    femaleVestigial: 0
+  };
+
+  for (let i = 0; i < n; i++) {
+    let genotype = normalizeGenotype(randomChoice(motherGametes) + randomChoice(fatherGametes));
+    let phenotype = phenotypeFromGenotype(genotype);
+    let sex = Math.random() < 0.5 ? "male" : "female";
+
+    if (sex === "male" && phenotype === "Wild type wings") counts.maleWild++;
+    if (sex === "male" && phenotype === "Vestigial wings") counts.maleVestigial++;
+    if (sex === "female" && phenotype === "Wild type wings") counts.femaleWild++;
+    if (sex === "female" && phenotype === "Vestigial wings") counts.femaleVestigial++;
+  }
+
+  return counts;
+}
+
+function expectedPhenotypeRatio(motherGenotype, fatherGenotype) {
+  let motherGametes = gametesFromGenotype(motherGenotype);
+  let fatherGametes = gametesFromGenotype(fatherGenotype);
+
+  let wild = 0;
+  let vestigial = 0;
+
+  for (let i = 0; i < motherGametes.length; i++) {
+    for (let j = 0; j < fatherGametes.length; j++) {
+      let genotype = normalizeGenotype(motherGametes[i] + fatherGametes[j]);
+      let phenotype = phenotypeFromGenotype(genotype);
+
+      if (phenotype === "Wild type wings") {
+        wild++;
+      } else {
+        vestigial++;
+      }
+    }
+  }
+
+  return reduceRatio(wild, vestigial);
+}
+
+function reduceRatio(a, b) {
+  if (a === 0 && b === 0) {
+    return { wild: 0, vestigial: 0 };
+  }
+
+  if (a === 0) {
+    return { wild: 0, vestigial: 1 };
+  }
+
+  if (b === 0) {
+    return { wild: 1, vestigial: 0 };
+  }
+
+  let divisor = gcd(a, b);
+
+  return {
+    wild: a / divisor,
+    vestigial: b / divisor
+  };
+}
+
+function gcd(a, b) {
+  while (b !== 0) {
+    let temp = b;
+    b = a % b;
+    a = temp;
+  }
+
+  return a;
+}
+
+
+function makeCross(motherPhenotype, fatherPhenotype) {
+  let motherGenotype = randomChoice(possibleGenotypesForPhenotype(motherPhenotype));
+  let fatherGenotype = randomChoice(possibleGenotypesForPhenotype(fatherPhenotype));
+  let total = Math.floor(Math.random() * 81) + 120;
+  let counts = simulateOffspring(motherGenotype, fatherGenotype, total);
+  let ratio = expectedPhenotypeRatio(motherGenotype, fatherGenotype);
+
+  return {
+    crossNumber: crossCounter++,
+    motherPhenotype: motherPhenotype,
+    fatherPhenotype: fatherPhenotype,
+    motherGenotype: motherGenotype,
+    fatherGenotype: fatherGenotype,
+    total: total,
+    counts: counts,
+    expectedRatio: ratio
+  };
+}
+
+function showIntro() {
+  document.getElementById("intro").innerHTML = `
+    <div class="card">
+      <h2>Monohybrid Cross Scenario</h2>
+      <p>You are analyzing a gene affecting wing shape in <i>Drosophila melanogaster</i>.</p>
+
+      <table>
+        <tr>
+          <th>Trait</th>
+          <th>Phenotypes</th>
+          <th>Question</th>
+        </tr>
+        <tr>
+          <td>Wing shape</td>
+          <td>Wild type wings or vestigial wings</td>
+          <td>Which allele is dominant?</td>
+        </tr>
+      </table>
+
+      <div class="warning">
+        <b>Important:</b> The app randomly decides whether wild type or vestigial is dominant. Your job is to infer the inheritance pattern from the crosses.
+      </div>
+
+      <div class="info">
+        <b>Why males and females are shown separately:</b> If the gene is autosomal, no consistent male-female bias should appear.
+      </div>
+    </div>
+  `;
+}
+
+function showStep1() {
+  document.getElementById("step1").innerHTML = `
+    <div class="card">
+      <h2>Step 1: Wild Type Female × Wild Type Male</h2>
+      <p>Generate three independent wild type × wild type crosses.</p>
+      <button id="step1_button" onclick="generateStep1()">Generate Wild Type × Wild Type Crosses</button>
+      <div id="step1_results"></div>
+    </div>
+  `;
+}
+
+function generateStep1() {
+  crossData.wt_wt = [
+    makeCross("Wild type wings", "Wild type wings"),
+    makeCross("Wild type wings", "Wild type wings"),
+    makeCross("Wild type wings", "Wild type wings")
+  ];
+
+  document.getElementById("step1_results").innerHTML = renderCrosses(crossData.wt_wt, "wt_wt");
+
+  document.getElementById("step1_button").disabled = true;
+
+  document.getElementById("step1_results").innerHTML += `
+    <button id="ratio_button_wt_wt" onclick="checkRatios('wt_wt')">Check Ratios and Continue</button>
+    <div id="ratio_feedback_wt_wt"></div>
+  `;
+}
+
+function showStep2() {
+  document.getElementById("step2").innerHTML = `
+    <div class="card">
+      <h2>Step 2: Wild Type Female × Vestigial Male</h2>
+      <p>Generate three independent crosses between a wild type female and a vestigial male.</p>
+      <button id="step2_button" onclick="generateStep2()">Generate Wild Type Female × Vestigial Male Crosses</button>
+      <div id="step2_results"></div>
+    </div>
+  `;
+}
+
+function generateStep2() {
+  crossData.wtFemale_vgMale = [
+    makeCross("Wild type wings", "Vestigial wings"),
+    makeCross("Wild type wings", "Vestigial wings"),
+    makeCross("Wild type wings", "Vestigial wings")
+  ];
+
+  document.getElementById("step2_results").innerHTML = renderCrosses(crossData.wtFemale_vgMale, "wtFemale_vgMale");
+
+  document.getElementById("step2_button").disabled = true;
+
+  document.getElementById("step2_results").innerHTML += `
+    <button id="ratio_button_wtFemale_vgMale" onclick="checkRatios('wtFemale_vgMale')">Check Ratios and Continue</button>
+    <div id="ratio_feedback_wtFemale_vgMale"></div>
+  `;
+}
+
+function showStep3() {
+  document.getElementById("step3").innerHTML = `
+    <div class="card">
+      <h2>Step 3: Vestigial Female × Wild Type Male</h2>
+      <p>Generate three independent crosses between a vestigial female and a wild type male.</p>
+      <button id="step3_button" onclick="generateStep3()">Generate Vestigial Female × Wild Type Male Crosses</button>
+      <div id="step3_results"></div>
+    </div>
+  `;
+}
+
+function generateStep3() {
+  crossData.vgFemale_wtMale = [
+    makeCross("Vestigial wings", "Wild type wings"),
+    makeCross("Vestigial wings", "Wild type wings"),
+    makeCross("Vestigial wings", "Wild type wings")
+  ];
+
+  document.getElementById("step3_results").innerHTML = renderCrosses(crossData.vgFemale_wtMale, "vgFemale_wtMale");
+
+  document.getElementById("step3_button").disabled = true;
+
+  document.getElementById("step3_results").innerHTML += `
+    <button id="ratio_button_vgFemale_wtMale" onclick="checkRatios('vgFemale_wtMale')">Check Ratios and Continue</button>
+    <div id="ratio_feedback_vgFemale_wtMale"></div>
+  `;
+}
+
+function showStep4() {
+  document.getElementById("step4").innerHTML = `
+    <div class="card">
+      <h2>Step 4: Vestigial Female × Vestigial Male</h2>
+      <p>Generate three independent vestigial × vestigial crosses.</p>
+      <button id="step4_button" onclick="generateStep4()">Generate Vestigial × Vestigial Crosses</button>
+      <div id="step4_results"></div>
+    </div>
+  `;
+}
+
+function generateStep4() {
+  crossData.vg_vg = [
+    makeCross("Vestigial wings", "Vestigial wings"),
+    makeCross("Vestigial wings", "Vestigial wings"),
+    makeCross("Vestigial wings", "Vestigial wings")
+  ];
+
+  document.getElementById("step4_results").innerHTML = renderCrosses(crossData.vg_vg, "vg_vg");
+
+  document.getElementById("step4_button").disabled = true;
+
+  document.getElementById("step4_results").innerHTML += `
+    <button id="ratio_button_vg_vg" onclick="checkRatios('vg_vg')">Check Ratios and Continue</button>
+    <div id="ratio_feedback_vg_vg"></div>
+  `;
+}
+
+function renderCrosses(crosses, stepKey) {
+  let html = `<div class="crossGrid">`;
+
+  for (let i = 0; i < crosses.length; i++) {
+    let c = crosses[i];
+    let totalWild = c.counts.maleWild + c.counts.femaleWild;
+    let totalVestigial = c.counts.maleVestigial + c.counts.femaleVestigial;
+
+    html += `
+      <div class="crossCard">
+        <h3>Cross ${c.crossNumber}</h3>
+        <p><b>Female parent:</b> ${c.motherPhenotype}</p>
+        <p><b>Male parent:</b> ${c.fatherPhenotype}</p>
+
+        <table>
+          <tr>
+            <th>Phenotype</th>
+            <th>Males</th>
+            <th>Females</th>
+            <th>Total</th>
+          </tr>
+          <tr>
+            <td>Wild type wings</td>
+            <td>${c.counts.maleWild}</td>
+            <td>${c.counts.femaleWild}</td>
+            <td>${totalWild}</td>
+          </tr>
+          <tr>
+            <td>Vestigial wings</td>
+            <td>${c.counts.maleVestigial}</td>
+            <td>${c.counts.femaleVestigial}</td>
+            <td>${totalVestigial}</td>
+          </tr>
+          <tr>
+            <th>Total</th>
+            <th>${c.counts.maleWild + c.counts.maleVestigial}</th>
+            <th>${c.counts.femaleWild + c.counts.femaleVestigial}</th>
+            <th>${c.total}</th>
+          </tr>
+        </table>
+
+        <div class="ratioBox">
+          <p><b>Estimate phenotypic ratio for Cross ${c.crossNumber}</b></p>
+          <p>Wild type wings : Vestigial wings</p>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <input type="number" min="0" step="1" id="ratio_wild_${stepKey}_${i}" placeholder="Wild type">
+            <input type="number" min="0" step="1" id="ratio_vestigial_${stepKey}_${i}" placeholder="Vestigial">
+          </div>
+          <div id="ratio_result_${stepKey}_${i}"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+function checkRatios(stepKey) {
+  let crosses = crossData[stepKey];
+  let allCorrect = true;
+
+  for (let i = 0; i < crosses.length; i++) {
+    let wildInput = document.getElementById(`ratio_wild_${stepKey}_${i}`);
+    let vestigialInput = document.getElementById(`ratio_vestigial_${stepKey}_${i}`);
+
+    let studentWild = parseInt(wildInput.value);
+    let studentVestigial = parseInt(vestigialInput.value);
+
+    wildInput.style.backgroundColor = "white";
+    vestigialInput.style.backgroundColor = "white";
+
+    if (
+      isNaN(studentWild) ||
+      isNaN(studentVestigial) ||
+      studentWild !== crosses[i].expectedRatio.wild ||
+      studentVestigial !== crosses[i].expectedRatio.vestigial
+    ) {
+      allCorrect = false;
+      wildInput.style.backgroundColor = "#ffd6d6";
+      vestigialInput.style.backgroundColor = "#ffd6d6";
+    }
+  }
+
+  if (!allCorrect) {
+    document.getElementById(`ratio_feedback_${stepKey}`).innerHTML = `
+      <div class="danger">
+        <b>Check your ratios.</b> Incorrect ratio boxes are highlighted in red. Use simplified ratios such as 1:0, 1:1, 3:1, or 0:1.
+      </div>
+    `;
+    return;
+  }
+
+  for (let i = 0; i < crosses.length; i++) {
+    document.getElementById(`ratio_wild_${stepKey}_${i}`).disabled = true;
+    document.getElementById(`ratio_vestigial_${stepKey}_${i}`).disabled = true;
+
+    document.getElementById(`ratio_result_${stepKey}_${i}`).innerHTML = `
+      <div class="success">
+        <b>Calculated ratio:</b> Wild type ${crosses[i].expectedRatio.wild} : Vestigial ${crosses[i].expectedRatio.vestigial}
+      </div>
+    `;
+  }
+
+  document.getElementById(`ratio_button_${stepKey}`).disabled = true;
+
+  document.getElementById(`ratio_feedback_${stepKey}`).innerHTML = `
+    <div class="success">
+      <b>Ratios correct and locked.</b> Continue to the next step.
+    </div>
+  `;
+
+  if (stepKey === "wt_wt") {
+    showStep2();
+  }
+
+  if (stepKey === "wtFemale_vgMale") {
+    showStep3();
+  }
+
+  if (stepKey === "vgFemale_wtMale") {
+    showStep4();
+  }
+
+  if (stepKey === "vg_vg") {
+    showDecisionStep();
+  }
+}
+
+function showDecisionStep() {
+  document.getElementById("decision").innerHTML = `
+    <div class="card">
+      <h2>Step 5: Infer Mode of Inheritance</h2>
+
+      <div class="info">
+        <b>Evidence to consider:</b>
+        <ul>
+          <li>If two parents with the same phenotype sometimes produce the opposite phenotype, the parents may be heterozygous and their phenotype is likely dominant.</li>
+          <li>If a phenotype always breeds true when crossed to itself, it may be recessive.</li>
+          <li>If reciprocal crosses show similar results in males and females, there is no strong evidence of sex linkage.</li>
+        </ul>
+      </div>
+
+      <p><b>Which allele appears dominant?</b></p>
+      <select id="dominance_choice">
+        <option value="">Select one answer</option>
+        <option value="Wild type wings">Wild type wings</option>
+        <option value="Vestigial wings">Vestigial wings</option>
+      </select>
+
+      <p><b>Is there evidence of sex linkage?</b></p>
+      <select id="sex_linkage_choice">
+        <option value="">Select one answer</option>
+        <option value="no">No, males and females show similar phenotypic patterns.</option>
+        <option value="yes">Yes, only one sex shows the recessive phenotype.</option>
+      </select>
+
+      <p><b>Write a short conclusion:</b></p>
+      <textarea id="student_conclusion" placeholder="Write your conclusion here..."></textarea>
+
+      <button id="decision_button" onclick="checkDecision()">Check Inheritance Interpretation</button>
+      <div id="decision_feedback"></div>
+    </div>
+  `;
+}
+
+function checkDecision() {
+  let dominanceChoice = document.getElementById("dominance_choice");
+  let sexChoice = document.getElementById("sex_linkage_choice");
+  let conclusion = document.getElementById("student_conclusion");
+
+  let allCorrect = true;
+
+  dominanceChoice.style.backgroundColor = "white";
+  sexChoice.style.backgroundColor = "white";
+  conclusion.style.backgroundColor = "white";
+
+  if (dominanceChoice.value !== dominantPhenotype) {
+    dominanceChoice.style.backgroundColor = "#ffd6d6";
+    allCorrect = false;
+  }
+
+  if (sexChoice.value !== "no") {
+    sexChoice.style.backgroundColor = "#ffd6d6";
+    allCorrect = false;
+  }
+
+  if (conclusion.value.trim().length < 40) {
+    conclusion.style.backgroundColor = "#ffd6d6";
+    allCorrect = false;
+  }
+
+  if (!allCorrect) {
+    document.getElementById("decision_feedback").innerHTML = `
+      <div class="danger">
+        <b>Check your interpretation.</b> Incorrect or incomplete fields are highlighted in red.
+      </div>
+    `;
+    return;
+  }
+
+  studentConclusionText = conclusion.value.trim();
+
+  dominanceChoice.disabled = true;
+  sexChoice.disabled = true;
+  conclusion.disabled = true;
+  document.getElementById("decision_button").disabled = true;
+
+  document.getElementById("decision_feedback").innerHTML = `
+    <div class="success">
+      <b>Correct. Interpretation recorded and locked.</b>
+      <p><b>Dominant phenotype:</b> ${dominantPhenotype}</p>
+      <p><b>Recessive phenotype:</b> ${recessivePhenotype}</p>
+      <p><b>Sex linkage:</b> No evidence of sex linkage. Males and females show similar autosomal inheritance patterns.</p>
+    </div>
+
+    <div class="resultBox">
+      <h3>Genetic Interpretation</h3>
+      <p>This trait behaves as an <b>autosomal monohybrid trait</b>. The phenotype ${dominantPhenotype} is dominant over ${recessivePhenotype}.</p>
+      <p>Because reciprocal crosses produce comparable male and female patterns, the data do not support sex-linked inheritance.</p>
+    </div>
+  `;
+
+  showFinalButtons();
+}
+
+function showFinalButtons() {
+  document.getElementById("finalCredit").innerHTML = `
+    <div class="credit">
+      Dr. Andres Posso-Terranova. 2026. ©
+    </div>
+
+    <button class="exportButton" onclick="exportPDF()">Export Report as PDF</button>
+    <button onclick="exitApp()">Exit</button>
+
+    <div style="text-align:center; margin-top:15px;">
+      <a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer">
+        <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
+      </a>
+    </div>
+  `;
+}
+
+function exportPDF() {
+  let studentName = prompt("Enter Student Name:");
+  if (!studentName) {
+    alert("Student Name is required.");
+    return;
+  }
+
+  let nsid = prompt("Enter NSID:");
+  if (!nsid) {
+    alert("NSID is required.");
+    return;
+  }
+
+  if (typeof html2canvas === "undefined" || typeof window.jspdf === "undefined") {
+    alert("PDF export libraries did not load. Please check your internet connection and try again.");
+    return;
+  }
+
+  const now = new Date();
+
+  const timestamp = now.toLocaleString("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+
+  function cleanForReport(elementId) {
+    let source = document.getElementById(elementId);
+    let clone = source.cloneNode(true);
+
+    if (elementId === "decision") {
+      let dominanceSelect = clone.querySelector("#dominance_choice");
+      if (dominanceSelect) {
+        let previous = dominanceSelect.previousElementSibling;
+        if (previous && previous.tagName === "P") {
+          previous.remove();
+        }
+        dominanceSelect.remove();
+      }
+
+      let sexSelect = clone.querySelector("#sex_linkage_choice");
+      if (sexSelect) {
+        let previous = sexSelect.previousElementSibling;
+        if (previous && previous.tagName === "P") {
+          previous.remove();
+        }
+        sexSelect.remove();
+      }
+    }
+
+    clone.querySelectorAll("select").forEach(select => {
+      let replacement = document.createElement("span");
+      replacement.innerHTML = select.options[select.selectedIndex] ? select.options[select.selectedIndex].text : "";
+      replacement.style.fontWeight = "bold";
+      select.parentNode.replaceChild(replacement, select);
+    });
+
+    clone.querySelectorAll("textarea").forEach(textarea => {
+      let replacement = document.createElement("p");
+      replacement.innerHTML = textarea.value || "";
+      replacement.style.fontWeight = "bold";
+      textarea.parentNode.replaceChild(replacement, textarea);
+    });
+
+    clone.querySelectorAll("button").forEach(button => button.remove());
+
+    return clone.innerHTML;
+  }
+
+  let report = document.createElement("div");
+  report.style.background = "white";
+  report.style.padding = "45px";
+  report.style.fontFamily = "Arial";
+  report.style.width = "900px";
+  report.style.position = "absolute";
+  report.style.left = "-9999px";
+  report.style.top = "0";
+
+  report.innerHTML = `
+    <div style="line-height:1.5;">
+
+    <h1 style="text-align:center; margin-bottom:25px;">Monohybrid Cross Inheritance Analyzer</h1>
+
+    <p><b>Student Name:</b> ${studentName}</p>
+    <p><b>NSID:</b> ${nsid}</p>
+    <p><b>Timestamp:</b> ${timestamp}</p>
+
+    <hr style="margin-top:20px; margin-bottom:20px;">
+
+    ${cleanForReport("intro")}
+    ${cleanForReport("step1")}
+    ${cleanForReport("step2")}
+    ${cleanForReport("step3")}
+    ${cleanForReport("step4")}
+    ${cleanForReport("decision")}
+
+    <div class="card">
+      <h2>Student Conclusion</h2>
+      <p>${studentConclusionText}</p>
+    </div>
+
+    <div style="text-align:center; font-size:15px; margin-top:25px; color:#555;">
+      Dr. Andres Posso-Terranova. 2026. ©
+    </div>
+
+    <div style="height:80px;"></div>
+
+    </div>
+  `;
+
+  document.body.appendChild(report);
+
+  html2canvas(report, { scale: 1 }).then(canvas => {
+    const { jsPDF } = window.jspdf;
+
+    let pdf = new jsPDF("p", "mm", "a4");
+    let pageWidth = pdf.internal.pageSize.getWidth();
+    let pageHeight = pdf.internal.pageSize.getHeight();
+
+    let marginLeft = 1;
+    let marginTop = 10;
+    let marginBottom = 20;
+
+    let imgWidth = pageWidth - 8;
+    let usablePageHeight = pageHeight - marginTop - marginBottom;
+
+    let pageCanvasHeight = Math.floor(canvas.width * usablePageHeight / imgWidth);
+    let sourceY = 0;
+    let pageNumber = 0;
+
+    while (sourceY < canvas.height) {
+      let sliceHeight = Math.min(pageCanvasHeight, canvas.height - sourceY);
+
+      let pageCanvas = document.createElement("canvas");
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sliceHeight;
+
+      let pageContext = pageCanvas.getContext("2d");
+      pageContext.drawImage(
+        canvas,
+        0,
+        sourceY,
+        canvas.width,
+        sliceHeight,
+        0,
+        0,
+        canvas.width,
+        sliceHeight
+      );
+
+      let pageImgData = pageCanvas.toDataURL("image/jpeg", 0.72);
+      let pageImgHeight = sliceHeight * imgWidth / canvas.width;
+
+      if (pageNumber > 0) {
+        pdf.addPage();
+      }
+
+      pdf.addImage(pageImgData, "JPEG", marginLeft, marginTop, imgWidth, pageImgHeight);
+
+      sourceY += pageCanvasHeight;
+      pageNumber++;
+    }
+
+    let cleanName = studentName.replace(/\s+/g, "_");
+    pdf.save(`${cleanName}_${nsid}_Monohybrid_Inheritance_Report.pdf`);
+
+    document.body.removeChild(report);
+  });
+}
+
+function exitApp() {
+  if (confirm("Are you sure you want to exit?")) {
+    location.reload();
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Genome Mapping Simulator - Mock GWAS</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body {
+  font-family: Arial;
+  padding: 20px;
+  background: #f7f7f7;
+}
+
+h1 {
+  font-size: 34px;
+  text-align: center;
+}
+
+button {
+  font-size: 22px;
+  padding: 15px;
+  margin-top: 10px;
+  width: 100%;
+  border-radius: 10px;
+  border: none;
+  background: #2f6fed;
+  color: white;
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+button:hover {
+  background: #1f5ad1;
+  transform: scale(1.03);
+  box-shadow: 0 8px 18px rgba(47,111,237,0.35);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+.generateButton {
+  font-size: 26px;
+  padding: 25px;
+}
+
+.exportButton {
+  background: #198754;
+}
+
+.backButton {
+  width: auto;
+  font-size: 16px;
+  padding: 10px 18px;
+  background: #6c757d;
+  margin-bottom: 15px;
+}
+
+.backButton:hover {
+  background: #5a6268;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+td, th {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 18px;
+  box-sizing: border-box;
+}
+
+textarea {
+  min-height: 120px;
+}
+
+.credit {
+  text-align: center;
+  font-size: 15px;
+  margin-top: 20px;
+  color: #555;
+}
+
+.warning {
+  background: #fff3cd;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.success {
+  background: #e6ffe6;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.danger {
+  background: #ffe5e5;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e9ecef;
+  margin: 4px;
+  font-weight: bold;
+}
+
+.chartWrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.chartWrapper canvas {
+  min-width: 900px;
+}
+
+@media (max-width: 600px) {
+  h1 {
+    font-size: 28px;
+  }
+
+  button {
+    font-size: 18px;
+    padding: 14px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .chartWrapper canvas {
+    min-width: 1100px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<h1>Genome Mapping Simulator - Mock GWAS</h1>
+
+<button class="backButton" onclick="window.location.href='index.html'">
+← Back to Main Menu
+</button>
+
+<button class="generateButton" onclick="generateGWASDataset()">Generate Mock NGS / GWAS Dataset</button>
+<button onclick="exitApp()">Exit / Refresh</button>
+
+<div class="credit">Dr. Andres Posso-Terranova. 2026. ©</div>
+
+<div style="text-align:center; margin-top:15px;">
+  <a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer">
+    <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
+  </a>
+</div>
+
+<div id="intro"></div>
+<div id="prediction"></div>
+<div id="dataset"></div>
+<div id="studentTask"></div>
+<div id="manualAnalysis"></div>
+<div id="analysis"></div>
+<div id="topHits"></div>
+<div id="plotArea"></div>
+<div id="studentConclusion"></div>
+<div id="finalCredit"></div>
+
+<script>
+let datasetLocked = false;
+
+let individuals = [];
+let snps = [];
+let associationResults = [];
+let topResult = null;
+let candidateResult = null;
+
+let chromosomeCount = 8;
+let snpsPerChromosome = 25;
+let totalSNPs = chromosomeCount * snpsPerChromosome;
+let cohortSize = 240;
+
+let causalChromosome = 0;
+let causalIndex = 0;
+let causalSNPId = "";
+
+let affectedCount = 0;
+let unaffectedCount = 0;
+
+let predictedChromosome = "";
+let recordedAssociationPattern = "";
+let recordedNullHypothesis = "";
+let studentConclusionText = "";
+
+let expectedAffectedRisk = 0;
+let expectedUnaffectedRisk = 0;
+
+let alleleFrequenciesLocked = false;
+let oddsRatioLocked = false;
+let expectedCountsLocked = false;
+let associationInterpretationLocked = false;
+let topHitLocked = false;
+let conclusionLocked = false;
+
+let recordedAffectedFrequency = "";
+let recordedUnaffectedFrequency = "";
+let recordedOddsRatioInterpretation = "";
+let recordedExpectedAffectedRisk = "";
+let recordedExpectedUnaffectedRisk = "";
+let recordedAssociationInterpretation = "";
+let recordedTopChromosome = "";
+let recordedTopSNP = "";
+
+let manhattanChart;
+
+function clearPrevious() {
+  document.getElementById("intro").innerHTML = "";
+  document.getElementById("prediction").innerHTML = "";
+  document.getElementById("dataset").innerHTML = "";
+  document.getElementById("studentTask").innerHTML = "";
+  document.getElementById("manualAnalysis").innerHTML = "";
+  document.getElementById("analysis").innerHTML = "";
+  document.getElementById("topHits").innerHTML = "";
+  document.getElementById("plotArea").innerHTML = "";
+  document.getElementById("studentConclusion").innerHTML = "";
+  document.getElementById("finalCredit").innerHTML = "";
+
+  if (manhattanChart) {
+    manhattanChart.destroy();
+  }
+}
+
+function generateGWASDataset() {
+  if (datasetLocked) {
+    alert("Refresh Browser for New Dataset");
+    return;
+  }
+
+  datasetLocked = true;
+  clearPrevious();
+
+  individuals = [];
+  snps = [];
+  associationResults = [];
+  predictedChromosome = "";
+  recordedAssociationPattern = "";
+  recordedNullHypothesis = "";
+  studentConclusionText = "";
+
+  alleleFrequenciesLocked = false;
+  oddsRatioLocked = false;
+  expectedCountsLocked = false;
+  associationInterpretationLocked = false;
+  topHitLocked = false;
+  conclusionLocked = false;
+
+  recordedAffectedFrequency = "";
+  recordedUnaffectedFrequency = "";
+  recordedOddsRatioInterpretation = "";
+  recordedExpectedAffectedRisk = "";
+  recordedExpectedUnaffectedRisk = "";
+  recordedAssociationInterpretation = "";
+  recordedTopChromosome = "";
+  recordedTopSNP = "";
+
+  cohortSize = Math.floor(Math.random() * 81) + 200;
+
+  let minAffected = Math.floor(cohortSize * 0.4);
+  let maxAffected = Math.ceil(cohortSize * 0.6);
+  affectedCount = Math.floor(Math.random() * (maxAffected - minAffected + 1)) + minAffected;
+  unaffectedCount = cohortSize - affectedCount;
+
+  causalChromosome = Math.floor(Math.random() * chromosomeCount) + 1;
+  causalIndex = Math.floor(Math.random() * snpsPerChromosome);
+  causalSNPId = `SNP_${causalChromosome}_${String(causalIndex + 1).padStart(3, "0")}`;
+
+  createSNPList();
+  createIndividuals();
+  runGWASAnalysis();
+
+  candidateResult = associationResults[Math.floor(Math.random() * 5)];
+
+  showIntro();
+  showPredictionStep();
+}
+
+function createSNPList() {
+  for (let chr = 1; chr <= chromosomeCount; chr++) {
+    for (let i = 0; i < snpsPerChromosome; i++) {
+      let position = (i + 1) * 1000000;
+      let id = `SNP_${chr}_${String(i + 1).padStart(3, "0")}`;
+
+      let nearCausal = chr === causalChromosome && Math.abs(i - causalIndex) <= 2;
+
+      snps.push({
+        id: id,
+        chromosome: chr,
+        position: position,
+        indexWithinChromosome: i,
+        nearCausal: nearCausal,
+        isCausal: id === causalSNPId
+      });
+    }
+  }
+}
+
+function createIndividuals() {
+  for (let i = 0; i < cohortSize; i++) {
+    let isAffected = i < affectedCount;
+    let genotypes = [];
+
+    for (let s = 0; s < snps.length; s++) {
+      let snp = snps[s];
+
+      let riskAlleleFrequency = 0.30;
+
+      if (snp.nearCausal && isAffected) {
+        riskAlleleFrequency = 0.68;
+      }
+
+      if (snp.nearCausal && !isAffected) {
+        riskAlleleFrequency = 0.28;
+      }
+
+      let genotype = sampleGenotype(riskAlleleFrequency);
+      genotypes.push(genotype);
+    }
+
+    individuals.push({
+      id: `IND_${String(i + 1).padStart(3, "0")}`,
+      status: isAffected ? "Affected" : "Unaffected",
+      genotypes: genotypes
+    });
+  }
+
+  affectedCount = individuals.filter(ind => ind.status === "Affected").length;
+  unaffectedCount = individuals.filter(ind => ind.status === "Unaffected").length;
+}
+
+function sampleGenotype(alleleFrequency) {
+  let a1 = Math.random() < alleleFrequency ? 1 : 0;
+  let a2 = Math.random() < alleleFrequency ? 1 : 0;
+  return a1 + a2;
+}
+
+function runGWASAnalysis() {
+  for (let s = 0; s < snps.length; s++) {
+    let affectedRiskAlleles = 0;
+    let unaffectedRiskAlleles = 0;
+
+    for (let i = 0; i < individuals.length; i++) {
+      if (individuals[i].status === "Affected") {
+        affectedRiskAlleles += individuals[i].genotypes[s];
+      } else {
+        unaffectedRiskAlleles += individuals[i].genotypes[s];
+      }
+    }
+
+    let affectedTotalAlleles = affectedCount * 2;
+    let unaffectedTotalAlleles = unaffectedCount * 2;
+
+    let affectedNonRiskAlleles = affectedTotalAlleles - affectedRiskAlleles;
+    let unaffectedNonRiskAlleles = unaffectedTotalAlleles - unaffectedRiskAlleles;
+
+    let chi = chiSquare2x2(
+      affectedRiskAlleles,
+      affectedNonRiskAlleles,
+      unaffectedRiskAlleles,
+      unaffectedNonRiskAlleles
+    );
+
+    let p = chiSquareP_df1(chi);
+let negLogP = -Math.log10(p);
+
+    let oddsRatio = calculateOddsRatio(
+      affectedRiskAlleles,
+      affectedNonRiskAlleles,
+      unaffectedRiskAlleles,
+      unaffectedNonRiskAlleles
+    );
+
+    associationResults.push({
+      snp: snps[s],
+      affectedRiskAlleles: affectedRiskAlleles,
+      unaffectedRiskAlleles: unaffectedRiskAlleles,
+      affectedNonRiskAlleles: affectedNonRiskAlleles,
+      unaffectedNonRiskAlleles: unaffectedNonRiskAlleles,
+      affectedTotalAlleles: affectedTotalAlleles,
+      unaffectedTotalAlleles: unaffectedTotalAlleles,
+      affectedRiskAlleleFrequency: affectedRiskAlleles / affectedTotalAlleles,
+      unaffectedRiskAlleleFrequency: unaffectedRiskAlleles / unaffectedTotalAlleles,
+      chiSquare: chi,
+      pValue: p,
+      negLogP: negLogP,
+      oddsRatio: oddsRatio
+    });
+  }
+
+  associationResults.sort((a, b) => b.negLogP - a.negLogP);
+  topResult = associationResults[0];
+}
+
+function chiSquare2x2(a, b, c, d) {
+  let n = a + b + c + d;
+  let numerator = n * Math.pow((a * d) - (b * c), 2);
+  let denominator = (a + b) * (c + d) * (a + c) * (b + d);
+
+  if (denominator === 0) {
+    return 0;
+  }
+
+  return numerator / denominator;
+}
+
+function calculateOddsRatio(a, b, c, d) {
+  return ((a + 0.5) * (d + 0.5)) / ((b + 0.5) * (c + 0.5));
+}
+
+/* Chi-square p-value for df = 1 */
+function chiSquareP_df1(x) {
+  return erfc(Math.sqrt(x / 2));
+}
+
+function erfc(x) {
+  let z = Math.abs(x);
+  let t = 1 / (1 + z / 2);
+
+  let r = t * Math.exp(
+    -z * z - 1.26551223 +
+    t * (1.00002368 +
+    t * (0.37409196 +
+    t * (0.09678418 +
+    t * (-0.18628806 +
+    t * (0.27886807 +
+    t * (-1.13520398 +
+    t * (1.48851587 +
+    t * (-0.82215223 +
+    t * 0.17087277))))))))
+  );
+
+  return x >= 0 ? r : 2 - r;
+}
+
+function showIntro() {
+  document.getElementById("intro").innerHTML = `
+    <div class="card">
+      <h2>Mock NGS / GWAS Mapping Scenario</h2>
+      <p>A cohort of human individuals was sequenced using mock next-generation sequencing data. Sequencing reads have already been processed into SNP genotypes.</p>
+      <p>Your task is to identify which genomic region is associated with a hypothetical disease phenotype.</p>
+
+      <div class="warning">
+        <b>Important:</b> This is a teaching simulation. The SNP genotypes are mock data generated by the app, not real human genetic data.
+      </div>
+    </div>
+  `;
+}
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+
+  return array;
+}
+
+function showPredictionStep() {
+  let patternAnswers = shuffleArray([
+    {
+      value: "higher_affected",
+      text: "The risk allele should be more common in affected individuals."
+    },
+    {
+      value: "higher_unaffected",
+      text: "The risk allele should be more common in unaffected individuals."
+    },
+    {
+      value: "same_frequency",
+      text: "The risk allele frequency should be identical in affected and unaffected individuals."
+    },
+    {
+      value: "chromosome_only",
+      text: "Chromosome number alone determines disease risk."
+    }
+  ]);
+
+  let nullAnswers = shuffleArray([
+    {
+      value: "same_between_groups",
+      text: "The risk allele frequency is the same in affected and unaffected individuals."
+    },
+    {
+      value: "different_between_groups",
+      text: "The risk allele frequency is different in affected and unaffected individuals."
+    },
+    {
+      value: "only_affected_have_allele",
+      text: "Only affected individuals carry the risk allele."
+    },
+    {
+      value: "snp_causes_disease",
+      text: "The candidate SNP definitely causes the disease."
+    }
+  ]);
+
+  let patternOptions = "";
+  let nullOptions = "";
+
+  for (let i = 0; i < patternAnswers.length; i++) {
+    patternOptions += `<option value="${patternAnswers[i].value}">${patternAnswers[i].text}</option>`;
+  }
+
+  for (let i = 0; i < nullAnswers.length; i++) {
+    nullOptions += `<option value="${nullAnswers[i].value}">${nullAnswers[i].text}</option>`;
+  }
+
+  document.getElementById("prediction").innerHTML = `
+    <div class="card">
+      <h2>Step 1: Study Design Prediction</h2>
+
+      <p><b>If a SNP is associated with increased disease risk, what pattern should you expect?</b></p>
+      <select id="association_pattern">
+        <option value="">Select one answer</option>
+        ${patternOptions}
+      </select>
+
+      <p><b>What is the null hypothesis for this SNP association analysis?</b></p>
+      <select id="null_hypothesis">
+        <option value="">Select one answer</option>
+        ${nullOptions}
+      </select>
+
+      <button onclick="checkPrediction()">Record Step 1 Answers</button>
+    </div>
+  `;
+}
+
+function checkPrediction() {
+  let patternSelect = document.getElementById("association_pattern");
+  let nullSelect = document.getElementById("null_hypothesis");
+  let predictionButton = nullSelect.nextElementSibling;
+
+  let patternAnswer = patternSelect.value;
+  let nullAnswer = nullSelect.value;
+
+  patternSelect.style.backgroundColor = "white";
+  nullSelect.style.backgroundColor = "white";
+
+  let allCorrect = true;
+
+  if (patternAnswer !== "higher_affected") {
+    allCorrect = false;
+    patternSelect.style.backgroundColor = "#ffd6d6";
+  }
+
+  if (nullAnswer !== "same_between_groups") {
+    allCorrect = false;
+    nullSelect.style.backgroundColor = "#ffd6d6";
+  }
+
+  if (!patternAnswer || !nullAnswer) {
+    alert("Please answer both Step 1 questions.");
+    return;
+  }
+
+  if (!allCorrect) {
+    document.getElementById("analysis").innerHTML = `
+      <div class="danger">
+        <b>Check your Step 1 answers.</b> Incorrect fields are highlighted in red.
+      </div>
+    `;
+    return;
+  }
+
+  predictedChromosome = "Not applicable";
+  recordedAssociationPattern = "The risk allele should be more common in affected individuals.";
+  recordedNullHypothesis = "The risk allele frequency is the same in affected and unaffected individuals.";
+
+  patternSelect.disabled = true;
+  nullSelect.disabled = true;
+  predictionButton.disabled = true;
+  predictionButton.style.background = "#6c757d";
+
+  document.getElementById("analysis").innerHTML = "";
+
+  document.getElementById("prediction").innerHTML += `
+    <div class="success">
+      <b>Step 1 answers recorded and locked.</b><br>
+      <b>Recorded association pattern:</b> ${recordedAssociationPattern}<br>
+      <b>Recorded null hypothesis:</b> ${recordedNullHypothesis}
+    </div>
+  `;
+
+  showDatasetSummary();
+  showStudentTask();
+  showManualAnalysisStep();
+}
+
+function showDatasetSummary() {
+  document.getElementById("dataset").innerHTML = `
+    <div class="card">
+      <h2>Dataset Summary</h2>
+
+      <span class="badge">Individuals: ${cohortSize}</span>
+      <span class="badge">Affected: ${affectedCount}</span>
+      <span class="badge">Unaffected: ${unaffectedCount}</span>
+      <span class="badge">Chromosomes: ${chromosomeCount}</span>
+      <span class="badge">SNPs: ${totalSNPs}</span>
+
+      <table>
+        <tr>
+          <th>Data type</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td>Phenotype</td>
+          <td>Affected or unaffected by a hypothetical disease</td>
+        </tr>
+        <tr>
+          <td>Genotype</td>
+          <td>SNP genotypes coded as 0, 1, or 2 risk alleles</td>
+        </tr>
+        <tr>
+          <td>Analysis</td>
+          <td>Allele-frequency comparison between affected and unaffected individuals</td>
+        </tr>
+      </table>
+    </div>
+  `;
+}
+
+function showStudentTask() {
+  document.getElementById("studentTask").innerHTML = `
+    <div class="card">
+      <h2>Student Task</h2>
+      <p>Use a candidate SNP to practice allele-frequency calculations before running the full genome-wide scan.</p>
+
+      <ol>
+        <li>Calculate risk allele frequencies in affected and unaffected individuals.</li>
+        <li>Interpret whether the risk allele is enriched in affected individuals.</li>
+        <li>Calculate expected allele counts for the candidate SNP.</li>
+        <li>Interpret the χ² value and p-value calculated by the app.</li>
+        <li>Unlock the genome-wide association scan.</li>
+        <li>Identify the top chromosome and SNP using the Manhattan plot.</li>
+      </ol>
+
+      <div class="warning">
+        <b>Key idea:</b> In a GWAS, SNPs near a trait-associated region often show elevated association signals because they are genetically linked to the causal variant.
+      </div>
+    </div>
+  `;
+}
+
+function showManualAnalysisStep() {
+  let r = candidateResult;
+
+  document.getElementById("manualAnalysis").innerHTML = `
+    <div class="card">
+      <h2>Step 2: Manual SNP Analysis</h2>
+      <p>Analyze this candidate SNP before unlocking the full genome-wide scan.</p>
+
+      <table>
+        <tr>
+          <th>SNP ID</th>
+          <th>Chromosome</th>
+          <th>Affected risk alleles</th>
+          <th>Affected total alleles</th>
+          <th>Unaffected risk alleles</th>
+          <th>Unaffected total alleles</th>
+        </tr>
+        <tr>
+          <td>${r.snp.id}</td>
+          <td>${r.snp.chromosome}</td>
+          <td>${r.affectedRiskAlleles}</td>
+          <td>${r.affectedTotalAlleles}</td>
+          <td>${r.unaffectedRiskAlleles}</td>
+          <td>${r.unaffectedTotalAlleles}</td>
+        </tr>
+      </table>
+
+      <p><b>Risk allele frequency in affected individuals</b></p>
+      <input type="number" step="0.0001" id="student_aff_freq" placeholder="affected risk allele frequency">
+
+      <p><b>Risk allele frequency in unaffected individuals</b></p>
+      <input type="number" step="0.0001" id="student_unaff_freq" placeholder="unaffected risk allele frequency">
+
+      <button onclick="checkAlleleFrequencies()">Check Allele Frequencies</button>
+    </div>
+  `;
+}
+
+function checkAlleleFrequencies() {
+  if (alleleFrequenciesLocked) {
+    alert("Allele frequencies have already been recorded and locked.");
+    return;
+  }
+
+  let affInput = document.getElementById("student_aff_freq");
+  let unaffInput = document.getElementById("student_unaff_freq");
+
+  let studentAff = parseFloat(affInput.value);
+  let studentUnaff = parseFloat(unaffInput.value);
+
+  affInput.style.backgroundColor = "white";
+  unaffInput.style.backgroundColor = "white";
+
+  let tolerance = 0.01;
+  let allCorrect = true;
+
+  if (isNaN(studentAff) || Math.abs(studentAff - candidateResult.affectedRiskAlleleFrequency) > tolerance) {
+    allCorrect = false;
+    affInput.style.backgroundColor = "#ffd6d6";
+  }
+
+  if (isNaN(studentUnaff) || Math.abs(studentUnaff - candidateResult.unaffectedRiskAlleleFrequency) > tolerance) {
+    allCorrect = false;
+    unaffInput.style.backgroundColor = "#ffd6d6";
+  }
+
+  if (!allCorrect) {
+    document.getElementById("analysis").innerHTML = `
+      <div class="danger">
+        <b>Check your allele frequencies.</b> Incorrect fields are highlighted in red. Values within 0.01 are accepted.
+      </div>
+    `;
+    return;
+  }
+
+  alleleFrequenciesLocked = true;
+  recordedAffectedFrequency = studentAff.toFixed(4);
+  recordedUnaffectedFrequency = studentUnaff.toFixed(4);
+  affInput.disabled = true;
+  unaffInput.disabled = true;
+  event.target.disabled = true;
+  event.target.style.background = "#6c757d";
+
+  document.getElementById("analysis").innerHTML = "";
+
+  document.getElementById("manualAnalysis").innerHTML += `
+    <div class="success">
+      <b>Correct.</b> Your allele frequency answers have been recorded and locked.<br>
+      <b>Recorded affected frequency:</b> ${recordedAffectedFrequency}<br>
+      <b>Recorded unaffected frequency:</b> ${recordedUnaffectedFrequency}<br>
+      You may now interpret the odds ratio.
+    </div>
+  `;
+
+  showOddsRatioStep();
+}
+
+function showOddsRatioStep() {
+  let orQuestion = candidateResult.oddsRatio > 1
+    ? "What does an odds ratio greater than 1 suggest?"
+    : "What does an odds ratio less than 1 suggest?";
+
+  let orAnswers = shuffleArray([
+    {
+      value: "increased",
+      text: "The risk allele is more common in affected individuals and may be associated with increased disease risk."
+    },
+    {
+      value: "decreased",
+      text: "The risk allele is less common in affected individuals and may be protective."
+    },
+    {
+      value: "none",
+      text: "The odds ratio cannot be interpreted in association studies."
+    }
+  ]);
+
+  let orOptions = "";
+
+  for (let i = 0; i < orAnswers.length; i++) {
+    orOptions += `<option value="${orAnswers[i].value}">${orAnswers[i].text}</option>`;
+  }
+
+  document.getElementById("manualAnalysis").innerHTML += `
+    <div class="card">
+      <h2>Step 3: Interpret the Odds Ratio</h2>
+      <p>The calculated odds ratio for this SNP is <b>${candidateResult.oddsRatio.toFixed(2)}</b>.</p>
+
+      <div class="warning">
+        <b>Hint:</b><br>
+        OR = 1 → no association<br>
+        OR &gt; 1 → allele enriched in affected individuals<br>
+        OR &lt; 1 → allele may be protective
+      </div>
+
+      <p><b>${orQuestion}</b></p>
+      <select id="or_interpretation">
+        <option value="">Select one answer</option>
+        ${orOptions}
+      </select>
+
+      <button onclick="checkOddsRatio()">Check Odds Ratio Interpretation</button>
+    </div>
+  `;
+}
+
+function checkOddsRatio() {
+  if (oddsRatioLocked) {
+    alert("Odds ratio interpretation has already been recorded and locked.");
+    return;
+  }
+
+  let orSelect = document.getElementById("or_interpretation");
+  let answer = orSelect.value;
+
+  let correctAnswer = candidateResult.oddsRatio > 1 ? "increased" : "decreased";
+
+  if (answer !== correctAnswer) {
+    let explanation = candidateResult.oddsRatio > 1
+      ? "An odds ratio greater than 1 means the risk allele is more common in affected individuals."
+      : "An odds ratio less than 1 means the risk allele is less common in affected individuals and may be protective.";
+
+    document.getElementById("analysis").innerHTML = `
+      <div class="danger">
+        <b>Try again.</b> ${explanation}
+      </div>
+    `;
+    return;
+  }
+
+  oddsRatioLocked = true;
+  recordedOddsRatioInterpretation = answer === "increased"
+    ? "The risk allele is more common in affected individuals and may be associated with increased disease risk."
+    : "The risk allele is less common in affected individuals and may be protective.";
+  orSelect.disabled = true;
+  event.target.disabled = true;
+  event.target.style.background = "#6c757d";
+
+  document.getElementById("analysis").innerHTML = "";
+
+  document.getElementById("manualAnalysis").innerHTML += `
+    <div class="success">
+      <b>Correct.</b> Your odds ratio interpretation has been recorded and locked.<br>
+      <b>Recorded interpretation:</b> ${recordedOddsRatioInterpretation}<br>
+      You may now calculate expected allele counts for this candidate SNP.
+    </div>
+  `;
+
+  showExpectedCountsStep();
+}
+
+function showExpectedCountsStep() {
+  let r = candidateResult;
+
+  let totalRisk = r.affectedRiskAlleles + r.unaffectedRiskAlleles;
+  let grandTotal = r.affectedTotalAlleles + r.unaffectedTotalAlleles;
+
+  expectedAffectedRisk = r.affectedTotalAlleles * totalRisk / grandTotal;
+  expectedUnaffectedRisk = r.unaffectedTotalAlleles * totalRisk / grandTotal;
+
+  document.getElementById("manualAnalysis").innerHTML += `
+    <div class="card">
+      <h2>Step 4: Expected Counts Checkpoint</h2>
+      <p>Instead of manually calculating the full χ² value, calculate the expected counts for the risk allele in each group.</p>
+
+      <table>
+        <tr>
+          <th>Group</th>
+          <th>Observed risk alleles</th>
+          <th>Observed non-risk alleles</th>
+          <th>Total alleles</th>
+        </tr>
+        <tr>
+          <td>Affected</td>
+          <td>${r.affectedRiskAlleles}</td>
+          <td>${r.affectedNonRiskAlleles}</td>
+          <td>${r.affectedTotalAlleles}</td>
+        </tr>
+        <tr>
+          <td>Unaffected</td>
+          <td>${r.unaffectedRiskAlleles}</td>
+          <td>${r.unaffectedNonRiskAlleles}</td>
+          <td>${r.unaffectedTotalAlleles}</td>
+        </tr>
+      <tr>
+          <td><b>Total</b></td>
+          <td><b>${r.affectedRiskAlleles + r.unaffectedRiskAlleles}</b></td>
+          <td><b>${r.affectedNonRiskAlleles + r.unaffectedNonRiskAlleles}</b></td>
+          <td><b>${r.affectedTotalAlleles + r.unaffectedTotalAlleles}</b></td>
+        </tr>
+      </table>
+
+      <div class="warning">
+        <b>Hint:</b> Expected count = (row total × column total) ÷ grand total.<br>
+        Example: Expected affected risk alleles = (affected total alleles × total risk alleles) ÷ grand total alleles.
+      </div>
+
+      <p><b>Expected affected risk alleles</b></p>
+      <input type="number" step="0.01" id="exp_aff_risk" placeholder="Expected affected risk alleles">
+
+      <p><b>Expected unaffected risk alleles</b></p>
+      <input type="number" step="0.01" id="exp_unaff_risk" placeholder="Expected unaffected risk alleles">
+
+      <button onclick="checkExpectedCounts()">Check Expected Counts</button>
+    </div>
+  `;
+}
+
+function checkExpectedCounts() {
+  if (expectedCountsLocked) {
+    alert("Expected counts have already been recorded and locked.");
+    return;
+  }
+
+  let affInput = document.getElementById("exp_aff_risk");
+  let unaffInput = document.getElementById("exp_unaff_risk");
+
+  let studentAff = parseFloat(affInput.value);
+  let studentUnaff = parseFloat(unaffInput.value);
+
+  affInput.style.backgroundColor = "white";
+  unaffInput.style.backgroundColor = "white";
+
+  let allCorrect = true;
+  let tolerance = 1.0;
+
+  if (isNaN(studentAff) || Math.abs(studentAff - expectedAffectedRisk) > tolerance) {
+    allCorrect = false;
+    affInput.style.backgroundColor = "#ffd6d6";
+  }
+
+  if (isNaN(studentUnaff) || Math.abs(studentUnaff - expectedUnaffectedRisk) > tolerance) {
+    allCorrect = false;
+    unaffInput.style.backgroundColor = "#ffd6d6";
+  }
+
+  if (!allCorrect) {
+    document.getElementById("analysis").innerHTML = `
+      <div class="danger">
+        <b>Check your expected counts.</b> Incorrect fields are highlighted in red. Values within 1 allele count are accepted.
+      </div>
+    `;
+    return;
+  }
+
+  expectedCountsLocked = true;
+  recordedExpectedAffectedRisk = studentAff.toFixed(2);
+  recordedExpectedUnaffectedRisk = studentUnaff.toFixed(2);
+  affInput.disabled = true;
+  unaffInput.disabled = true;
+  event.target.disabled = true;
+  event.target.style.background = "#6c757d";
+
+  document.getElementById("analysis").innerHTML = "";
+
+  document.getElementById("manualAnalysis").innerHTML += `
+    <div class="success">
+      <b>Correct.</b> Your expected counts have been recorded and locked.<br>
+      <b>Recorded expected affected risk alleles:</b> ${recordedExpectedAffectedRisk}<br>
+      <b>Recorded expected unaffected risk alleles:</b> ${recordedExpectedUnaffectedRisk}<br>
+      The app will now show the χ² value and p-value for interpretation.
+    </div>
+  `;
+
+  showAssociationInterpretationStep();
+}
+
+function showAssociationInterpretationStep() {
+  let associationAnswers = shuffleArray([
+    {
+      value: "yes",
+      text: "Yes, the allele frequencies differ between affected and unaffected individuals."
+    },
+    {
+      value: "no",
+      text: "No, the allele frequencies are identical."
+    },
+    {
+      value: "impossible",
+      text: "It is impossible to compare affected and unaffected groups."
+    }
+  ]);
+
+  let associationOptions = "";
+
+  for (let i = 0; i < associationAnswers.length; i++) {
+    associationOptions += `<option value="${associationAnswers[i].value}">${associationAnswers[i].text}</option>`;
+  }
+
+  document.getElementById("manualAnalysis").innerHTML += `
+    <div class="card">
+      <h2>Step 5: Interpret Association Significance</h2>
+      <p>For this candidate SNP, the app calculated:</p>
+      <p><b>χ² value:</b> ${candidateResult.chiSquare.toFixed(4)}</p>
+      <p><b>H₀:</b> The risk allele frequency is the same in affected and unaffected individuals.</p>
+      <p><b>p-value:</b> ${candidateResult.pValue.toExponential(2)}</p>
+      <p><b>-log10(p):</b> ${candidateResult.negLogP.toFixed(2)}</p>
+
+      <p><b>Does this SNP appear associated with disease?</b></p>
+      <select id="association_interpretation">
+        <option value="">Select one answer</option>
+        ${associationOptions}
+      </select>
+
+      <button onclick="checkAssociationInterpretation()">Check Interpretation</button>
+    </div>
+  `;
+}
+
+function checkAssociationInterpretation() {
+  if (associationInterpretationLocked) {
+    alert("Association interpretation has already been recorded and locked.");
+    return;
+  }
+
+  let associationSelect = document.getElementById("association_interpretation");
+  let answer = associationSelect.value;
+
+  if (answer !== "yes") {
+    document.getElementById("analysis").innerHTML = `
+      <div class="danger">
+        <b>Try again.</b> Association is suggested when allele frequencies differ between affected and unaffected individuals.
+      </div>
+    `;
+    return;
+  }
+
+  associationInterpretationLocked = true;
+  recordedAssociationInterpretation = "Yes, the allele frequencies differ between affected and unaffected individuals.";
+  associationSelect.disabled = true;
+  event.target.disabled = true;
+  event.target.style.background = "#6c757d";
+
+  document.getElementById("analysis").innerHTML = "";
+
+  document.getElementById("manualAnalysis").innerHTML += `
+    <div class="success">
+      <b>Correct.</b> Your association interpretation has been recorded and locked.<br>
+      <b>Recorded interpretation:</b> ${recordedAssociationInterpretation}<br>
+      You have unlocked the genome-wide association scan.
+    </div>
+  `;
+
+  showGenomeScanButton();
+}
+
+function showGenomeScanButton() {
+  document.getElementById("manualAnalysis").innerHTML += `
+    <div class="card">
+      <h2>Step 6: Genome-Wide Scan</h2>
+      <p>You have completed the manual checkpoint. Now run the full mock GWAS scan.</p>
+      <button onclick="showGenomeWideResults()">Run Genome-Wide Association Scan</button>
+    </div>
+  `;
+}
+
+function showGenomeWideResults() {
+  showTopHits();
+  showManhattanPlotArea();
+  drawManhattanPlot();
+  showTopHitCheckpoint();
+}
+
+function showTopHits() {
+  let topFive = associationResults.slice(0, 5);
+
+  let html = `
+    <div class="card">
+      <h2>Top Associated SNPs</h2>
+
+      <table>
+        <tr>
+          <th>Rank</th>
+          <th>SNP ID</th>
+          <th>Chromosome</th>
+          <th>Position</th>
+          <th>Risk allele freq. affected</th>
+          <th>Risk allele freq. unaffected</th>
+          <th>Odds ratio</th>
+          <th>p-value</th>
+          <th>-log10(p)</th>
+        </tr>
+  `;
+
+  for (let i = 0; i < topFive.length; i++) {
+    let r = topFive[i];
+
+    html += `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${r.snp.id}</td>
+        <td>${r.snp.chromosome}</td>
+        <td>${r.snp.position.toLocaleString()}</td>
+        <td>${r.affectedRiskAlleleFrequency.toFixed(3)}</td>
+        <td>${r.unaffectedRiskAlleleFrequency.toFixed(3)}</td>
+        <td>${r.oddsRatio.toFixed(2)}</td>
+        <td>${r.pValue.toExponential(2)}</td>
+        <td>${r.negLogP.toFixed(2)}</td>
+      </tr>
+    `;
+  }
+
+  html += `
+      </table>
+    </div>
+  `;
+
+  document.getElementById("topHits").innerHTML = html;
+}
+
+function showManhattanPlotArea() {
+  document.getElementById("plotArea").innerHTML = `
+    <div class="card">
+      <div class="chartWrapper">
+        <canvas id="manhattanChart"></canvas>
+      </div>
+    </div>
+  `;
+}
+
+function showTopHitCheckpoint() {
+  document.getElementById("studentConclusion").innerHTML = `
+    <div class="card">
+      <h2>Step 7: Identify the Mapping Signal</h2>
+
+      <p><b>Which chromosome has the strongest association?</b></p>
+      <input type="number" id="student_top_chr" placeholder="Chromosome number">
+
+      <p><b>Which SNP has the strongest association?</b></p>
+      <input type="text" id="student_top_snp" placeholder="Example: SNP_3_012">
+
+      <button onclick="checkTopHit()">Check Mapping Signal</button>
+    </div>
+  `;
+}
+
+function checkTopHit() {
+  if (topHitLocked) {
+    alert("Mapping signal answer has already been recorded and locked.");
+    return;
+  }
+
+  let chrInput = document.getElementById("student_top_chr");
+  let snpInput = document.getElementById("student_top_snp");
+
+  let chr = parseInt(chrInput.value);
+  let snp = snpInput.value.trim();
+
+  chrInput.style.backgroundColor = "white";
+  snpInput.style.backgroundColor = "white";
+
+  let allCorrect = true;
+
+  if (chr !== topResult.snp.chromosome) {
+    allCorrect = false;
+    chrInput.style.backgroundColor = "#ffd6d6";
+  }
+
+  if (snp.toUpperCase() !== topResult.snp.id.toUpperCase()) {
+    allCorrect = false;
+    snpInput.style.backgroundColor = "#ffd6d6";
+  }
+
+  if (!allCorrect) {
+    document.getElementById("analysis").innerHTML = `
+      <div class="danger">
+        <b>Check the Manhattan plot and top SNP table again.</b> Incorrect fields are highlighted in red.
+      </div>
+    `;
+    return;
+  }
+
+  topHitLocked = true;
+  recordedTopChromosome = chr;
+  recordedTopSNP = snp.toUpperCase();
+  chrInput.disabled = true;
+  snpInput.disabled = true;
+  event.target.disabled = true;
+  event.target.style.background = "#6c757d";
+
+  document.getElementById("analysis").innerHTML = "";
+
+  document.getElementById("studentConclusion").innerHTML += `
+    <div class="success">
+      <b>Correct.</b> Your mapping signal answer has been recorded and locked.<br>
+      <b>Recorded chromosome:</b> ${recordedTopChromosome}<br>
+      <b>Recorded SNP:</b> ${recordedTopSNP}
+    </div>
+  `;
+
+  showWrittenConclusionStep();
+}
+
+function showWrittenConclusionStep() {
+  document.getElementById("studentConclusion").innerHTML += `
+    <div class="card">
+      <h2>Step 8: Written Conclusion</h2>
+      <p>Write a brief conclusion explaining where the disease-associated region maps and why SNPs near that region show elevated association signals.</p>
+
+      <textarea id="student_conclusion_text" placeholder="Write your conclusion here..."></textarea>
+
+      <button onclick="saveConclusion()">Save Conclusion and Unlock Report</button>
+    </div>
+  `;
+}
+
+function saveConclusion() {
+  if (conclusionLocked) {
+    alert("Conclusion has already been recorded and locked.");
+    return;
+  }
+
+  let conclusionInput = document.getElementById("student_conclusion_text");
+  let text = conclusionInput.value.trim();
+
+  if (text.length < 40) {
+    alert("Please write a more complete conclusion before exporting.");
+    return;
+  }
+
+  studentConclusionText = text;
+  conclusionLocked = true;
+  conclusionInput.disabled = true;
+  event.target.disabled = true;
+  event.target.style.background = "#6c757d";
+
+  document.getElementById("analysis").innerHTML = "";
+
+  document.getElementById("studentConclusion").innerHTML += `
+    <div class="success">
+      <b>Conclusion saved.</b> Your written conclusion has been recorded and locked. The report is now ready to export.
+    </div>
+  `;
+
+  showRevealAndFinalButtons();
+}
+
+function showRevealAndFinalButtons() {
+  document.getElementById("finalCredit").innerHTML = `
+    <div class="credit">
+      Dr. Andres Posso-Terranova. 2026. ©
+    </div>
+    <button class="exportButton" onclick="exportPDF()">Export Report as PDF</button>
+    <button onclick="exitApp()">Exit</button>
+
+    <div style="text-align:center; margin-top:15px;">
+      <a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer">
+        <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
+      </a>
+    </div>
+  `;
+}
+
+function drawManhattanPlot() {
+  const ctx = document.getElementById("manhattanChart");
+
+  if (manhattanChart) {
+    manhattanChart.destroy();
+  }
+
+  let orderedResults = [...associationResults].sort((a, b) => {
+    if (a.snp.chromosome !== b.snp.chromosome) {
+      return a.snp.chromosome - b.snp.chromosome;
+    }
+
+    return a.snp.position - b.snp.position;
+  });
+
+  let labels = orderedResults.map(r => `Chr${r.snp.chromosome}:${r.snp.indexWithinChromosome + 1}`);
+  let values = orderedResults.map(r => r.negLogP);
+
+  let backgroundColors = orderedResults.map(r => {
+    if (r.snp.chromosome === topResult.snp.chromosome) {
+      return "rgba(255, 99, 132, 0.75)";
+    }
+
+    return r.snp.chromosome % 2 === 0
+      ? "rgba(54, 162, 235, 0.65)"
+      : "rgba(120, 120, 120, 0.65)";
+  });
+
+  manhattanChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: "-log10(p)",
+          data: values,
+          backgroundColor: backgroundColors
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: "Mini Manhattan Plot: Mock GWAS Association Signal",
+          font: {
+            size: 28
+          }
+        },
+        legend: {
+          labels: {
+            font: {
+              size: 18
+            }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            title: function(items) {
+              let index = items[0].dataIndex;
+              let r = orderedResults[index];
+              return r.snp.id;
+            },
+            label: function(item) {
+              let r = orderedResults[item.dataIndex];
+              return [
+                `Chromosome: ${r.snp.chromosome}`,
+                `Position: ${r.snp.position.toLocaleString()}`,
+                `-log10(p): ${r.negLogP.toFixed(2)}`,
+                `p-value: ${r.pValue.toExponential(2)}`,
+                `Odds ratio: ${r.oddsRatio.toFixed(2)}`
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            maxRotation: 90,
+            minRotation: 90,
+            font: {
+              size: window.innerWidth < 600 ? 8 : 10
+            }
+          },
+          title: {
+            display: true,
+            text: "SNPs ordered by chromosome"
+          }
+        },
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: "-log10(p)"
+          },
+          ticks: {
+            font: {
+              size: 18
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function exportPDF() {
+  let studentName = prompt("Enter Student Name:");
+  if (!studentName) {
+    alert("Student Name is required.");
+    return;
+  }
+
+  let nsid = prompt("Enter NSID:");
+  if (!nsid) {
+    alert("NSID is required.");
+    return;
+  }
+
+  const now = new Date();
+
+  const timestamp = now.toLocaleString("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+
+  const manhattanImage = document.getElementById("manhattanChart").toDataURL("image/png");
+
+  let report = document.createElement("div");
+  report.style.background = "white";
+  report.style.padding = "45px";
+  report.style.fontFamily = "Arial";
+  report.style.width = "900px";
+  report.style.position = "absolute";
+  report.style.left = "-9999px";
+  report.style.top = "0";
+
+  report.innerHTML = `
+    <div style="line-height:1.5;">
+
+    <h1 style="text-align:center; margin-bottom:25px;">Genome Mapping Simulator - Mock GWAS</h1>
+
+    <p><b>Student Name:</b> ${studentName}</p>
+    <p><b>NSID:</b> ${nsid}</p>
+    <p><b>Step 1 association pattern:</b> ${recordedAssociationPattern}</p>
+    <p><b>Step 1 null hypothesis:</b> ${recordedNullHypothesis}</p>
+    <p><b>Individuals:</b> ${cohortSize}</p>
+    <p><b>Affected:</b> ${affectedCount}</p>
+    <p><b>Unaffected:</b> ${unaffectedCount}</p>
+    <p><b>Chromosomes analyzed:</b> ${chromosomeCount}</p>
+    <p><b>Total SNPs:</b> ${totalSNPs}</p>
+    <p><b>Timestamp:</b> ${timestamp}</p>
+
+    <hr style="margin-top:20px; margin-bottom:20px;">
+
+    ${document.getElementById("intro").innerHTML}
+    ${document.getElementById("dataset").innerHTML}
+    ${document.getElementById("studentTask").innerHTML}
+
+    <div class="card">
+      <h2>Recorded Student Checkpoints</h2>
+      <p><b>Recorded association pattern:</b> ${recordedAssociationPattern}</p>
+      <p><b>Recorded null hypothesis:</b> ${recordedNullHypothesis}</p>
+      <p><b>Recorded affected risk allele frequency:</b> ${recordedAffectedFrequency}</p>
+      <p><b>Recorded unaffected risk allele frequency:</b> ${recordedUnaffectedFrequency}</p>
+      <p><b>Recorded odds ratio interpretation:</b> ${recordedOddsRatioInterpretation}</p>
+      <p><b>Recorded expected affected risk alleles:</b> ${recordedExpectedAffectedRisk}</p>
+      <p><b>Recorded expected unaffected risk alleles:</b> ${recordedExpectedUnaffectedRisk}</p>
+      <p><b>Recorded association interpretation:</b> ${recordedAssociationInterpretation}</p>
+      <p><b>Recorded strongest chromosome:</b> ${recordedTopChromosome}</p>
+      <p><b>Recorded strongest SNP:</b> ${recordedTopSNP}</p>
+    </div>
+
+    ${document.getElementById("manualAnalysis").innerHTML}
+    ${document.getElementById("topHits").innerHTML}
+
+    <div class="card">
+      <h2>Mini Manhattan Plot</h2>
+      <img src="${manhattanImage}" style="width:100%;">
+    </div>
+
+    <div class="card">
+      <h2>Student Conclusion</h2>
+      <p>${studentConclusionText}</p>
+    </div>
+
+    <div style="text-align:center; font-size:15px; margin-top:25px; color:#555;">
+      Dr. Andres Posso-Terranova. 2026. ©
+    </div>
+
+    <div style="height:80px;"></div>
+
+    </div>
+  `;
+
+  document.body.appendChild(report);
+
+  html2canvas(report, { scale: 1 }).then(canvas => {
+    const { jsPDF } = window.jspdf;
+
+    let pdf = new jsPDF("p", "mm", "a4");
+    let pageWidth = pdf.internal.pageSize.getWidth();
+    let pageHeight = pdf.internal.pageSize.getHeight();
+
+    let marginLeft = 15;
+    let marginTop = 15;
+    let marginBottom = 35;
+
+    let imgWidth = pageWidth - 30;
+    let usablePageHeight = pageHeight - marginTop - marginBottom;
+
+    let pageCanvasHeight = Math.floor(canvas.width * usablePageHeight / imgWidth);
+    let sourceY = 0;
+    let pageNumber = 0;
+
+    while (sourceY < canvas.height) {
+      let sliceHeight = Math.min(pageCanvasHeight, canvas.height - sourceY);
+
+      let pageCanvas = document.createElement("canvas");
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sliceHeight;
+
+      let pageContext = pageCanvas.getContext("2d");
+      pageContext.drawImage(
+        canvas,
+        0,
+        sourceY,
+        canvas.width,
+        sliceHeight,
+        0,
+        0,
+        canvas.width,
+        sliceHeight
+      );
+
+      let pageImgData = pageCanvas.toDataURL("image/jpeg", 0.72);
+      let pageImgHeight = sliceHeight * imgWidth / canvas.width;
+
+      if (pageNumber > 0) {
+        pdf.addPage();
+      }
+
+      pdf.addImage(pageImgData, "JPEG", marginLeft, marginTop, imgWidth, pageImgHeight);
+
+      sourceY += pageCanvasHeight;
+      pageNumber++;
+    }
+
+    let cleanName = studentName.replace(/\s+/g, "_");
+    pdf.save(`${cleanName}_${nsid}_Mock_GWAS_Report.pdf`);
+
+    document.body.removeChild(report);
+  });
+}
+
+function exitApp() {
+  if (confirm("Are you sure you want to exit?")) {
+    location.reload();
+  }
+}
+</script>
+
+</body>
+</html>

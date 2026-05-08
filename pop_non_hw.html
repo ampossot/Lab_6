@@ -802,9 +802,13 @@ function exportPDF() {
     }
 
     let cleanName = studentName.replace(/\s+/g, "_");
-    pdf.save(`${cleanName}_${nsid}_Population_Genetics_Report.pdf`);
 
-    document.body.removeChild(report);
+let pdfBlob = pdf.output("blob");
+let pdfUrl = URL.createObjectURL(pdfBlob);
+
+window.open(pdfUrl, "_blank");
+
+document.body.removeChild(report);
   });
 }
 

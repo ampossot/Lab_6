@@ -5,184 +5,257 @@
 <title>Genetics Virtual Lab</title>
 
 <style>
-body {
-  font-family: Arial;
-  padding: 20px;
-  background: #f7f7f7;
+* {
+  box-sizing: border-box;
 }
 
-h1 {
-  font-size: 34px;
-  text-align: center;
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(47,111,237,0.22), transparent 30%),
+    linear-gradient(180deg, #07152f 0%, #0b1020 45%, #f4f7fb 45%, #f7f7f7 100%);
+  color: #0b1020;
+}
+
+.page {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.hero {
+  width: 100%;
+  display: block;
+  border-radius: 22px;
+  box-shadow: 0 18px 45px rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.25);
+}
+
+.lab-panel {
+  margin-top: 18px;
+  background: rgba(255,255,255,0.96);
+  border-radius: 24px;
+  padding: 22px;
+  box-shadow: 0 18px 35px rgba(9,20,45,0.18);
+  border: 1px solid rgba(47,111,237,0.12);
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
 }
 
 button {
-  font-size: 22px;
-  padding: 22px;
-  margin-top: 10px;
+  min-height: 94px;
   width: 100%;
-  border-radius: 10px;
   border: none;
-  background: #2f6fed;
+  border-radius: 18px;
   color: white;
   cursor: pointer;
-
+  padding: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  background:
+    linear-gradient(135deg, rgba(37,99,235,1), rgba(14,165,233,1));
+  box-shadow: 0 10px 22px rgba(37,99,235,0.28);
   transition:
-    transform 0.2s ease,
-    background 0.2s ease,
-    box-shadow 0.2s ease;
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
 }
 
 button:hover {
-  background: #1f5ad1;
-
-  transform: scale(1.03);
-
-  box-shadow: 0 8px 18px rgba(47,111,237,0.35);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 28px rgba(37,99,235,0.38);
+  filter: brightness(1.05);
 }
 
 button:active {
   transform: scale(0.98);
 }
 
-.generateButton {
-  font-size: 26px;
-  padding: 25px;
+.tool-icon {
+  display: block;
+  font-size: 34px;
+  line-height: 1;
+  margin-bottom: 8px;
 }
 
-.exportButton {
-  background: #198754;
+.tool-title {
+  display: block;
 }
 
-.card {
-  background: white;
-  padding: 15px;
-  margin-top: 20px;
-  border-radius: 12px;
+.downloads {
+  background:
+    linear-gradient(135deg, #13b981, #0891b2);
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
+.mapping {
+  background:
+    linear-gradient(135deg, #7c3aed, #2563eb);
 }
 
-td, th {
-  border: 1px solid #ccc;
-  padding: 8px;
+.stats {
+  background:
+    linear-gradient(135deg, #f97316, #e11d48);
 }
 
-input {
-  width: 100%;
-  padding: 10px;
-  font-size: 18px;
+.population {
+  background:
+    linear-gradient(135deg, #0f766e, #2563eb);
+}
+
+.exitButton {
+  background:
+    linear-gradient(135deg, #1f2937, #0f172a);
 }
 
 .credit {
   text-align: center;
   font-size: 15px;
   margin-top: 20px;
-  color: #555;
+  color: #263244;
+  font-weight: 700;
 }
-.warning {
-  background: #fff3cd;
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 10px;
-}
-.download-link {
-  display: block;
+
+.coffee {
   text-align: center;
-  font-size: 20px;
-  font-weight: bold;
-  margin: 20px auto;
-  color: #2f6fed;
-  text-decoration: none;
+  margin-top: 15px;
 }
 
-.download-link:hover {
-  text-decoration: underline;
+.coffee img {
+  max-width: 230px;
+  width: 90%;
 }
 
-.chartWrapper {
-  overflow-x: auto;
-  width: 100%;
-}
-
-.chartWrapper canvas {
-  min-width: 700px;
-}
-
-@media (max-width: 600px) {
-
-  h1 {
-    font-size: 28px;
+@media (max-width: 900px) {
+  .tool-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   button {
-    font-size: 18px;
-    padding: 14px;
+    min-height: 88px;
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 10px;
   }
 
-  .card {
+  .hero {
+    border-radius: 16px;
+  }
+
+  .lab-panel {
+    margin-top: 12px;
+    border-radius: 18px;
     padding: 12px;
   }
 
-  .chartWrapper canvas {
-    min-width: 900px;
+  .tool-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 
+  button {
+    min-height: 74px;
+    font-size: 17px;
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .tool-icon {
+    font-size: 28px;
+    margin-bottom: 5px;
+  }
+
+  .credit {
+    font-size: 14px;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<h1>Genetics Virtual Lab</h1>
+<div class="page">
 
-<button class="generateButton" onclick="window.location.href='downloads.html'">
-Downloads
-</button>
+  <img class="hero" src="genetics_virtual_lab_banner.jpeg" alt="Genetics Virtual Lab banner">
 
-<button class="generateButton" onclick="window.location.href='monohybrid_inheritance_analyzer.html'">
-Monohybrid Inheritance Analyzer
-</button>
+  <div class="lab-panel">
+    <div class="tool-grid">
 
-<button class="generateButton" onclick="window.location.href='dihybrid_inheritance_analyzer.html'">
-Dihybrid Inheritance Analyzer
-</button>
+      <button class="downloads" onclick="window.location.href='downloads.html'">
+        <span class="tool-icon">⬇️</span>
+        <span class="tool-title">Downloads</span>
+      </button>
 
-<button class="generateButton" onclick="window.location.href='sex_linked_inheritance_analyzer.html'">
-Sex-Linked Inheritance Analyzer
-</button>
+      <button onclick="window.location.href='monohybrid_inheritance_analyzer.html'">
+        <span class="tool-icon">🌱</span>
+        <span class="tool-title">Monohybrid Inheritance Analyzer</span>
+      </button>
 
-<button class="generateButton" onclick="window.location.href='dihybrid_x2.html'">Dihybrid Cross and X<sup>2</sup> Test</button>
-<button class="generateButton" onclick="window.location.href='test_cross_x2.html'">Test-Cross and X<sup>2</sup> Test</button>
+      <button onclick="window.location.href='dihybrid_inheritance_analyzer.html'">
+        <span class="tool-icon">🧬</span>
+        <span class="tool-title">Dihybrid Inheritance Analyzer</span>
+      </button>
 
-<button class="generateButton" onclick="window.location.href='three_point_mapping_drosophila.html'">
-Three-point Mapping in <i>Drosophila</i>
-</button>
+      <button onclick="window.location.href='sex_linked_inheritance_analyzer.html'">
+        <span class="tool-icon">♂️♀️</span>
+        <span class="tool-title">Sex-Linked Inheritance Analyzer</span>
+      </button>
 
-<button class="generateButton" onclick="window.location.href='three_point_linkage_mapping.html'">
-Three-Point Mapping Exercise
-</button>
+      <button class="stats" onclick="window.location.href='dihybrid_x2.html'">
+        <span class="tool-icon">χ²</span>
+        <span class="tool-title">Dihybrid Cross and X<sup>2</sup> Test</span>
+      </button>
 
-<button class="generateButton" onclick="window.location.href='gwas_generator.html'">
-GWAS - Mapping Generator
-</button>
+      <button class="stats" onclick="window.location.href='test_cross_x2.html'">
+        <span class="tool-icon">Σ</span>
+        <span class="tool-title">Test-Cross and X<sup>2</sup> Test</span>
+      </button>
 
-<button class="generateButton" onclick="window.location.href='pop_gen.html'">
-Population Genetics Generator
-</button>
+      <button class="mapping" onclick="window.location.href='three_point_mapping_drosophila.html'">
+        <span class="tool-icon">🪰</span>
+        <span class="tool-title">Three-point Mapping in <i>Drosophila</i></span>
+      </button>
 
-<button onclick="exitApp()">Exit / Refresh</button>
+      <button class="mapping" onclick="window.location.href='three_point_linkage_mapping.html'">
+        <span class="tool-icon">📍</span>
+        <span class="tool-title">Three-Point Mapping Exercise</span>
+      </button>
 
-<div class="credit">Dr. Andres Posso-Terranova. 2026. ©</div>
+      <button class="mapping" onclick="window.location.href='gwas_generator.html'">
+        <span class="tool-icon">📈</span>
+        <span class="tool-title">GWAS - Mapping Generator</span>
+      </button>
 
-<div style="text-align:center; margin-top:15px;">
-  <a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer">
-    <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
-  </a>
+      <button class="population" onclick="window.location.href='pop_gen.html'">
+        <span class="tool-icon">🌎</span>
+        <span class="tool-title">Population Genetics Generator</span>
+      </button>
+
+      <button class="exitButton" onclick="exitApp()">
+        <span class="tool-icon">↻</span>
+        <span class="tool-title">Exit / Refresh</span>
+      </button>
+
+    </div>
+
+    <div class="credit">Dr. Andres Posso-Terranova. 2026. ©</div>
+
+    <div class="coffee">
+      <a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer">
+        <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
+      </a>
+    </div>
+  </div>
+
 </div>
 
 <script>

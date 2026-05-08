@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Genetics Virtual Lab</title>
+
+<style>
+body {
+  font-family: Arial;
+  padding: 20px;
+  background: #f7f7f7;
+}
+
+h1 {
+  font-size: 34px;
+  text-align: center;
+}
+
+button {
+  font-size: 22px;
+  padding: 22px;
+  margin-top: 10px;
+  width: 100%;
+  border-radius: 10px;
+  border: none;
+  background: #2f6fed;
+  color: white;
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+button:hover {
+  background: #1f5ad1;
+
+  transform: scale(1.03);
+
+  box-shadow: 0 8px 18px rgba(47,111,237,0.35);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+.generateButton {
+  font-size: 26px;
+  padding: 25px;
+}
+
+.exportButton {
+  background: #198754;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+td, th {
+  border: 1px solid #ccc;
+  padding: 8px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  font-size: 18px;
+}
+
+.credit {
+  text-align: center;
+  font-size: 15px;
+  margin-top: 20px;
+  color: #555;
+}
+.warning {
+  background: #fff3cd;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+.download-link {
+  display: block;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  margin: 20px auto;
+  color: #2f6fed;
+  text-decoration: none;
+}
+
+.download-link:hover {
+  text-decoration: underline;
+}
+
+.chartWrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.chartWrapper canvas {
+  min-width: 700px;
+}
+
+@media (max-width: 600px) {
+
+  h1 {
+    font-size: 28px;
+  }
+
+  button {
+    font-size: 18px;
+    padding: 14px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .chartWrapper canvas {
+    min-width: 900px;
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<h1>Genetics Virtual Lab</h1>
+
+<button class="generateButton" onclick="window.location.href='downloads.html'">
+Downloads
+</button>
+
+<button class="generateButton" onclick="window.location.href='monohybrid_inheritance_analyzer.html'">
+Monohybrid Inheritance Deduction
+</button>
+
+<button class="generateButton" onclick="window.location.href='dihybrid_x2.html'">Dihybrid Cross and X<sup>2</sup> Test</button>
+<button class="generateButton" onclick="window.location.href='test_cross_x2.html'">Test-Cross and X<sup>2</sup> Test</button>
+
+<button class="generateButton" onclick="window.location.href='three_point_mapping_drosophila.html'">
+Three-point Mapping in <i>Drosophila</i>
+</button>
+
+<button class="generateButton" onclick="window.location.href='gwas_generator.html'">
+GWAS - Mapping Generator
+</button>
+
+<button class="generateButton" onclick="window.location.href='pop_gen.html'">
+Population Genetics Generator
+</button>
+
+<button onclick="exitApp()">Exit / Refresh</button>
+
+<div class="credit">Dr. Andres Posso-Terranova. 2026. ©</div>
+
+<div style="text-align:center; margin-top:15px;">
+  <a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer">
+    <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
+  </a>
+</div>
+
+<script>
+function exitApp() {
+  if (confirm("Are you sure you want to exit?")) {
+    location.reload();
+  }
+}
+</script>
+
+</body>
+</html>

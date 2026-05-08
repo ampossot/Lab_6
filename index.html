@@ -25,12 +25,29 @@ body {
   padding: 16px;
 }
 
+.hero-wrap {
+  position: relative;
+}
+
 .hero {
   width: 100%;
   display: block;
   border-radius: 22px;
   box-shadow: 0 18px 45px rgba(0,0,0,0.35);
   border: 1px solid rgba(255,255,255,0.25);
+}
+
+.hero-coffee {
+  position: absolute;
+  right: 22px;
+  bottom: 22px;
+  z-index: 3;
+  background: rgba(255,255,255,0.82);
+  border: 1px solid rgba(255,255,255,0.55);
+  border-radius: 22px;
+  padding: 10px 12px;
+  box-shadow: 0 14px 34px rgba(0,0,0,0.30);
+  backdrop-filter: blur(7px);
 }
 
 .lab-panel {
@@ -237,9 +254,27 @@ button::after {
   margin-top: 15px;
 }
 
-.coffee img {
+.coffee img,
+.hero-coffee img {
   max-width: 230px;
   width: 90%;
+  border-radius: 18px;
+  transition:
+    transform 0.22s ease,
+    filter 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.hero-coffee img {
+  width: 220px;
+  display: block;
+}
+
+.coffee img:hover,
+.hero-coffee img:hover {
+  transform: translateY(-5px) scale(1.06) rotate(-1.2deg);
+  filter: brightness(1.05) saturate(1.12);
+  box-shadow: 0 16px 32px rgba(0,0,0,0.28);
 }
 
 @media (max-width: 900px) {
@@ -264,6 +299,16 @@ button::after {
 
   .hero {
     border-radius: 16px;
+  }
+
+  .hero-coffee {
+    position: static;
+    margin: 12px auto 0 auto;
+    width: fit-content;
+  }
+
+  .hero-coffee img {
+    width: 210px;
   }
 
   .lab-panel {
@@ -350,6 +395,52 @@ button::after {
   fill: none;
 }
 
+
+
+.coffee {
+  position: relative;
+}
+
+.coffee a {
+  position: relative;
+  display: inline-block;
+}
+
+.coffee .heart {
+  position: absolute;
+  font-size: 16px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 30;
+}
+
+.coffee:hover .heart {
+  animation: floatHeart 0.9s linear infinite;
+}
+
+.coffee .h1 { left: 8%; bottom: 8px; animation-delay: 0s; }
+.coffee .h2 { left: 24%; bottom: 0px; animation-delay: 0.08s; }
+.coffee .h3 { left: 40%; bottom: 10px; animation-delay: 0.16s; }
+.coffee .h4 { left: 56%; bottom: 4px; animation-delay: 0.24s; }
+.coffee .h5 { left: 72%; bottom: 12px; animation-delay: 0.32s; }
+.coffee .h6 { left: 86%; bottom: 6px; animation-delay: 0.40s; }
+
+@keyframes floatHeart {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.5) rotate(0deg);
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-95px) translateX(-10px) scale(1.15) rotate(-10deg);
+    opacity: 0;
+  }
+}
+
 </style>
 </head>
 
@@ -357,7 +448,15 @@ button::after {
 
 <div class="page">
 
-  <img class="hero" src="genetics_virtual_lab_banner.jpeg" alt="Genetics Virtual Lab banner">
+  <div class="hero-wrap">
+    <img class="hero" src="genetics_virtual_lab_banner.jpeg" alt="Genetics Virtual Lab banner">
+
+    <div class="hero-coffee">
+      <a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer">
+        <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
+      </a>
+    </div>
+  </div>
 
   <div class="lab-panel">
     <div class="section-grid">
@@ -497,6 +596,12 @@ button::after {
     <div class="coffee">
       <a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer">
         <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
+        <span class="heart h1">💛</span>
+        <span class="heart h2">💛</span>
+        <span class="heart h3">💛</span>
+        <span class="heart h4">💛</span>
+        <span class="heart h5">💛</span>
+        <span class="heart h6">💛</span>
       </a>
     </div>
   </div>

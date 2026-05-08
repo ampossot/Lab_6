@@ -6,16 +6,156 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-body { font-family: Arial; padding: 20px; background: #f7f7f7; }
+body {
+  font-family: Arial;
+  padding: 20px;
+  background:
+    radial-gradient(circle at top left, rgba(244,63,94,0.18), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(109,40,217,0.16), transparent 30%),
+    #f7f7f7;
+}
+
 h1 { font-size: 34px; text-align: center; }
+
+.heroBanner {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, #0f172a 0%, #be123c 48%, #6d28d9 100%);
+  color: white;
+  padding: 34px 24px;
+  border-radius: 24px;
+  box-shadow: 0 16px 35px rgba(15,23,42,0.28);
+  margin-bottom: 18px;
+}
+
+.heroBanner::before {
+  content: "XᴬXᵃ × XᵃY";
+  position: absolute;
+  top: 14px;
+  right: 22px;
+  font-size: 42px;
+  font-weight: bold;
+  opacity: 0.13;
+  letter-spacing: 3px;
+}
+
+.heroBanner::after {
+  content: "reciprocal crosses  |  sex bias  |  X-linkage";
+  position: absolute;
+  bottom: 12px;
+  left: 22px;
+  font-size: 22px;
+  opacity: 0.16;
+  font-weight: bold;
+}
+
+.heroTitle {
+  position: relative;
+  font-size: 42px;
+  font-weight: 800;
+  text-align: center;
+  margin: 0;
+  letter-spacing: 0.3px;
+}
+
+.heroSubtitle {
+  position: relative;
+  text-align: center;
+  max-width: 780px;
+  margin: 12px auto 0 auto;
+  font-size: 18px;
+  line-height: 1.45;
+  opacity: 0.96;
+}
+
+.heroBadges {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.heroBadge {
+  background: rgba(255,255,255,0.16);
+  border: 1px solid rgba(255,255,255,0.28);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: bold;
+  backdrop-filter: blur(4px);
+}
+
+.startPanel {
+  background: white;
+  padding: 18px;
+  margin-top: 20px;
+  border-radius: 18px;
+  box-shadow: 0 10px 24px rgba(15,23,42,0.08);
+  border: 1px solid rgba(148,163,184,0.25);
+}
+
+.startPanel h2 {
+  margin: 0 0 6px 0;
+  font-size: 22px;
+  color: #0f172a;
+}
+
+.startPanel p {
+  margin: 0 0 12px 0;
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.buttonIcon {
+  display: inline-block;
+  margin-right: 8px;
+}
 button { font-size: 22px; padding: 15px; margin-top: 10px; width: 100%; border-radius: 10px; border: none; background: #2f6fed; color: white; cursor: pointer; transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease; }
 button:hover { background: #1f5ad1; transform: scale(1.03); box-shadow: 0 8px 18px rgba(47,111,237,0.35); }
 button:active { transform: scale(0.98); }
 button:disabled { background: #9ca3af; cursor: not-allowed; transform: none; box-shadow: none; }
-.generateButton { font-size: 26px; padding: 25px; }
+.generateButton {
+  font-size: 21px;
+  padding: 20px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
 .exportButton { background: #198754; }
-.backButton { width: auto; font-size: 16px; padding: 10px 18px; background: #6c757d; margin-bottom: 15px; }
-.backButton:hover { background: #5a6268; }
+.backButton {
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 12px 22px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #0f172a, #334155);
+  color: white;
+  margin-bottom: 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 10px 24px rgba(15,23,42,0.18);
+}
+
+.backButton:hover {
+  background: linear-gradient(135deg, #1e293b, #475569);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 14px 28px rgba(15,23,42,0.25);
+}
+
+.exitButton {
+  background: linear-gradient(135deg, #475569, #0f172a);
+}
+
+.exitButton:hover {
+  background: linear-gradient(135deg, #334155, #020617);
+}
 .card { background: white; padding: 15px; margin-top: 20px; border-radius: 12px; }
 .crossGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
 .crossCard { background: #f8fafc; border: 1px solid #d1d5db; border-radius: 12px; padding: 12px; }
@@ -37,14 +177,47 @@ textarea { min-height: 120px; }
 .compactLabel { font-size: 13px; line-height: 1.05; }
 .summaryGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 @media (max-width: 800px) { .crossGrid, .summaryGrid { grid-template-columns: 1fr; } }
-@media (max-width: 600px) { h1 { font-size: 28px; } button { font-size: 18px; padding: 14px; } .card { padding: 12px; } table { font-size: 13px; } input, select, textarea { font-size: 16px; } }
+@media (max-width: 600px) {
+  h1 { font-size: 28px; }
+  button { font-size: 18px; padding: 14px; }
+  .card { padding: 12px; }
+  table { font-size: 13px; }
+  input, select, textarea { font-size: 16px; }
+  .heroTitle { font-size: 32px; }
+  .heroSubtitle { font-size: 16px; }
+  .generateButton { font-size: 18px; padding: 16px; }
+}
 </style>
 </head>
 <body>
-<h1>Sex-Linked Inheritance Analyzer</h1>
-<button class="backButton" onclick="window.location.href='index.html'">← Back to Main Menu</button>
-<button id="start_button" class="generateButton" onclick="startLab()">Start Sex-Linked Inheritance Lab</button>
-<button onclick="exitApp()">Exit / Refresh</button>
+<button class="backButton" onclick="window.location.href='index.html'">🧬 Back to Main Menu</button>
+
+<div class="heroBanner">
+  <h1 class="heroTitle">Sex-Linked Inheritance Analyzer</h1>
+  <p class="heroSubtitle">
+    Compare reciprocal crosses, phenotype ratios, and male/female patterns to detect sex-linked inheritance.
+  </p>
+  <div class="heroBadges">
+    <span class="heroBadge">Sex Linkage</span>
+    <span class="heroBadge">Reciprocal Crosses</span>
+    <span class="heroBadge">Sex Bias</span>
+    <span class="heroBadge">Dominance</span>
+  </div>
+</div>
+
+<div class="startPanel">
+  <h2>Start the sex-linkage challenge</h2>
+  <p>Generate randomized datasets, evaluate sex-biased phenotypes, and infer which gene is autosomal or sex-linked.</p>
+
+  <button id="start_button" class="generateButton" onclick="startLab()">
+    <span class="buttonIcon">♀♂</span>Start Sex-Linked Inheritance Lab
+  </button>
+
+  <button class="exitButton" onclick="exitApp()">
+    <span class="buttonIcon">↻</span>Exit / Refresh
+  </button>
+</div>
+
 <div class="credit">Dr. Andres Posso-Terranova. 2026. ©</div>
 <div style="text-align:center; margin-top:15px;"><a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" /></a></div>
 <div id="intro"></div><div id="eye_section"></div><div id="body_section"></div><div id="finalDecision"></div><div id="finalCredit"></div>

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dihybrid Inheritance Analyzer - Drosophila</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body { font-family: Arial; padding: 20px; background: #f7f7f7; }
+h1 { font-size: 34px; text-align: center; }
+button { font-size: 22px; padding: 15px; margin-top: 10px; width: 100%; border-radius: 10px; border: none; background: #2f6fed; color: white; cursor: pointer; transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease; }
+button:hover { background: #1f5ad1; transform: scale(1.03); box-shadow: 0 8px 18px rgba(47,111,237,0.35); }
+button:active { transform: scale(0.98); }
+button:disabled { background: #9ca3af; cursor: not-allowed; transform: none; box-shadow: none; }
+.generateButton { font-size: 26px; padding: 25px; }
+.exportButton { background: #198754; }
+.backButton { width: auto; font-size: 16px; padding: 10px 18px; background: #6c757d; margin-bottom: 15px; }
+.backButton:hover { background: #5a6268; }
+.card { background: white; padding: 15px; margin-top: 20px; border-radius: 12px; }
+.crossGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+.crossCard { background: #f8fafc; border: 1px solid #d1d5db; border-radius: 12px; padding: 12px; }
+.geneHeader { background: linear-gradient(135deg, #eef4ff, #ffffff); border-left: 8px solid #2f6fed; padding: 18px; border-radius: 12px; margin-top: 22px; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+td, th { border: 1px solid #ccc; padding: 8px; text-align: center; }
+input, select, textarea { width: 100%; padding: 10px; font-size: 18px; box-sizing: border-box; }
+textarea { min-height: 120px; }
+.credit { text-align: center; font-size: 15px; margin-top: 20px; color: #555; }
+.warning { background: #fff3cd; padding: 12px; border-radius: 8px; margin-top: 10px; }
+.success { background: #e6ffe6; padding: 12px; border-radius: 8px; margin-top: 10px; }
+.danger { background: #ffe5e5; padding: 12px; border-radius: 8px; margin-top: 10px; }
+.info { background: #eef4ff; padding: 12px; border-radius: 8px; margin-top: 10px; border-left: 6px solid #2f6fed; }
+.resultBox { background: #f8fafc; border: 1px solid #d1d5db; border-radius: 12px; padding: 15px; margin-top: 15px; }
+.ratioBox { background: #eef4ff; border-left: 6px solid #2f6fed; padding: 12px; border-radius: 10px; margin-top: 12px; }
+.dihybridTable { font-size: 13px; table-layout: fixed; }
+.dihybridTable th, .dihybridTable td { padding: 5px; }
+.dihybridTable th { line-height: 1.05; }
+.compactLabel { font-size: 13px; line-height: 1.05; }
+.summaryGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+@media (max-width: 800px) { .crossGrid, .summaryGrid { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { h1 { font-size: 28px; } button { font-size: 18px; padding: 14px; } .card { padding: 12px; } table { font-size: 13px; } input, select, textarea { font-size: 16px; } }
+</style>
+</head>
+
+<body>
+<h1>Dihybrid Inheritance Analyzer</h1>
+
+<button class="backButton" onclick="window.location.href='index.html'">← Back to Main Menu</button>
+<button id="start_button" class="generateButton" onclick="startLab()">Start Dihybrid Inheritance Lab</button>
+<button onclick="exitApp()">Exit / Refresh</button>
+
+<div class="credit">Dr. Andres Posso-Terranova. 2026. ©</div>
+<div style="text-align:center; margin-top:15px;">
+  <a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer">
+    <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
+  </a>
+</div>
+
+<div id="intro"></div>
+<div id="wing_section"></div>
+<div id="body_section"></div>
+<div id="finalDecision"></div>
+<div id="finalCredit"></div>
+
+<script>
+let labLocked = false;
+let crossCounter = 1;
+let finalConclusionText = "";
+
+const geneConfigs = {
+  wing: {
+    geneName: "Wing shape", mutantPhenotype: "Curly wings", wildPhenotype: "Wild type wings", mutantShort: "Curly", wildShort: "Wild type",
+    dominantPhenotype: "", recessivePhenotype: "", dominanceScenario: "", studentConclusion: "",
+    crossData: { wt_wt: [], wtFemale_mutMale: [], mutFemale_wtMale: [], mut_mut: [] }
+  },
+  body: {
+    geneName: "Body color", mutantPhenotype: "Ebony body", wildPhenotype: "Wild type body", mutantShort: "Ebony", wildShort: "Wild type",
+    dominantPhenotype: "", recessivePhenotype: "", dominanceScenario: "", studentConclusion: "",
+    crossData: { wt_wt: [], wtFemale_mutMale: [], mutFemale_wtMale: [], mut_mut: [] }
+  }
+};
+
+function startLab() {
+  if (labLocked) { alert("Refresh Browser for New Dataset"); return; }
+  labLocked = true;
+  document.getElementById("start_button").disabled = true;
+  crossCounter = 1;
+  assignDominance("wing");
+  assignDominance("body");
+  showIntro();
+  showGeneIntro("wing");
+  showStep1("wing");
+}
+
+function assignDominance(geneKey) {
+  let gene = geneConfigs[geneKey];
+  if (Math.random() < 0.5) {
+    gene.dominantPhenotype = gene.wildPhenotype;
+    gene.recessivePhenotype = gene.mutantPhenotype;
+    gene.dominanceScenario = "wildtype_dominant";
+  } else {
+    gene.dominantPhenotype = gene.mutantPhenotype;
+    gene.recessivePhenotype = gene.wildPhenotype;
+    gene.dominanceScenario = "mutant_dominant";
+  }
+}
+
+function alleleLabels(geneKey) {
+  let gene = geneConfigs[geneKey];
+  if (geneKey === "wing") {
+    return gene.dominanceScenario === "wildtype_dominant" ? { dominant: "W", recessive: "c" } : { dominant: "C", recessive: "w" };
+  }
+  return gene.dominanceScenario === "wildtype_dominant" ? { dominant: "B", recessive: "e" } : { dominant: "E", recessive: "b" };
+}
+
+function phenotypeFromGenotype(geneKey, genotype) {
+  let gene = geneConfigs[geneKey];
+  let labels = alleleLabels(geneKey);
+  if (genotype.includes(labels.dominant)) return gene.dominantPhenotype;
+  return gene.recessivePhenotype;
+}
+
+function possibleGenotypesForPhenotype(geneKey, phenotype) {
+  let gene = geneConfigs[geneKey];
+  let labels = alleleLabels(geneKey);
+  let DD = labels.dominant + labels.dominant;
+  let Dd = labels.dominant + labels.recessive;
+  let dd = labels.recessive + labels.recessive;
+  if (phenotype === gene.dominantPhenotype) return [DD, Dd];
+  return [dd];
+}
+
+function normalizeGenotype(genotype) { return genotype.split("").sort().join(""); }
+function gametesFromGenotype(genotype) { return genotype.split(""); }
+function randomChoice(array) { return array[Math.floor(Math.random() * array.length)]; }
+
+function simulateOffspring(geneKey, motherGenotype, fatherGenotype, n) {
+  let motherGametes = gametesFromGenotype(motherGenotype);
+  let fatherGametes = gametesFromGenotype(fatherGenotype);
+  let gene = geneConfigs[geneKey];
+  let counts = { maleWild: 0, maleMutant: 0, femaleWild: 0, femaleMutant: 0 };
+  for (let i = 0; i < n; i++) {
+    let genotype = normalizeGenotype(randomChoice(motherGametes) + randomChoice(fatherGametes));
+    let phenotype = phenotypeFromGenotype(geneKey, genotype);
+    let sex = Math.random() < 0.5 ? "male" : "female";
+    if (sex === "male" && phenotype === gene.wildPhenotype) counts.maleWild++;
+    if (sex === "male" && phenotype === gene.mutantPhenotype) counts.maleMutant++;
+    if (sex === "female" && phenotype === gene.wildPhenotype) counts.femaleWild++;
+    if (sex === "female" && phenotype === gene.mutantPhenotype) counts.femaleMutant++;
+  }
+  return counts;
+}
+
+function expectedPhenotypeRatio(geneKey, motherGenotype, fatherGenotype) {
+  let motherGametes = gametesFromGenotype(motherGenotype);
+  let fatherGametes = gametesFromGenotype(fatherGenotype);
+  let gene = geneConfigs[geneKey];
+  let wild = 0;
+  let mutant = 0;
+  for (let i = 0; i < motherGametes.length; i++) {
+    for (let j = 0; j < fatherGametes.length; j++) {
+      let genotype = normalizeGenotype(motherGametes[i] + fatherGametes[j]);
+      let phenotype = phenotypeFromGenotype(geneKey, genotype);
+      if (phenotype === gene.wildPhenotype) wild++; else mutant++;
+    }
+  }
+  return reduceRatio(wild, mutant);
+}
+
+function reduceRatio(a, b) {
+  if (a === 0 && b === 0) return { wild: 0, mutant: 0 };
+  if (a === 0) return { wild: 0, mutant: 1 };
+  if (b === 0) return { wild: 1, mutant: 0 };
+  let divisor = gcd(a, b);
+  return { wild: a / divisor, mutant: b / divisor };
+}
+
+function gcd(a, b) {
+  while (b !== 0) { let temp = b; b = a % b; a = temp; }
+  return a;
+}
+
+function makeCross(geneKey, motherPhenotype, fatherPhenotype) {
+  let motherGenotype = randomChoice(possibleGenotypesForPhenotype(geneKey, motherPhenotype));
+  let fatherGenotype = randomChoice(possibleGenotypesForPhenotype(geneKey, fatherPhenotype));
+  let total = Math.floor(Math.random() * 81) + 120;
+  let counts = simulateOffspring(geneKey, motherGenotype, fatherGenotype, total);
+  let ratio = expectedPhenotypeRatio(geneKey, motherGenotype, fatherGenotype);
+  return { crossNumber: crossCounter++, geneKey, motherPhenotype, fatherPhenotype, motherGenotype, fatherGenotype, total, counts, expectedRatio: ratio };
+}
+
+function showIntro() {
+  document.getElementById("intro").innerHTML = `
+    <div class="card">
+      <h2>Dihybrid Inheritance Scenario</h2>
+      <p>You are analyzing two genes affecting visible phenotypes in <i>Drosophila melanogaster</i>.</p>
+      <table>
+        <tr><th>Gene</th><th>Phenotypes</th><th>Question</th></tr>
+        <tr><td>Wing shape</td><td>Wild type wings or Curly wings</td><td>Which wing-shape allele is dominant?</td></tr>
+        <tr><td>Body color</td><td>Wild type body or Ebony body</td><td>Which body-color allele is dominant?</td></tr>
+      </table>
+      <div class="warning"><b>Important:</b> The app randomly decides dominance for each gene separately. Your job is to infer the inheritance pattern from the crosses.</div>
+      <div class="info"><b>Strategy:</b> Analyze one gene at a time. First solve Wing shape using 12 crosses. Then solve Body color using 12 more crosses. Finally, combine both conclusions.</div>
+    </div>`;
+}
+
+function sectionId(geneKey) { return geneKey === "wing" ? "wing_section" : "body_section"; }
+
+function showGeneIntro(geneKey) {
+  let gene = geneConfigs[geneKey];
+  document.getElementById(sectionId(geneKey)).innerHTML += `
+    <div class="geneHeader">
+      <h2>${gene.geneName} Analysis</h2>
+      <p><b>Phenotypes:</b> ${gene.wildPhenotype} and ${gene.mutantPhenotype}</p>
+      <p>Work through the crosses and infer dominance for this gene before moving to the next gene.</p>
+    </div>`;
+}
+
+function showStep1(geneKey) {
+  let gene = geneConfigs[geneKey];
+  document.getElementById(sectionId(geneKey)).innerHTML += `
+    <div class="card"><h2>${gene.geneName} - Step 1: Wild Type Female × Wild Type Male</h2>
+    <p>Generate three independent wild type × wild type crosses.</p>
+    <button id="${geneKey}_step1_button" onclick="generateStep1('${geneKey}')">Generate Wild Type × Wild Type Crosses</button>
+    <div id="${geneKey}_step1_results"></div></div>`;
+}
+
+function generateStep1(geneKey) {
+  let gene = geneConfigs[geneKey];
+  gene.crossData.wt_wt = [makeCross(geneKey, gene.wildPhenotype, gene.wildPhenotype), makeCross(geneKey, gene.wildPhenotype, gene.wildPhenotype), makeCross(geneKey, gene.wildPhenotype, gene.wildPhenotype)];
+  document.getElementById(`${geneKey}_step1_results`).innerHTML = renderCrosses(geneKey, gene.crossData.wt_wt, "wt_wt");
+  document.getElementById(`${geneKey}_step1_button`).disabled = true;
+  document.getElementById(`${geneKey}_step1_results`).innerHTML += `<button id="ratio_button_${geneKey}_wt_wt" onclick="checkRatios('${geneKey}', 'wt_wt')">Check Ratios and Continue</button><div id="ratio_feedback_${geneKey}_wt_wt"></div>`;
+}
+
+function showStep2(geneKey) {
+  let gene = geneConfigs[geneKey];
+  document.getElementById(sectionId(geneKey)).innerHTML += `
+    <div class="card"><h2>${gene.geneName} - Step 2: Wild Type Female × ${gene.mutantShort} Male</h2>
+    <p>Generate three independent crosses between a wild type female and a ${gene.mutantShort} male.</p>
+    <button id="${geneKey}_step2_button" onclick="generateStep2('${geneKey}')">Generate Wild Type Female × ${gene.mutantShort} Male Crosses</button>
+    <div id="${geneKey}_step2_results"></div></div>`;
+}
+
+function generateStep2(geneKey) {
+  let gene = geneConfigs[geneKey];
+  gene.crossData.wtFemale_mutMale = [makeCross(geneKey, gene.wildPhenotype, gene.mutantPhenotype), makeCross(geneKey, gene.wildPhenotype, gene.mutantPhenotype), makeCross(geneKey, gene.wildPhenotype, gene.mutantPhenotype)];
+  document.getElementById(`${geneKey}_step2_results`).innerHTML = renderCrosses(geneKey, gene.crossData.wtFemale_mutMale, "wtFemale_mutMale");
+  document.getElementById(`${geneKey}_step2_button`).disabled = true;
+  document.getElementById(`${geneKey}_step2_results`).innerHTML += `<button id="ratio_button_${geneKey}_wtFemale_mutMale" onclick="checkRatios('${geneKey}', 'wtFemale_mutMale')">Check Ratios and Continue</button><div id="ratio_feedback_${geneKey}_wtFemale_mutMale"></div>`;
+}
+
+function showStep3(geneKey) {
+  let gene = geneConfigs[geneKey];
+  document.getElementById(sectionId(geneKey)).innerHTML += `
+    <div class="card"><h2>${gene.geneName} - Step 3: ${gene.mutantShort} Female × Wild Type Male</h2>
+    <p>Generate three independent crosses between a ${gene.mutantShort} female and a wild type male.</p>
+    <button id="${geneKey}_step3_button" onclick="generateStep3('${geneKey}')">Generate ${gene.mutantShort} Female × Wild Type Male Crosses</button>
+    <div id="${geneKey}_step3_results"></div></div>`;
+}
+
+function generateStep3(geneKey) {
+  let gene = geneConfigs[geneKey];
+  gene.crossData.mutFemale_wtMale = [makeCross(geneKey, gene.mutantPhenotype, gene.wildPhenotype), makeCross(geneKey, gene.mutantPhenotype, gene.wildPhenotype), makeCross(geneKey, gene.mutantPhenotype, gene.wildPhenotype)];
+  document.getElementById(`${geneKey}_step3_results`).innerHTML = renderCrosses(geneKey, gene.crossData.mutFemale_wtMale, "mutFemale_wtMale");
+  document.getElementById(`${geneKey}_step3_button`).disabled = true;
+  document.getElementById(`${geneKey}_step3_results`).innerHTML += `<button id="ratio_button_${geneKey}_mutFemale_wtMale" onclick="checkRatios('${geneKey}', 'mutFemale_wtMale')">Check Ratios and Continue</button><div id="ratio_feedback_${geneKey}_mutFemale_wtMale"></div>`;
+}
+
+function showStep4(geneKey) {
+  let gene = geneConfigs[geneKey];
+  document.getElementById(sectionId(geneKey)).innerHTML += `
+    <div class="card"><h2>${gene.geneName} - Step 4: ${gene.mutantShort} Female × ${gene.mutantShort} Male</h2>
+    <p>Generate three independent ${gene.mutantShort} × ${gene.mutantShort} crosses.</p>
+    <button id="${geneKey}_step4_button" onclick="generateStep4('${geneKey}')">Generate ${gene.mutantShort} × ${gene.mutantShort} Crosses</button>
+    <div id="${geneKey}_step4_results"></div></div>`;
+}
+
+function generateStep4(geneKey) {
+  let gene = geneConfigs[geneKey];
+  gene.crossData.mut_mut = [makeCross(geneKey, gene.mutantPhenotype, gene.mutantPhenotype), makeCross(geneKey, gene.mutantPhenotype, gene.mutantPhenotype), makeCross(geneKey, gene.mutantPhenotype, gene.mutantPhenotype)];
+  document.getElementById(`${geneKey}_step4_results`).innerHTML = renderCrosses(geneKey, gene.crossData.mut_mut, "mut_mut");
+  document.getElementById(`${geneKey}_step4_button`).disabled = true;
+  document.getElementById(`${geneKey}_step4_results`).innerHTML += `<button id="ratio_button_${geneKey}_mut_mut" onclick="checkRatios('${geneKey}', 'mut_mut')">Check Ratios and Continue</button><div id="ratio_feedback_${geneKey}_mut_mut"></div>`;
+}
+
+
+function splitCountRandomly(count) {
+  let first = 0;
+
+  for (let i = 0; i < count; i++) {
+    if (Math.random() < 0.5) {
+      first++;
+    }
+  }
+
+  return [first, count - first];
+}
+
+function makeDihybridDisplayRows(geneKey, c) {
+  let rows = [
+    { wing: "Curly", body: "Ebony", female: 0, male: 0 },
+    { wing: "Curly", body: "WT", female: 0, male: 0 },
+    { wing: "WT", body: "Ebony", female: 0, male: 0 },
+    { wing: "WT", body: "WT", female: 0, male: 0 }
+  ];
+
+  if (geneKey === "wing") {
+    let gene = geneConfigs.wing;
+
+    let wildMale = c.counts.maleWild;
+    let mutantMale = c.counts.maleMutant;
+    let wildFemale = c.counts.femaleWild;
+    let mutantFemale = c.counts.femaleMutant;
+
+    let mutantMaleSplit = splitCountRandomly(mutantMale);
+    let mutantFemaleSplit = splitCountRandomly(mutantFemale);
+    let wildMaleSplit = splitCountRandomly(wildMale);
+    let wildFemaleSplit = splitCountRandomly(wildFemale);
+
+    let mutantWingLabel = gene.mutantPhenotype === "Curly wings" ? "Curly" : "WT";
+    let wildWingLabel = gene.wildPhenotype === "Wild type wings" ? "WT" : "Curly";
+
+    addDisplayCounts(rows, mutantWingLabel, "Ebony", mutantFemaleSplit[0], mutantMaleSplit[0]);
+    addDisplayCounts(rows, mutantWingLabel, "WT", mutantFemaleSplit[1], mutantMaleSplit[1]);
+    addDisplayCounts(rows, wildWingLabel, "Ebony", wildFemaleSplit[0], wildMaleSplit[0]);
+    addDisplayCounts(rows, wildWingLabel, "WT", wildFemaleSplit[1], wildMaleSplit[1]);
+  }
+
+  if (geneKey === "body") {
+    let gene = geneConfigs.body;
+
+    let wildMale = c.counts.maleWild;
+    let mutantMale = c.counts.maleMutant;
+    let wildFemale = c.counts.femaleWild;
+    let mutantFemale = c.counts.femaleMutant;
+
+    let mutantMaleSplit = splitCountRandomly(mutantMale);
+    let mutantFemaleSplit = splitCountRandomly(mutantFemale);
+    let wildMaleSplit = splitCountRandomly(wildMale);
+    let wildFemaleSplit = splitCountRandomly(wildFemale);
+
+    let mutantBodyLabel = gene.mutantPhenotype === "Ebony body" ? "Ebony" : "WT";
+    let wildBodyLabel = gene.wildPhenotype === "Wild type body" ? "WT" : "Ebony";
+
+    addDisplayCounts(rows, "Curly", mutantBodyLabel, mutantFemaleSplit[0], mutantMaleSplit[0]);
+    addDisplayCounts(rows, "WT", mutantBodyLabel, mutantFemaleSplit[1], mutantMaleSplit[1]);
+    addDisplayCounts(rows, "Curly", wildBodyLabel, wildFemaleSplit[0], wildMaleSplit[0]);
+    addDisplayCounts(rows, "WT", wildBodyLabel, wildFemaleSplit[1], wildMaleSplit[1]);
+  }
+
+  return rows;
+}
+
+function addDisplayCounts(rows, wingLabel, bodyLabel, femaleCount, maleCount) {
+  let row = rows.find(r => r.wing === wingLabel && r.body === bodyLabel);
+
+  if (row) {
+    row.female += femaleCount;
+    row.male += maleCount;
+  }
+}
+
+function compactPhenotypeName(name) {
+  if (name.includes("Wild type")) {
+    return "WT";
+  }
+
+  if (name.includes("Curly")) {
+    return "Curly";
+  }
+
+  if (name.includes("Ebony")) {
+    return "Ebony";
+  }
+
+  return name;
+}
+
+
+function renderCrosses(geneKey, crosses, stepKey) {
+  let gene = geneConfigs[geneKey];
+  let html = `<div class="crossGrid">`;
+
+  for (let i = 0; i < crosses.length; i++) {
+    let c = crosses[i];
+    let displayRows = makeDihybridDisplayRows(geneKey, c);
+
+    html += `
+      <div class="crossCard">
+        <h3>Cross ${c.crossNumber}</h3>
+        <p class="compactLabel"><b>Gene analyzed:</b> ${gene.geneName}</p>
+        <p class="compactLabel"><b>F parent:</b> ${compactPhenotypeName(c.motherPhenotype)}</p>
+        <p class="compactLabel"><b>M parent:</b> ${compactPhenotypeName(c.fatherPhenotype)}</p>
+
+        <table class="dihybridTable">
+          <tr>
+            <th>Wing<br>Shape</th>
+            <th>Body<br>Color</th>
+            <th>F</th>
+            <th>M</th>
+            <th>Total</th>
+          </tr>
+          ${displayRows.map(row => `
+            <tr>
+              <td>${row.wing}</td>
+              <td>${row.body}</td>
+              <td>${row.female}</td>
+              <td>${row.male}</td>
+              <td>${row.female + row.male}</td>
+            </tr>
+          `).join("")}
+        </table>
+
+        <div class="ratioBox">
+          <p><b>Estimate phenotypic ratio for Cross ${c.crossNumber}</b></p>
+          <p>${compactPhenotypeName(gene.wildPhenotype)} : ${compactPhenotypeName(gene.mutantPhenotype)}</p>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <input type="number" min="0" step="1" id="ratio_wild_${geneKey}_${stepKey}_${i}" placeholder="${compactPhenotypeName(gene.wildPhenotype)}">
+            <input type="number" min="0" step="1" id="ratio_mutant_${geneKey}_${stepKey}_${i}" placeholder="${compactPhenotypeName(gene.mutantPhenotype)}">
+          </div>
+          <div id="ratio_result_${geneKey}_${stepKey}_${i}"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+function checkRatios(geneKey, stepKey) {
+  let gene = geneConfigs[geneKey];
+  let crosses = gene.crossData[stepKey];
+  let allCorrect = true;
+  for (let i = 0; i < crosses.length; i++) {
+    let wildInput = document.getElementById(`ratio_wild_${geneKey}_${stepKey}_${i}`);
+    let mutantInput = document.getElementById(`ratio_mutant_${geneKey}_${stepKey}_${i}`);
+    let studentWild = parseInt(wildInput.value);
+    let studentMutant = parseInt(mutantInput.value);
+    wildInput.style.backgroundColor = "white";
+    mutantInput.style.backgroundColor = "white";
+    if (isNaN(studentWild) || isNaN(studentMutant) || studentWild !== crosses[i].expectedRatio.wild || studentMutant !== crosses[i].expectedRatio.mutant) {
+      allCorrect = false;
+      wildInput.style.backgroundColor = "#ffd6d6";
+      mutantInput.style.backgroundColor = "#ffd6d6";
+    }
+  }
+  if (!allCorrect) {
+    document.getElementById(`ratio_feedback_${geneKey}_${stepKey}`).innerHTML = `<div class="danger"><b>Check your ratios.</b> Incorrect ratio boxes are highlighted in red. Use simplified ratios such as 1:0, 1:1, 3:1, or 0:1.</div>`;
+    return;
+  }
+  for (let i = 0; i < crosses.length; i++) {
+    document.getElementById(`ratio_wild_${geneKey}_${stepKey}_${i}`).disabled = true;
+    document.getElementById(`ratio_mutant_${geneKey}_${stepKey}_${i}`).disabled = true;
+    document.getElementById(`ratio_result_${geneKey}_${stepKey}_${i}`).innerHTML = `<div class="success"><b>Calculated ratio:</b> ${compactPhenotypeName(gene.wildPhenotype)} ${crosses[i].expectedRatio.wild} : ${compactPhenotypeName(gene.mutantPhenotype)} ${crosses[i].expectedRatio.mutant}</div>`;
+  }
+  document.getElementById(`ratio_button_${geneKey}_${stepKey}`).disabled = true;
+  document.getElementById(`ratio_feedback_${geneKey}_${stepKey}`).innerHTML = `<div class="success"><b>Ratios correct and locked.</b> Continue to the next step.</div>`;
+  if (stepKey === "wt_wt") showStep2(geneKey);
+  if (stepKey === "wtFemale_mutMale") showStep3(geneKey);
+  if (stepKey === "mutFemale_wtMale") showStep4(geneKey);
+  if (stepKey === "mut_mut") showDecisionStep(geneKey);
+}
+
+function showDecisionStep(geneKey) {
+  let gene = geneConfigs[geneKey];
+  document.getElementById(sectionId(geneKey)).innerHTML += `<div class="card"><h2>${gene.geneName} - Infer Mode of Inheritance</h2><div class="info"><b>Evidence to consider:</b><ul><li>If two parents with the same phenotype sometimes produce the opposite phenotype, the parents may be heterozygous and their phenotype is likely dominant.</li><li>If a phenotype always breeds true when crossed to itself, it may be recessive.</li><li>If reciprocal crosses show similar results in males and females, there is no strong evidence of sex linkage.</li></ul></div><p><b>Which phenotype appears dominant for ${gene.geneName}?</b></p><select id="${geneKey}_dominance_choice"><option value="">Select one answer</option><option value="${gene.wildPhenotype}">${gene.wildPhenotype}</option><option value="${gene.mutantPhenotype}">${gene.mutantPhenotype}</option></select><p><b>Is there evidence of sex linkage for ${gene.geneName}?</b></p><select id="${geneKey}_sex_linkage_choice"><option value="">Select one answer</option><option value="no">No, males and females show similar phenotypic patterns.</option><option value="yes">Yes, only one sex shows the recessive phenotype.</option></select><p><b>Write a short conclusion for ${gene.geneName}:</b></p><textarea id="${geneKey}_student_conclusion" placeholder="Write your conclusion here..."></textarea><button id="${geneKey}_decision_button" onclick="checkDecision('${geneKey}')">Check ${gene.geneName} Interpretation</button><div id="${geneKey}_decision_feedback"></div></div>`;
+}
+
+function checkDecision(geneKey) {
+  let gene = geneConfigs[geneKey];
+  let dominanceChoice = document.getElementById(`${geneKey}_dominance_choice`);
+  let sexChoice = document.getElementById(`${geneKey}_sex_linkage_choice`);
+  let conclusion = document.getElementById(`${geneKey}_student_conclusion`);
+  let allCorrect = true;
+  dominanceChoice.style.backgroundColor = "white";
+  sexChoice.style.backgroundColor = "white";
+  conclusion.style.backgroundColor = "white";
+  if (dominanceChoice.value !== gene.dominantPhenotype) { dominanceChoice.style.backgroundColor = "#ffd6d6"; allCorrect = false; }
+  if (sexChoice.value !== "no") { sexChoice.style.backgroundColor = "#ffd6d6"; allCorrect = false; }
+  if (conclusion.value.trim().length < 40) { conclusion.style.backgroundColor = "#ffd6d6"; allCorrect = false; }
+  if (!allCorrect) {
+    document.getElementById(`${geneKey}_decision_feedback`).innerHTML = `<div class="danger"><b>Check your interpretation.</b> Incorrect or incomplete fields are highlighted in red.</div>`;
+    return;
+  }
+  gene.studentConclusion = conclusion.value.trim();
+  dominanceChoice.disabled = true;
+  sexChoice.disabled = true;
+  conclusion.disabled = true;
+  document.getElementById(`${geneKey}_decision_button`).disabled = true;
+  document.getElementById(`${geneKey}_decision_feedback`).innerHTML = `<div class="success"><b>Correct. ${gene.geneName} interpretation recorded and locked.</b><p><b>Dominant phenotype:</b> ${gene.dominantPhenotype}</p><p><b>Recessive phenotype:</b> ${gene.recessivePhenotype}</p><p><b>Sex linkage:</b> No evidence of sex linkage. Males and females show similar autosomal inheritance patterns.</p></div><div class="resultBox"><h3>${gene.geneName} Genetic Interpretation</h3><p>This gene behaves as an <b>autosomal monohybrid trait</b>. The phenotype ${gene.dominantPhenotype} is dominant over ${gene.recessivePhenotype}.</p><p>Because reciprocal crosses produce comparable male and female patterns, the data do not support sex-linked inheritance for this gene.</p></div>`;
+  if (geneKey === "wing") showTransitionToBody(); else showFinalDecision();
+}
+
+function showTransitionToBody() {
+  document.getElementById("body_section").innerHTML = `<div class="card"><h2>Next Gene: Body Color</h2><p>You have completed Wing shape. Now repeat the same logic for Body color.</p><button id="start_body_button" onclick="startBodyAnalysis()">Start Body Color Analysis</button></div>`;
+}
+
+function startBodyAnalysis() {
+  document.getElementById("start_body_button").disabled = true;
+  showGeneIntro("body");
+  showStep1("body");
+}
+
+function showFinalDecision() {
+  document.getElementById("finalDecision").innerHTML = `<div class="card"><h2>Final Dihybrid Inheritance Conclusion</h2><div class="summaryGrid"><div class="resultBox"><h3>Wing Shape</h3><p><b>Dominant phenotype:</b> ${geneConfigs.wing.dominantPhenotype}</p><p><b>Recessive phenotype:</b> ${geneConfigs.wing.recessivePhenotype}</p><p><b>Sex linkage:</b> No evidence detected.</p></div><div class="resultBox"><h3>Body Color</h3><p><b>Dominant phenotype:</b> ${geneConfigs.body.dominantPhenotype}</p><p><b>Recessive phenotype:</b> ${geneConfigs.body.recessivePhenotype}</p><p><b>Sex linkage:</b> No evidence detected.</p></div></div><div class="info"><b>Big-picture interpretation:</b> You analyzed a dihybrid system by reducing it into two monohybrid inheritance problems. This is how complex genetic crosses become manageable: solve one trait at a time, then combine the conclusions.</div><p><b>Write your final conclusion combining both genes:</b></p><textarea id="final_conclusion" placeholder="Write your final combined conclusion here..."></textarea><button id="final_conclusion_button" onclick="checkFinalConclusion()">Save Final Conclusion and Unlock Export</button><div id="final_conclusion_feedback"></div></div>`;
+}
+
+function checkFinalConclusion() {
+  let text = document.getElementById("final_conclusion").value.trim();
+  if (text.length < 60) {
+    document.getElementById("final_conclusion").style.backgroundColor = "#ffd6d6";
+    document.getElementById("final_conclusion_feedback").innerHTML = `<div class="danger"><b>Please write a more complete final conclusion.</b> Mention both genes and their dominance relationships.</div>`;
+    return;
+  }
+  document.getElementById("final_conclusion").style.backgroundColor = "white";
+  finalConclusionText = text;
+  document.getElementById("final_conclusion").disabled = true;
+  document.getElementById("final_conclusion_button").disabled = true;
+  document.getElementById("final_conclusion_feedback").innerHTML = `<div class="success"><b>Final conclusion saved and locked.</b> Your report is ready.</div>`;
+  showFinalButtons();
+}
+
+function showFinalButtons() {
+  document.getElementById("finalCredit").innerHTML = `<div class="credit">Dr. Andres Posso-Terranova. 2026. ©</div><button class="exportButton" onclick="exportPDF()">Export Report as PDF</button><button onclick="exitApp()">Exit</button><div style="text-align:center; margin-top:15px;"><a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" /></a></div>`;
+}
+
+function exportPDF() {
+  let studentName = prompt("Enter Student Name:");
+  if (!studentName) { alert("Student Name is required."); return; }
+  let nsid = prompt("Enter NSID:");
+  if (!nsid) { alert("NSID is required."); return; }
+  if (typeof html2canvas === "undefined" || typeof window.jspdf === "undefined") { alert("PDF export libraries did not load. Please check your internet connection and try again."); return; }
+  const now = new Date();
+  const timestamp = now.toLocaleString("en-CA", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  function cleanForReport(elementId) {
+    let source = document.getElementById(elementId);
+    let clone = source.cloneNode(true);
+    clone.querySelectorAll("select").forEach(select => { let replacement = document.createElement("span"); replacement.innerHTML = select.options[select.selectedIndex] ? select.options[select.selectedIndex].text : ""; replacement.style.fontWeight = "bold"; select.parentNode.replaceChild(replacement, select); });
+    clone.querySelectorAll("textarea").forEach(textarea => { let replacement = document.createElement("p"); replacement.innerHTML = textarea.value || ""; replacement.style.fontWeight = "bold"; textarea.parentNode.replaceChild(replacement, textarea); });
+    clone.querySelectorAll("button").forEach(button => button.remove());
+    return clone.innerHTML;
+  }
+  let report = document.createElement("div");
+  report.style.background = "white";
+  report.style.padding = "45px";
+  report.style.fontFamily = "Arial";
+  report.style.width = "900px";
+  report.style.position = "absolute";
+  report.style.left = "-9999px";
+  report.style.top = "0";
+  report.innerHTML = `<div style="line-height:1.5;"><h1 style="text-align:center; margin-bottom:25px;">Dihybrid Inheritance Analyzer</h1><p><b>Student Name:</b> ${studentName}</p><p><b>NSID:</b> ${nsid}</p><p><b>Timestamp:</b> ${timestamp}</p><hr style="margin-top:20px; margin-bottom:20px;">${cleanForReport("intro")}${cleanForReport("wing_section")}${cleanForReport("body_section")}${cleanForReport("finalDecision")}<div class="card"><h2>Final Student Conclusion</h2><p>${finalConclusionText}</p></div><div style="text-align:center; font-size:15px; margin-top:25px; color:#555;">Dr. Andres Posso-Terranova. 2026. ©</div><div style="height:80px;"></div></div>`;
+  document.body.appendChild(report);
+  html2canvas(report, { scale: 1 }).then(canvas => {
+    const { jsPDF } = window.jspdf;
+    let pdf = new jsPDF("p", "mm", "a4");
+    let pageWidth = pdf.internal.pageSize.getWidth();
+    let pageHeight = pdf.internal.pageSize.getHeight();
+    let marginLeft = 1;
+    let marginTop = 10;
+    let marginBottom = 20;
+    let imgWidth = pageWidth - 8;
+    let usablePageHeight = pageHeight - marginTop - marginBottom;
+    let pageCanvasHeight = Math.floor(canvas.width * usablePageHeight / imgWidth);
+    let sourceY = 0;
+    let pageNumber = 0;
+    while (sourceY < canvas.height) {
+      let sliceHeight = Math.min(pageCanvasHeight, canvas.height - sourceY);
+      let pageCanvas = document.createElement("canvas");
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sliceHeight;
+      let pageContext = pageCanvas.getContext("2d");
+      pageContext.drawImage(canvas, 0, sourceY, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
+      let pageImgData = pageCanvas.toDataURL("image/jpeg", 0.72);
+      let pageImgHeight = sliceHeight * imgWidth / canvas.width;
+      if (pageNumber > 0) pdf.addPage();
+      pdf.addImage(pageImgData, "JPEG", marginLeft, marginTop, imgWidth, pageImgHeight);
+      sourceY += pageCanvasHeight;
+      pageNumber++;
+    }
+    let cleanName = studentName.replace(/\s+/g, "_");
+    pdf.save(`${cleanName}_${nsid}_Dihybrid_Inheritance_Report.pdf`);
+    document.body.removeChild(report);
+  });
+}
+
+function exitApp() {
+  if (confirm("Are you sure you want to exit?")) location.reload();
+}
+</script>
+</body>
+</html>

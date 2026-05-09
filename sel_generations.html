@@ -250,6 +250,24 @@ input, select {
     padding: 16px;
   }
 }
+
+
+.coffee img {
+  max-width: 230px;
+  width: 90%;
+  border-radius: 18px;
+  transition:
+    transform 0.22s ease,
+    filter 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.coffee img:hover {
+  transform: translateY(-5px) scale(1.06) rotate(-1.2deg);
+  filter: brightness(1.05) saturate(1.12);
+  box-shadow: 0 16px 32px rgba(0,0,0,0.28);
+}
+
 </style>
 </head>
 
@@ -287,7 +305,7 @@ input, select {
 
 <div class="credit">Dr. Andres Posso-Terranova. 2026. ©</div>
 
-<div style="text-align:center; margin-top:15px;">
+<div class="coffee" style="text-align:center; margin-top:15px;">
   <a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer">
     <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
   </a>
@@ -863,7 +881,7 @@ function showExportButtons() {
     <button onclick="exitApp()">Exit</button>
 
 
-<div style="text-align:center; margin-top:15px;">
+<div class="coffee" style="text-align:center; margin-top:15px;">
   <a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer">
     <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
   </a>

@@ -577,6 +577,45 @@
       text-transform: uppercase;
     }
 
+    
+    .lab-card-button {
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+      transition:
+        transform 0.28s ease,
+        box-shadow 0.28s ease,
+        border-color 0.28s ease,
+        background 0.28s ease;
+    }
+
+    .lab-card-button:hover {
+      transform: translateY(-10px) scale(1.045);
+      border-color: rgba(85, 230, 255, 0.72);
+      background:
+        linear-gradient(150deg, rgba(255,255,255,0.22), rgba(85,230,255,0.12));
+      box-shadow:
+        0 38px 95px rgba(85, 230, 255, 0.22),
+        0 0 40px rgba(85, 230, 255, 0.12);
+    }
+
+    .lab-card-button::after {
+      content: "Open Genetics Virtual Lab →";
+      display: block;
+      margin-top: 16px;
+      color: rgba(255,255,255,0.92);
+      font-size: 0.92rem;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .lab-card-button:hover::after {
+      transform: translateX(4px);
+      opacity: 1;
+    }
+
+
     @media (max-width: 980px) {
       .hero, .bio-layout { grid-template-columns: 1fr; }
       .showcase { min-height: 560px; }
@@ -649,10 +688,10 @@
           <div class="head"></div>
           <div class="eye"></div>
         </div>
-        <article class="floating-card card-1">
+        <a href="virtual_lab.html" class="floating-card card-1 lab-card-button">
           <h3>Virtual genetics labs</h3>
           <p>Students explore crosses, datasets, phenotypes, genotypes, and hypothesis testing through active simulations.</p>
-        </article>
+        </a>
         <article class="floating-card card-2">
           <h3>From genes to genomes</h3>
           <p>Tools that connect classical inheritance with modern molecular and genomic thinking.</p>

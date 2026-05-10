@@ -1,612 +1,818 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Genetics Virtual Lab</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-<style>
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background:
-    radial-gradient(circle at top left, rgba(47,111,237,0.22), transparent 30%),
-    linear-gradient(180deg, #07152f 0%, #0b1020 45%, #f4f7fb 45%, #f7f7f7 100%);
-  color: #0b1020;
-}
-
-.page {
-  width: min(1180px, 100%);
-  margin: 0 auto;
-  padding: 16px;
-}
-
-.hero-wrap {
-  position: relative;
-}
-
-.hero {
-  width: 100%;
-  display: block;
-  border-radius: 22px;
-  box-shadow: 0 18px 45px rgba(0,0,0,0.35);
-  border: 1px solid rgba(255,255,255,0.25);
-}
-
-.hero-coffee {
-  position: absolute;
-  right: 22px;
-  bottom: 22px;
-  z-index: 3;
-  background: rgba(255,255,255,0.82);
-  border: 1px solid rgba(255,255,255,0.55);
-  border-radius: 22px;
-  padding: 10px 12px;
-  box-shadow: 0 14px 34px rgba(0,0,0,0.30);
-  backdrop-filter: blur(7px);
-}
-
-.lab-panel {
-  margin-top: 18px;
-  background: rgba(255,255,255,0.96);
-  border-radius: 24px;
-  padding: 22px;
-  box-shadow: 0 18px 35px rgba(9,20,45,0.18);
-  border: 1px solid rgba(47,111,237,0.12);
-}
-
-.tool-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
-
-.section-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
-}
-
-.tool-section {
-  background: rgba(255,255,255,0.98);
-  border: 1px solid rgba(47,111,237,0.12);
-  border-radius: 22px;
-  padding: 18px;
-  box-shadow: 0 10px 26px rgba(9,20,45,0.10);
-}
-
-.tool-section.full-width {
-  grid-column: 1 / -1;
-}
-
-.section-heading {
-  margin: 0 0 6px 0;
-  font-size: 23px;
-  color: #07152f;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.section-description {
-  margin: 0 0 14px 0;
-  color: #475569;
-  line-height: 1.4;
-  font-size: 15px;
-}
-
-.section-tools {
-  display: grid;
-  gap: 12px;
-}
-
-button {
-  min-height: 120px;
-  width: 100%;
-  border: none;
-  border-radius: 22px;
-  cursor: pointer;
-  padding: 22px;
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 0.2px;
-  background: white;
-  color: #14213d;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
-    filter 0.18s ease;
-  display: flex;
-  align-items: center;
-  text-align: left;
-  gap: 18px;
-  position: relative;
-  overflow: hidden;
-}
-
-button:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 18px 35px rgba(0,0,0,0.18);
-}
-
-button:active {
-  transform: scale(0.98);
-}
-
-.tool-icon {
-  width: 76px;
-  height: 76px;
-  min-width: 76px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 34px;
-  color: white;
-  box-shadow:
-    inset 0 2px 10px rgba(255,255,255,0.22),
-    0 4px 10px rgba(0,0,0,0.15);
-}
-
-.tool-text {
-  display: block;
-}
-
-.tool-title {
-  display: block;
-  font-size: 17px;
-  line-height: 1.3;
-  font-weight: 700;
-}
-
-.tool-desc {
-  display: block;
-  margin-top: 6px;
-  font-size: 13px;
-  line-height: 1.35;
-  font-weight: 500;
-  color: #64748b;
-}
-
-.downloads {
-  background: white;
-  color: #2563eb;
-}
-
-.mapping {
-  background: white;
-  color: #6d28d9;
-}
-
-.stats {
-  background: white;
-  color: #15803d;
-}
-
-.population {
-  background: white;
-  color: #d97706;
-}
-
-.downloads .tool-icon {
-  background: linear-gradient(135deg,#3b82f6,#2563eb);
-}
-
-.monohybrid {
-  background: white;
-  color: #0f766e;
-}
-
-.monohybrid .tool-icon {
-  background: linear-gradient(135deg,#14b8a6,#0f766e);
-}
-
-button:not(.downloads):not(.stats):not(.mapping):not(.population):not(.exitButton):nth-of-type(2) .tool-icon {
-  background: linear-gradient(135deg,#8b5cf6,#6d28d9);
-}
-
-button:not(.downloads):not(.stats):not(.mapping):not(.population):not(.exitButton):nth-of-type(3) .tool-icon {
-  background: linear-gradient(135deg,#06b6d4,#0284c7);
-}
-
-button:not(.downloads):not(.stats):not(.mapping):not(.population):not(.exitButton):nth-of-type(4) .tool-icon {
-  background: linear-gradient(135deg,#f43f5e,#e11d48);
-}
-
-.stats .tool-icon {
-  background: linear-gradient(135deg,#22c55e,#15803d);
-}
-
-.mapping .tool-icon {
-  background: linear-gradient(135deg,#7c3aed,#6d28d9);
-}
-
-.population .tool-icon {
-  background: linear-gradient(135deg,#f59e0b,#d97706);
-}
-
-button::after {
-  content: "";
-  position: absolute;
-  left: 114px;
-  right: 28px;
-  bottom: 24px;
-  height: 2px;
-  opacity: 0.28;
-  background: currentColor;
-}
-
-.credit {
-  text-align: center;
-  font-size: 15px;
-  margin-top: 20px;
-  color: #263244;
-  font-weight: 700;
-}
-
-.coffee {
-  text-align: center;
-  margin-top: 15px;
-}
-
-.coffee img,
-.hero-coffee img {
-  max-width: 230px;
-  width: 90%;
-  border-radius: 18px;
-  transition:
-    transform 0.22s ease,
-    filter 0.22s ease,
-    box-shadow 0.22s ease;
-}
-
-.hero-coffee img {
-  width: 220px;
-  display: block;
-}
-
-.coffee img:hover,
-.hero-coffee img:hover {
-  transform: translateY(-5px) scale(1.06) rotate(-1.2deg);
-  filter: brightness(1.05) saturate(1.12);
-  box-shadow: 0 16px 32px rgba(0,0,0,0.28);
-}
-
-@media (max-width: 900px) {
-  .tool-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .section-grid {
-    grid-template-columns: 1fr;
-  }
-
-  button {
-    min-height: 88px;
-    font-size: 17px;
-  }
-}
-
-@media (max-width: 600px) {
-  .page {
-    padding: 10px;
-  }
-
-  .hero {
-    border-radius: 16px;
-  }
-
-  .hero-coffee {
-    position: static;
-    margin: 12px auto 0 auto;
-    width: fit-content;
-  }
-
-  .hero-coffee img {
-    width: 210px;
-  }
-
-  .lab-panel {
-    margin-top: 12px;
-    border-radius: 18px;
-    padding: 12px;
-  }
-
-  .tool-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  .section-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .tool-section {
-    padding: 12px;
-    border-radius: 18px;
-  }
-
-  button {
-    min-height: 92px;
-    font-size: 16px;
-    padding: 14px;
-    border-radius: 16px;
-    gap: 12px;
-  }
-
-  .tool-icon {
-    font-size: 28px;
-    margin-bottom: 5px;
-  }
-
-  .credit {
-    font-size: 14px;
-  }
-}
-
-.sigma-symbol {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 46px;
-  font-weight: 900;
-  line-height: 1;
-}
-
-.drosophila-icon svg {
-  width: 58px;
-  height: 58px;
-  display: block;
-}
-
-.fly-wing {
-  fill: rgba(255,255,255,0.72);
-  stroke: white;
-  stroke-width: 1.7;
-}
-
-.fly-body {
-  fill: white;
-}
-
-.fly-head {
-  fill: white;
-}
-
-.fly-eye {
-  fill: #ff2f2f;
-}
-
-.fly-detail {
-  stroke: #7c3aed;
-  stroke-width: 1.4;
-  stroke-linecap: round;
-  opacity: 0.55;
-}
-
-.fly-leg {
-  stroke: white;
-  stroke-width: 2.8;
-  stroke-linecap: round;
-  fill: none;
-}
-
-
-
-.coffee {
-  position: relative;
-}
-
-.coffee a {
-  position: relative;
-  display: inline-block;
-}
-
-.coffee .heart {
-  position: absolute;
-  font-size: 16px;
-  pointer-events: none;
-  opacity: 0;
-  z-index: 30;
-}
-
-.coffee:hover .heart {
-  animation: floatHeart 0.9s linear infinite;
-}
-
-.coffee .h1 { left: 8%; bottom: 8px; animation-delay: 0s; }
-.coffee .h2 { left: 24%; bottom: 0px; animation-delay: 0.08s; }
-.coffee .h3 { left: 40%; bottom: 10px; animation-delay: 0.16s; }
-.coffee .h4 { left: 56%; bottom: 4px; animation-delay: 0.24s; }
-.coffee .h5 { left: 72%; bottom: 12px; animation-delay: 0.32s; }
-.coffee .h6 { left: 86%; bottom: 6px; animation-delay: 0.40s; }
-
-@keyframes floatHeart {
-  0% {
-    transform: translateY(0) translateX(0) scale(0.5) rotate(0deg);
-    opacity: 0;
-  }
-
-  15% {
-    opacity: 1;
-  }
-
-  100% {
-    transform: translateY(-95px) translateX(-10px) scale(1.15) rotate(-10deg);
-    opacity: 0;
-  }
-}
-
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dr. Andres Posso-Terranova | Genetics, Evolution & Interactive Biology</title>
+  <meta name="description" content="Personal academic website of Dr. Andres Posso-Terranova: genetics education, evolutionary biology, interactive learning tools, and open science resources." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #071018;
+      --bg-2: #0c1824;
+      --card: rgba(255, 255, 255, 0.08);
+      --card-strong: rgba(255, 255, 255, 0.14);
+      --text: #f5fbff;
+      --muted: #b9c7d4;
+      --soft: #8ea5b8;
+      --cyan: #55e6ff;
+      --green: #7dffb2;
+      --purple: #b28cff;
+      --amber: #ffd36b;
+      --pink: #ff7ab6;
+      --line: rgba(255, 255, 255, 0.14);
+      --shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+      --radius: 28px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(85, 230, 255, 0.22), transparent 28%),
+        radial-gradient(circle at 90% 10%, rgba(178, 140, 255, 0.20), transparent 30%),
+        radial-gradient(circle at 50% 85%, rgba(125, 255, 178, 0.18), transparent 32%),
+        linear-gradient(140deg, var(--bg), var(--bg-2));
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, black, transparent 82%);
+      z-index: -3;
+    }
+
+    .dna-bg {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      z-index: -2;
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    .helix {
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      border-radius: 50%;
+      border: 1px solid rgba(85, 230, 255, 0.35);
+      filter: blur(0.2px);
+      animation: float 16s ease-in-out infinite;
+    }
+
+    .helix.one { top: 8%; right: -120px; }
+    .helix.two { bottom: -180px; left: -120px; animation-delay: -6s; border-color: rgba(125, 255, 178, 0.35); }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-28px) rotate(18deg); }
+    }
+
+    .container {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(18px);
+      background: rgba(7, 16, 24, 0.62);
+      border-bottom: 1px solid var(--line);
+    }
+
+    nav {
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      background: linear-gradient(135deg, var(--cyan), var(--green));
+      color: #061018;
+      box-shadow: 0 12px 30px rgba(85, 230, 255, 0.28);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      font-size: 0.94rem;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 180ms ease;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 15px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+      color: var(--muted);
+      font-weight: 700;
+      width: fit-content;
+    }
+
+    .hero {
+      min-height: calc(100vh - 76px);
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      align-items: center;
+      gap: 52px;
+      padding: 78px 0 70px;
+    }
+
+    .hero h1 {
+      margin: 22px 0 18px;
+      font-family: "Playfair Display", serif;
+      font-size: clamp(3.5rem, 8vw, 7.8rem);
+      line-height: 0.88;
+      letter-spacing: -0.075em;
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, #fff, var(--cyan), var(--green), var(--amber));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1.15rem, 2vw, 1.55rem);
+      line-height: 1.55;
+      color: var(--muted);
+      max-width: 680px;
+      margin: 0 0 30px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 30px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 52px;
+      padding: 0 22px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 850;
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .button:hover { transform: translateY(-2px); }
+
+    .button.primary {
+      background: linear-gradient(135deg, var(--cyan), var(--green));
+      color: #061018;
+      border: none;
+      box-shadow: 0 16px 42px rgba(85, 230, 255, 0.25);
+    }
+
+    .button.secondary { background: rgba(255,255,255,0.07); }
+
+    .showcase {
+      position: relative;
+      min-height: 620px;
+    }
+
+    .orb {
+      position: absolute;
+      inset: 13% 8% auto auto;
+      width: 390px;
+      height: 390px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95), transparent 9%),
+        radial-gradient(circle at 40% 40%, rgba(85, 230, 255, 0.95), rgba(178, 140, 255, 0.55) 45%, rgba(125, 255, 178, 0.25) 68%, transparent 72%);
+      filter: drop-shadow(0 34px 80px rgba(85, 230, 255, 0.18));
+      animation: pulse 8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { transform: scale(1); }
+      50% { transform: scale(1.045); }
+    }
+
+    .floating-card {
+      position: absolute;
+      padding: 22px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: linear-gradient(150deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06));
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow);
+    }
+
+    .floating-card h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    .floating-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 0.95rem;
+    }
+
+    .card-1 { top: 5%; left: 2%; width: 260px; }
+    .card-2 { top: 44%; right: 0; width: 280px; }
+    .card-3 { bottom: 6%; left: 7%; width: 320px; }
+
+    .fly {
+      position: absolute;
+      top: 24%;
+      left: 28%;
+      width: 190px;
+      height: 130px;
+      animation: flyMove 6s ease-in-out infinite;
+    }
+
+    @keyframes flyMove {
+      0%, 100% { transform: translate(0, 0) rotate(-8deg); }
+      50% { transform: translate(18px, -16px) rotate(7deg); }
+    }
+
+    .wing {
+      position: absolute;
+      width: 86px;
+      height: 58px;
+      border-radius: 80% 20% 70% 30%;
+      background: rgba(255,255,255,0.36);
+      border: 1px solid rgba(255,255,255,0.55);
+      filter: blur(0.1px);
+    }
+
+    .wing.left { left: 22px; top: 4px; transform: rotate(-18deg); }
+    .wing.right { left: 82px; top: 8px; transform: scaleX(-1) rotate(-18deg); }
+    .body {
+      position: absolute;
+      left: 58px;
+      top: 48px;
+      width: 76px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, #2a1510, #c17931, #2a1510);
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,0.12);
+    }
+    .head {
+      position: absolute;
+      left: 124px;
+      top: 51px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #29120e;
+    }
+    .eye {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #ef3d32;
+      top: 59px;
+      left: 147px;
+      box-shadow: -9px 2px 0 #b91f23;
+    }
+
+    section { padding: 84px 0; }
+
+    .section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 32px;
+      margin-bottom: 34px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 4.2rem);
+      line-height: 0.95;
+      letter-spacing: -0.055em;
+    }
+
+    .section-heading p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 460px;
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid.three { grid-template-columns: repeat(3, 1fr); }
+    .grid.two { grid-template-columns: repeat(2, 1fr); }
+
+    .feature {
+      padding: 28px;
+      min-height: 260px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(150deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05));
+      box-shadow: 0 16px 50px rgba(0,0,0,0.16);
+      transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+    }
+
+    .feature:hover {
+      transform: translateY(-4px);
+      border-color: rgba(85, 230, 255, 0.42);
+      background: linear-gradient(150deg, rgba(255,255,255,0.16), rgba(255,255,255,0.07));
+    }
+
+    .icon {
+      width: 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      font-size: 1.6rem;
+      background: rgba(255,255,255,0.1);
+      margin-bottom: 20px;
+    }
+
+    .feature h3 {
+      margin: 0 0 12px;
+      font-size: 1.3rem;
+      letter-spacing: -0.03em;
+    }
+
+    .feature p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .wide-panel {
+      padding: clamp(28px, 5vw, 56px);
+      border-radius: 36px;
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at 85% 20%, rgba(255, 122, 182, 0.18), transparent 28%),
+        linear-gradient(135deg, rgba(85, 230, 255, 0.12), rgba(255,255,255,0.06));
+      box-shadow: var(--shadow);
+    }
+
+    .bio-layout {
+      display: grid;
+      grid-template-columns: 0.8fr 1.2fr;
+      gap: 34px;
+      align-items: center;
+    }
+
+    .portrait-card {
+      aspect-ratio: 1 / 1.1;
+      border-radius: 34px;
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at 38% 26%, rgba(255, 211, 107, 0.5), transparent 10%),
+        radial-gradient(circle at 55% 30%, rgba(85, 230, 255, 0.28), transparent 22%),
+        linear-gradient(150deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04));
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .portrait-card::before {
+      content: "AP";
+      font-family: "Playfair Display", serif;
+      font-size: clamp(6rem, 12vw, 11rem);
+      font-weight: 800;
+      letter-spacing: -0.12em;
+      opacity: 0.9;
+    }
+
+    .bio-copy h2 {
+      font-size: clamp(2.2rem, 5vw, 4.8rem);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+      margin: 0 0 20px;
+    }
+
+    .bio-copy p {
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 1.07rem;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .stat {
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--line);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.8rem;
+      letter-spacing: -0.04em;
+    }
+
+    .stat span {
+      color: var(--soft);
+      font-size: 0.9rem;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 18px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .timeline-item .year {
+      color: var(--green);
+      font-weight: 900;
+    }
+
+    .timeline-item p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .quote {
+      padding: clamp(30px, 7vw, 76px);
+      text-align: center;
+      border-radius: 40px;
+      background: linear-gradient(135deg, rgba(125,255,178,0.16), rgba(85,230,255,0.12), rgba(178,140,255,0.12));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .quote h2 {
+      margin: 0 auto;
+      max-width: 900px;
+      font-family: "Playfair Display", serif;
+      font-size: clamp(2.4rem, 6vw, 6rem);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+    }
+
+    .quote p {
+      color: var(--muted);
+      font-size: 1.15rem;
+      line-height: 1.6;
+      margin: 22px auto 0;
+      max-width: 680px;
+    }
+
+    footer {
+      padding: 46px 0 60px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+    }
+
+    .footer-grid {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+    }
+
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+
+    .feature.featured-tool {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255, 211, 107, 0.22), transparent 30%),
+        linear-gradient(150deg, rgba(85,230,255,0.18), rgba(178,140,255,0.13), rgba(255,255,255,0.06));
+      border-color: rgba(255, 211, 107, 0.42);
+    }
+
+    .feature.featured-tool::after {
+      content: "Start here";
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 211, 107, 0.18);
+      border: 1px solid rgba(255, 211, 107, 0.35);
+      color: var(--amber);
+      font-size: 0.76rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 980px) {
+      .hero, .bio-layout { grid-template-columns: 1fr; }
+      .showcase { min-height: 560px; }
+      .grid.three, .grid.two { grid-template-columns: 1fr; }
+      .section-heading { align-items: start; flex-direction: column; }
+      .nav-links { display: none; }
+    }
+
+    @media (max-width: 620px) {
+      .container { width: min(100% - 26px, 1180px); }
+      nav { height: 68px; }
+      .hero { padding-top: 50px; }
+      .hero h1 { font-size: 4.2rem; }
+      .showcase { min-height: 680px; }
+      .orb { width: 280px; height: 280px; right: 4%; top: 18%; }
+      .card-1, .card-2, .card-3 { left: 0; right: 0; width: auto; }
+      .card-1 { top: 0; }
+      .card-2 { top: 390px; }
+      .card-3 { bottom: 0; }
+      .fly { top: 190px; left: 16%; transform: scale(0.86); }
+      .stats, .timeline-item { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
-
 <body>
-
-<div class="page">
-
-  <div class="hero-wrap">
-    <img class="hero" src="genetics_virtual_lab_banner.jpeg" alt="Genetics Virtual Lab banner">
-
-    <div class="hero-coffee">
-      <a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer">
-        <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
-      </a>
-    </div>
+  <div class="dna-bg" aria-hidden="true">
+    <div class="helix one"></div>
+    <div class="helix two"></div>
   </div>
 
-  <div class="lab-panel">
-    <div class="section-grid">
-
-      <div class="tool-section full-width">
-        <h2 class="section-heading"><i class="fa-solid fa-folder-open"></i> Course Resources</h2>
-        <p class="section-description">Access downloadable lab materials and files for students and instructors.</p>
-        <div class="section-tools">
-          <button class="downloads" onclick="window.location.href='downloads.html'">
-            <span class="tool-icon"><i class="fa-solid fa-folder-open"></i></span>
-            <span class="tool-text">
-              <span class="tool-title">Downloads</span>
-              <span class="tool-desc">Find course files, handouts, and downloadable resources.</span>
-            </span>
-          </button>
+  <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <div class="brand-mark">AP</div>
+          <span>ampossot.com</span>
         </div>
-      </div>
-
-      <div class="tool-section">
-        <h2 class="section-heading"><i class="fa-solid fa-seedling"></i> Inheritance Analyzers</h2>
-        <p class="section-description">Infer dominance, recessiveness, autosomal inheritance, and sex-linkage from simulated genetic crosses.</p>
-        <div class="section-tools">
-          <button class="monohybrid" onclick="window.location.href='monohybrid_inheritance_analyzer.html'">
-            <span class="tool-icon"><i class="fa-solid fa-dna"></i></span>
-            <span class="tool-text">
-              <span class="tool-title">Monohybrid Inheritance Analyzer</span>
-              <span class="tool-desc">Analyze one gene at a time and infer the mode of inheritance.</span>
-            </span>
-          </button>
-
-          <button onclick="window.location.href='dihybrid_inheritance_analyzer.html'">
-            <span class="tool-icon"><i class="fa-solid fa-table-cells-large"></i></span>
-            <span class="tool-text">
-              <span class="tool-title">Dihybrid Inheritance Analyzer</span>
-              <span class="tool-desc">Use two-gene phenotype tables while reasoning one trait at a time.</span>
-            </span>
-          </button>
-
-          <button onclick="window.location.href='sex_linked_inheritance_analyzer.html'">
-            <span class="tool-icon"><i class="fa-solid fa-venus-mars"></i></span>
-            <span class="tool-text">
-              <span class="tool-title">Sex-Linked Inheritance Analyzer</span>
-              <span class="tool-desc">Compare reciprocal crosses and detect sex-biased phenotypic patterns.</span>
-            </span>
-          </button>
+        <div class="nav-links" aria-label="Primary navigation">
+          <a href="#tools">Tools</a>
+          <a href="#teaching">Teaching</a>
+          <a href="#research">Research</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
         </div>
-      </div>
-
-      <div class="tool-section">
-        <h2 class="section-heading"><i class="fa-solid fa-chart-column"></i> Chi-Square Genetics</h2>
-        <p class="section-description">Generate datasets, calculate expected values, run χ² tests, and interpret H₀.</p>
-        <div class="section-tools">
-          <button class="stats" onclick="window.location.href='dihybrid_x2.html'">
-            <span class="tool-icon"><i class="fa-solid fa-chart-column"></i></span>
-            <span class="tool-text">
-              <span class="tool-title">Dihybrid Cross and X<sup>2</sup> Test</span>
-              <span class="tool-desc">Test whether observed data fit the expected 9:3:3:1 ratio.</span>
-            </span>
-          </button>
-
-          <button class="stats" onclick="window.location.href='test_cross_x2.html'">
-            <span class="tool-icon"><span class="sigma-symbol">Σ</span></span>
-            <span class="tool-text">
-              <span class="tool-title">Test-Cross and X<sup>2</sup> Test</span>
-              <span class="tool-desc">Evaluate 1:1:1:1 expectations and estimate recombination frequency.</span>
-            </span>
-          </button>
-        </div>
-      </div>
-
-      <div class="tool-section">
-        <h2 class="section-heading"><i class="fa-solid fa-map-location-dot"></i> Linkage and Mapping</h2>
-        <p class="section-description">Move from classical recombination data to gene order, map distances, interference, and GWAS signals.</p>
-        <div class="section-tools">
-          <button class="mapping" onclick="window.location.href='three_point_mapping_drosophila.html'">
-            <span class="tool-icon drosophila-icon">
-              <svg viewBox="0 0 80 80" aria-hidden="true">
-                <ellipse class="fly-wing" cx="25" cy="28" rx="12" ry="22" transform="rotate(-35 25 28)"/>
-                <ellipse class="fly-wing" cx="55" cy="28" rx="12" ry="22" transform="rotate(35 55 28)"/>
-                <ellipse class="fly-body" cx="40" cy="44" rx="9" ry="20"/>
-                <circle class="fly-head" cx="40" cy="24" r="10"/>
-                <circle class="fly-eye" cx="34" cy="22" r="4.2"/>
-                <circle class="fly-eye" cx="46" cy="22" r="4.2"/>
-                <path class="fly-detail" d="M40 31 L40 60"/>
-                <path class="fly-detail" d="M34 38 Q40 42 46 38"/>
-                <path class="fly-detail" d="M33 48 Q40 52 47 48"/>
-                <path class="fly-leg" d="M33 49 L20 57"/>
-                <path class="fly-leg" d="M47 49 L60 57"/>
-                <path class="fly-leg" d="M34 57 L26 69"/>
-                <path class="fly-leg" d="M46 57 L54 69"/>
-                <path class="fly-leg" d="M33 20 L22 10"/>
-                <path class="fly-leg" d="M47 20 L58 10"/>
-              </svg>
-            </span>
-            <span class="tool-text">
-              <span class="tool-title">Three-point Mapping in <i>Drosophila</i></span>
-              <span class="tool-desc">Analyze observed fruit fly data to infer gene order and interference.</span>
-            </span>
-          </button>
-
-          <button class="mapping" onclick="window.location.href='three_point_linkage_mapping.html'">
-            <span class="tool-icon"><i class="fa-solid fa-location-dot"></i></span>
-            <span class="tool-text">
-              <span class="tool-title">Three-point Linkage Mapping Generator</span>
-              <span class="tool-desc">Generate randomized three-gene linkage datasets across organisms.</span>
-            </span>
-          </button>
-
-          <button class="mapping" onclick="window.location.href='gwas_generator.html'">
-            <span class="tool-icon"><i class="fa-solid fa-chart-line"></i></span>
-            <span class="tool-text">
-              <span class="tool-title">GWAS - Mapping Generator</span>
-              <span class="tool-desc">Map a simulated trait using SNP association and Manhattan-style reasoning.</span>
-            </span>
-          </button>
-        </div>
-      </div>
-
-      <div class="tool-section">
-        <h2 class="section-heading"><i class="fa-solid fa-users"></i> Population Genetics</h2>
-        <p class="section-description">Explore Hardy-Weinberg expectations, selection, genetic drift, bottlenecks, and allele-frequency change.</p>
-        <div class="section-tools">
-          <button class="population" onclick="window.location.href='pop_gen.html'">
-            <span class="tool-icon"><i class="fa-solid fa-users"></i></span>
-            <span class="tool-text">
-              <span class="tool-title">Population Genetics Generator</span>
-              <span class="tool-desc">Open the population genetics simulator portal.</span>
-            </span>
-          </button>
-        </div>
-      </div>
-
+      </nav>
     </div>
+  </header>
 
-    <div class="credit">Dr. Andres Posso-Terranova. 2026. ©</div>
+  <main>
+    <section class="hero container">
+      <div>
+        <div class="pill">🧬 Genetics • Evolution • Interactive Learning</div>
+        <h1>Making <span class="gradient-text">biology</span> click.</h1>
+        <p class="hero-subtitle">
+          I build interactive genetics tools, virtual labs, and data-driven teaching resources that help students move from memorizing biology to thinking like scientists.
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#tools">Explore the tools →</a>
+          <a class="button secondary" href="#about">Meet Andres</a>
+          <a class="button secondary" href="#research">Research interests</a>
+        </div>
+      </div>
 
-    <div class="coffee">
-      <a href="https://www.buymeacoffee.com/ampossot" target="_blank" rel="noopener noreferrer">
-        <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ampossot&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
-        <span class="heart h1">💛</span>
-        <span class="heart h2">💛</span>
-        <span class="heart h3">💛</span>
-        <span class="heart h4">💛</span>
-        <span class="heart h5">💛</span>
-        <span class="heart h6">💛</span>
-      </a>
+      <div class="showcase" aria-label="Animated biology showcase">
+        <div class="orb"></div>
+        <div class="fly" aria-hidden="true">
+          <div class="wing left"></div>
+          <div class="wing right"></div>
+          <div class="body"></div>
+          <div class="head"></div>
+          <div class="eye"></div>
+        </div>
+        <article class="floating-card card-1">
+          <h3>Virtual genetics labs</h3>
+          <p>Students explore crosses, datasets, phenotypes, genotypes, and hypothesis testing through active simulations.</p>
+        </article>
+        <article class="floating-card card-2">
+          <h3>From genes to genomes</h3>
+          <p>Tools that connect classical inheritance with modern molecular and genomic thinking.</p>
+        </article>
+        <article class="floating-card card-3">
+          <h3>Open educational science</h3>
+          <p>Freely shared resources for students, instructors, and curious people who want biology to feel alive.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="tools" class="container">
+      <div class="section-heading">
+        <h2>Interactive<br>genetics tools.</h2>
+        <p>Designed for students who learn best by clicking, testing, making mistakes, and seeing biology unfold in real time.</p>
+      </div>
+      <div class="grid three">
+        <a href="drosophila_notation_trainer.html" style="text-decoration: none; color: inherit;">
+          <article class="feature featured-tool">
+            <div class="icon">✍️</div>
+            <h3><i>Drosophila</i> Notation Trainer</h3>
+            <p>Practice gene symbols, wild-type notation, dominance, and genotype interpretation before starting fly crosses.</p>
+          </article>
+        </a>
+
+        <a href="dros_simulator.html" style="text-decoration: none; color: inherit;">
+          <article class="feature">
+            <div class="icon">🪰</div>
+            <h3><i>Drosophila</i> Cross Simulator</h3>
+            <p>Create fly populations, select parents, simulate generations, compare phenotypes, and make inheritance patterns visible.</p>
+          </article>
+        </a>
+
+        <a href="virtual_lab.html" style="text-decoration: none; color: inherit;">
+          <article class="feature">
+            <div class="icon">🧪</div>
+            <h3>Genetics Virtual Lab</h3>
+            <p>Open the full lab portal for datasets, χ² analysis, mapping, inheritance analyzers, and population genetics.</p>
+          </article>
+        </a>
+      </div>
+    </section>
+
+    <section id="teaching" class="container">
+      <div class="wide-panel">
+        <div class="section-heading">
+          <h2>Teaching that feels<br>like discovery.</h2>
+          <p>Biology becomes powerful when students stop asking “what is the answer?” and start asking “what evidence supports this?”</p>
+        </div>
+        <div class="grid three">
+          <article class="feature">
+            <div class="icon">🔍</div>
+            <h3>Evidence first</h3>
+            <p>Students work with observations, expected values, hypotheses, uncertainty, and biological interpretation.</p>
+          </article>
+          <article class="feature">
+            <div class="icon">🧠</div>
+            <h3>Reasoning over memorizing</h3>
+            <p>Learning activities emphasize logic, prediction, analysis, and experimental design — not just vocabulary.</p>
+          </article>
+          <article class="feature">
+            <div class="icon">🌎</div>
+            <h3>Accessible science</h3>
+            <p>Open, friendly, mobile-ready resources built for classrooms, labs, and independent learners.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="research" class="container">
+      <div class="section-heading">
+        <h2>Research<br>interests.</h2>
+        <p>Evolutionary biology, molecular ecology, systematics, biodiversity, and the stories hidden inside genomes.</p>
+      </div>
+      <div class="grid two">
+        <article class="feature">
+          <div class="icon">🐸</div>
+          <h3>Evolutionary biology & biodiversity</h3>
+          <p>Exploring how organisms diversify, adapt, signal, and persist across landscapes and evolutionary time.</p>
+        </article>
+        <article class="feature">
+          <div class="icon">🌊</div>
+          <h3>Marine molecular ecology</h3>
+          <p>Using molecular tools, population genomics, and systematics to understand tropical marine diversity and connectivity.</p>
+        </article>
+        <article class="feature">
+          <div class="icon">🧬</div>
+          <h3>Genetics education research</h3>
+          <p>Designing tools that transform abstract genetic concepts into concrete, testable, visual experiences.</p>
+        </article>
+        <article class="feature">
+          <div class="icon">💻</div>
+          <h3>Digital biology learning</h3>
+          <p>Developing web-based simulations that make data analysis, inheritance, and genomics more approachable.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="about" class="container">
+      <div class="bio-layout">
+        <div class="portrait-card" aria-label="Stylized initials AP"></div>
+        <div class="bio-copy">
+          <div class="pill">About Andres</div>
+          <h2>Biologist, educator, builder.</h2>
+          <p>
+            I am Dr. Andres Posso-Terranova, a Colombian biologist and evolutionary biology PhD based in Canada. My work lives at the intersection of genetics, evolution, teaching, and technology.
+          </p>
+          <p>
+            I design interactive biology tools that help students practice scientific reasoning: generating data, testing hypotheses, interpreting uncertainty, and connecting genetic mechanisms to real organisms.
+          </p>
+          <div class="stats">
+            <div class="stat"><strong>Genetics</strong><span>teaching tools</span></div>
+            <div class="stat"><strong>Evolution</strong><span>research foundation</span></div>
+            <div class="stat"><strong>Open</strong><span>science education</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="container">
+      <div class="quote">
+        <h2>Science should feel rigorous, beautiful, and a little bit dangerous.</h2>
+        <p>Not dangerous like a lab fire. Dangerous like a student suddenly realizing they can understand genetics.</p>
+      </div>
+    </section>
+
+    <section class="container">
+      <div class="section-heading">
+        <h2>What’s next?</h2>
+        <p>This site is designed to grow as a living platform for tools, teaching, research, and outreach.</p>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="year">Now</div>
+          <p>Launch the personal homepage and connect existing genetics tools under one polished academic identity.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="year">Next</div>
+          <p>Add dedicated pages for <i>Drosophila</i> simulations, dataset generators, virtual PCR, and teaching resources.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="year">Future</div>
+          <p>Build a complete open virtual genetics lab for students and educators around the world.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="contact">
+    <div class="container footer-grid">
+      <div>
+        <strong>Dr. Andres Posso-Terranova</strong><br>
+        Genetics • Evolution • Interactive Biology Education
+      </div>
+      <div class="footer-links">
+        <a href="mailto:andres.posso@usask.ca">Email</a>
+        <a href="#tools">Tools</a>
+        <a href="#research">Research</a>
+      </div>
     </div>
-  </div>
-
-</div>
-
+  </footer>
 </body>
 </html>

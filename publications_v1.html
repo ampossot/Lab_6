@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Publications | Dr. Andres Posso-Terranova</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#071018;--bg2:#0c1824;--text:#f5fbff;--muted:#b9c7d4;--soft:#8ea5b8;--cyan:#55e6ff;--green:#7dffb2;--amber:#ffd36b;--purple:#b28cff;--pink:#ff7ab6;--line:rgba(255,255,255,.14);--shadow:0 30px 80px rgba(0,0,0,.35)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,system-ui,sans-serif;background:radial-gradient(circle at 10% 8%,rgba(85,230,255,.2),transparent 30%),radial-gradient(circle at 90% 16%,rgba(178,140,255,.2),transparent 30%),linear-gradient(145deg,var(--bg),var(--bg2));color:var(--text);overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,black,transparent 86%);z-index:-3}
+.container{width:min(1180px,calc(100% - 40px));margin:0 auto}header{position:sticky;top:0;z-index:20;background:rgba(7,16,24,.66);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+nav{height:76px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{display:flex;align-items:center;gap:12px;font-weight:900}.brand-mark{width:42px;height:42px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,var(--cyan),var(--green));color:#061018}.nav-links{display:flex;gap:18px;flex-wrap:wrap}.nav-links a,.back-link{color:var(--muted);text-decoration:none;font-weight:700}.nav-links a:hover,.back-link:hover{color:var(--text)}
+.hero{padding:86px 0 50px;display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:center}.kicker{display:inline-flex;padding:10px 15px;border:1px solid var(--line);border-radius:999px;color:var(--muted);background:rgba(255,255,255,.06);font-weight:800}
+h1{margin:22px 0 16px;font-family:"Playfair Display",serif;font-size:clamp(3.4rem,8vw,7.2rem);line-height:.9;letter-spacing:-.075em}.gradient-text{background:linear-gradient(90deg,#fff,var(--cyan),var(--green),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}.hero p{max-width:720px;color:var(--muted);font-size:clamp(1.08rem,2vw,1.35rem);line-height:1.6}
+.hero-card{border:1px solid var(--line);border-radius:34px;padding:28px;background:radial-gradient(circle at 80% 10%,rgba(255,211,107,.16),transparent 30%),linear-gradient(150deg,rgba(255,255,255,.14),rgba(255,255,255,.05));box-shadow:var(--shadow);position:relative;overflow:hidden}.hero-card:before{content:"2005 → 2023";position:absolute;right:20px;top:18px;font-weight:900;color:rgba(255,255,255,.12);font-size:2rem}
+.metric-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:22px}.metric{border:1px solid var(--line);border-radius:22px;padding:18px;background:rgba(255,255,255,.07)}.metric strong{display:block;font-size:2rem}.metric span{display:block;color:var(--soft);margin-top:4px;font-size:.92rem}
+.topic-cloud{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}.topic{padding:8px 11px;border-radius:999px;font-size:.82rem;font-weight:800;color:#071018}.topic:nth-child(1){background:var(--cyan)}.topic:nth-child(2){background:var(--green)}.topic:nth-child(3){background:var(--amber)}.topic:nth-child(4){background:var(--purple);color:#fff}.topic:nth-child(5){background:var(--pink);color:#fff}
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0 34px}.search{flex:1 1 320px;min-height:48px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--text);padding:0 18px;font-size:1rem}.search::placeholder{color:rgba(185,199,212,.78)}.filter{border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--text);min-height:48px;border-radius:999px;padding:0 14px;font-weight:800}
+.section-title{display:flex;justify-content:space-between;align-items:end;gap:20px;margin:28px 0 14px}.section-title h2{margin:0;font-size:clamp(2rem,4vw,4rem);letter-spacing:-.06em;line-height:.96}.section-title p{margin:0;max-width:520px;color:var(--muted);line-height:1.6}
+.timeline{position:relative;padding-bottom:80px}.timeline:before{content:"";position:absolute;left:92px;top:20px;bottom:80px;width:2px;background:linear-gradient(to bottom,var(--cyan),var(--green),transparent);opacity:.55}.year-marker{position:sticky;top:90px;z-index:8;width:fit-content;margin:30px 0 14px}.year-marker span{display:inline-flex;align-items:center;justify-content:center;min-width:86px;height:42px;border-radius:999px;background:linear-gradient(135deg,var(--cyan),var(--green));color:#061018;font-weight:950;box-shadow:0 16px 34px rgba(85,230,255,.2)}
+.pub-card{margin-left:122px;margin-bottom:16px;padding:24px;border:1px solid var(--line);border-radius:28px;background:linear-gradient(150deg,rgba(255,255,255,.12),rgba(255,255,255,.052));box-shadow:0 16px 50px rgba(0,0,0,.16);transition:transform .18s ease,border-color .18s ease;position:relative}.pub-card:before{content:"";position:absolute;left:-34px;top:28px;width:14px;height:14px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 6px rgba(85,230,255,.12)}.pub-card:hover{transform:translateY(-3px);border-color:rgba(85,230,255,.42)}
+.pub-top{display:flex;justify-content:space-between;gap:12px;margin-bottom:12px}.pub-type{display:inline-flex;width:fit-content;padding:6px 10px;border-radius:999px;background:rgba(178,140,255,.15);border:1px solid rgba(178,140,255,.3);color:#d9ccff;font-size:.78rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em}.pub-year{color:var(--amber);font-weight:900}.pub-card h3{margin:0 0 10px;font-size:clamp(1.15rem,2vw,1.45rem);line-height:1.28;letter-spacing:-.035em}.authors{margin:0;color:var(--muted);line-height:1.55;font-weight:600}.venue{margin:10px 0 0;color:var(--soft);line-height:1.55;font-style:italic}.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.tag{padding:6px 9px;border-radius:999px;background:rgba(85,230,255,.1);border:1px solid rgba(85,230,255,.18);color:#bff6ff;font-size:.78rem;font-weight:800}
+.paper-links{
+margin-top:18px;
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+.paper-btn{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:10px 16px;
+border-radius:999px;
+text-decoration:none;
+font-weight:800;
+font-size:.85rem;
+transition:all .2s ease;
+border:1px solid rgba(85,230,255,.25);
+background:rgba(85,230,255,.10);
+color:#dffbff;
+}
+.paper-btn:hover{
+transform:translateY(-2px) scale(1.03);
+background:linear-gradient(135deg, rgba(85,230,255,.25), rgba(125,255,178,.22));
+border-color:rgba(125,255,178,.5);
+box-shadow:0 12px 25px rgba(85,230,255,.15);
+}
+
+footer{border-top:1px solid var(--line);padding:44px 0 60px;color:var(--muted)}.footer-grid{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}.footer-links{display:flex;gap:18px;flex-wrap:wrap}.footer-links a{color:var(--muted);text-decoration:none}.footer-links a:hover{color:var(--text)}.hidden{display:none}
+@media(max-width:860px){.hero{grid-template-columns:1fr;padding-top:54px}.section-title{flex-direction:column;align-items:start}.timeline:before{left:20px}.pub-card{margin-left:48px}.pub-card:before{left:-35px}.year-marker{position:relative;top:auto}.nav-links{display:none}}
+@media(max-width:560px){.container{width:min(100% - 26px,1180px)}nav{height:68px}h1{font-size:4rem}.metric-grid{grid-template-columns:1fr}.timeline:before,.pub-card:before{display:none}.pub-card{margin-left:0}}
+</style></head>
+<body>
+<header>
+  <div class="container">
+    <nav>
+      <a class="back-link" href="index.html">← Back to main site</a>
+      <div class="brand">
+        <div class="brand-mark">AP</div>
+        <span>Publications</span>
+      </div>
+      <div class="nav-links">
+        <a href="#list">Publication list</a>
+        <a href="poison_frogs_v1.html">Poison frogs</a>
+        <a href="mailto:andres.posso@usask.ca">Contact</a>
+      </div>
+    </nav>
+  </div>
+</header>
+<main><section class="hero container"><div><div class="kicker">📚 Genetics • Evolution • Biodiversity • Molecular Ecology</div><h1>Selected <span class="gradient-text">publications</span>.</h1><p>A chronological view of selected peer-reviewed articles and book chapters across evolutionary biology, molecular ecology, biodiversity, animal and plant genetics.</p><div class="topic-cloud"><span class="topic">Poison frogs</span><span class="topic">Molecular ecology</span><span class="topic">Genetic diversity</span><span class="topic">Animal genetics</span><span class="topic">Plant genetics</span></div></div><aside class="hero-card"><h2 style="margin:0 0 8px;font-size:1.25rem">Publication snapshot</h2><p style="margin:0;color:var(--muted);line-height:1.55">From early molecular characterization studies in Colombian genetic resources to evolutionary genomic work on aposematism and diversification.</p><div class="metric-grid"><div class="metric"><strong>19</strong><span>years represented</span></div><div class="metric"><strong>30+</strong><span>listed outputs</span></div><div class="metric"><strong>5</strong><span>major research themes</span></div><div class="metric"><strong>∞</strong><span>questions left to ask</span></div></div></aside></section>
+<section id="list" class="container"><div class="section-title"><h2>Publication<br>timeline.</h2><p>Browse from most recent to oldest. Use the search box to find topics, species, collaborators, journals, or keywords.</p></div>
+<div class="toolbar"><input id="searchBox" class="search" type="search" placeholder="Search: <em>Oophaga</em>, cassava, cattle, RAMs, Molecular Ecology..." oninput="filterPublications()"><select id="typeFilter" class="filter" onchange="filterPublications()"><option value="all">All types</option><option value="Journal article">Journal articles</option><option value="Book chapter">Book chapters</option></select></div>
+<div class="timeline" id="publicationTimeline">
+<div class="year-marker"><span>2023</span></div>
+
+<article class="pub-card" data-type="Book chapter">
+  <div class="pub-top"><span class="pub-type">Book chapter</span><span class="pub-year">2023</span></div>
+  <h3>Variation in cassava landraces: high levels of diversity in germplasm from central Brazil</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Variation in cassava landraces: high levels of diversity in germplasm from central Brazil" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Posso-Terranova, A., Vilpoux, O.F., Cereda, M.P., Hoogerheide, E.S.S., &amp; Sharbel, T.F.</p>
+  <p class="venue">In Cultural Practices and Traditional Uses in Underground Starchy Crops of South American Origin 2, Academic Press, pp. 225–243.</p>
+  <div class="tags"><span class="tag">Cassava</span><span class="tag">Genetic diversity</span><span class="tag">Crop genetics</span></div>
+</article>
+<div class="year-marker"><span>2021</span></div>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2021</span></div>
+  <h3>Genetic structure and diversity of <em>Calycolpus moritzianus</em> (Myrtaceae) in the north-eastern Andes of Colombia</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://www.scielo.org.mx/scielo.php?script=sci_arttext&pid=S1870-34532021000100213" target="_blank">Read article</a>
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Genetic structure and diversity of &lt;em&gt;Calycolpus moritzianus&lt;/em&gt; (Myrtaceae) in the north-eastern Andes of Colombia" target="_blank">Google Scholar</a>
+  </div>
+  <p class="authors">Hernandez-Contreras, D., Torres-Torres, F., Figueroa-Lozano, M., Sanchez-Montaño, L., Posso-Terranova, A., &amp; Muñoz, J.E.</p>
+  <p class="venue">Revista Mexicana de Biodiversidad, 92, e923635.</p>
+  <div class="tags"><span class="tag">Plant genetics</span><span class="tag">Biodiversity</span><span class="tag">Colombia</span></div>
+</article>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2021</span></div>
+  <h3>Aphid-ant mutualistic interaction in pepper crops <em>Capsicum annuum</em> and <em>Capsicum frutenscens</em> (Solanaceae) in southwestern Colombia</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Aphid-ant mutualistic interaction in pepper crops Capsicum annuum and Capsicum frutenscens (Solanaceae) in southwestern Colombia" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Duque, D., Clavijo, A., Posso-Terranova, A., &amp; Toro-Perea, N.</p>
+  <p class="venue">International Journal of Tropical Biology and Conservation, 69(2), 626–639.</p>
+  <div class="tags"><span class="tag">Ecology</span><span class="tag">Mutualism</span><span class="tag">Crops</span></div>
+</article>
+<div class="year-marker"><span>2020</span></div>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2020</span></div>
+  <h3>Use of infrared analysis to identify genetic resources from isolated producers in Brazil as a tool to improve cassava competitiveness in the starch market</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Use of infrared analysis to identify genetic resources from isolated producers in Brazil as a tool to improve cassava competitiveness in the starch market" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Vilpoux, O., Sharbel, T., Posso-Terranova, A., Hoogerheide, E., &amp; Cereda, M.</p>
+  <p class="venue">Food Science and Technology, 56(3), 1354–1361.</p>
+  <div class="tags"><span class="tag">Cassava</span><span class="tag">Genetic resources</span><span class="tag">Food science</span></div>
+</article>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2020</span></div>
+  <h3>Skin transcriptional profiles in <em>Oophaga</em> poison frogs</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://www.scielo.br/j/gmb/a/yvT6P5c7tqpj9xWg5N8Q3yD/" target="_blank">Read article</a>
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Skin transcriptional profiles in &lt;em&gt;Oophaga&lt;/em&gt; poison frogs" target="_blank">Google Scholar</a>
+  </div>
+  <p class="authors">Posso-Terranova, A., &amp; Andrés, J.A.</p>
+  <p class="venue">Genetics and Molecular Biology, 43(4), e20190401.</p>
+  <div class="tags"><span class="tag">Poison frogs</span><span class="tag">Transcriptomics</span><span class="tag">Evolution</span></div>
+</article>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2020</span></div>
+  <h3>Complex patterns of differentiation and geneflow underly the divergence of aposematic phenotypes in <em>Oophaga</em> poison frogs</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://onlinelibrary.wiley.com/doi/10.1111/mec.15420" target="_blank">Read article</a>
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Complex patterns of differentiation and geneflow underly the divergence of aposematic phenotypes in &lt;em&gt;Oophaga&lt;/em&gt; poison frogs" target="_blank">Google Scholar</a>
+  </div>
+  <p class="authors">Ebersbach, J., Posso-Terranova, A., Bogdanowicz, S., Gomez-Diaz, M., Garcia-Gonzalez, M., Bolivar, W., &amp; Andres, J.</p>
+  <p class="venue">Molecular Ecology, 29(11), 1944–1956.</p>
+  <div class="tags"><span class="tag">Poison frogs</span><span class="tag">Gene flow</span><span class="tag">Aposematism</span></div>
+</article>
+<div class="year-marker"><span>2018</span></div>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2018</span></div>
+  <h3>Multivariate species boundaries and conservation of harlequin poison frogs</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://onlinelibrary.wiley.com/doi/10.1111/mec.14802" target="_blank">Read article</a>
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Multivariate species boundaries and conservation of harlequin poison frogs" target="_blank">Google Scholar</a>
+  </div>
+  <p class="authors">Posso-Terranova, A., &amp; Andrés, J.A.</p>
+  <p class="venue">Molecular Ecology, 27(17), 3432–3451.</p>
+  <div class="tags"><span class="tag">Species boundaries</span><span class="tag">Conservation</span><span class="tag">Poison frogs</span></div>
+</article>
+<div class="year-marker"><span>2017</span></div>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2017</span></div>
+  <h3>Genetic diversity on citrus rootstocks with random amplified microsatellites (RAMs)</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Genetic diversity on citrus rootstocks with random amplified microsatellites (RAMs)" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Gallego, J., Enriquez, A., Caicedo, A., Posso-Terranova, A., &amp; Muñoz, J.</p>
+  <p class="venue">Biotecnología en el Sector Agropecuario y Agroindustrial, 15(1), 85–94.</p>
+  <div class="tags"><span class="tag">Plant genetics</span><span class="tag">RAMs</span><span class="tag">Citrus</span></div>
+</article>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2017</span></div>
+  <h3>Diversification and convergence of aposematic phenotypes: truncated receptors and cellular arrangements mediate rapid evolution of coloration in harlequin poison frogs</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://onlinelibrary.wiley.com/doi/10.1111/evo.13313" target="_blank">Read article</a>
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Diversification and convergence of aposematic phenotypes: truncated receptors and cellular arrangements mediate rapid evolution of coloration in harlequin poison frogs" target="_blank">Google Scholar</a>
+  </div>
+  <p class="authors">Posso-Terranova, A., &amp; Andrés, J.A.</p>
+  <p class="venue">Evolution, 71(11), 2677–2692.</p>
+  <div class="tags"><span class="tag">Aposematism</span><span class="tag">Color evolution</span><span class="tag">Poison frogs</span></div>
+</article>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2017</span></div>
+  <h3>Current and predicted distribution of the pathogenic fungus <em>Batrachochytrium dendrobatidis</em> in Colombia, a hotspot of amphibian biodiversity</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://onlinelibrary.wiley.com/doi/10.1111/btp.12478" target="_blank">Read article</a>
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Current and predicted distribution of the pathogenic fungus &lt;em&gt;Batrachochytrium dendrobatidis&lt;/em&gt; in Colombia, a hotspot of amphibian biodiversity" target="_blank">Google Scholar</a>
+  </div>
+  <p class="authors">Flechas, S.V., Paz, A., Crawford, A.J., Sarmiento, C., Acevedo, A.A., Arboleda, A., Bolívar-García, W., Echeverry-Sandoval, C.L., Franco, R., Mojica, C., Muñoz, A., Palacios-Rodríguez, P., Posso-Terranova, A., Quintero-Marín, P., Rueda-Solano, L.A., Castro-Herrera, F., &amp; Amézquita, A.</p>
+  <p class="venue">Biotropica, 49(5), 685–694.</p>
+  <div class="tags"><span class="tag">Amphibian disease</span><span class="tag">Conservation</span><span class="tag">Colombia</span></div>
+</article>
+<div class="year-marker"><span>2016</span></div>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2016</span></div>
+  <h3>Complex niche divergence underlies lineage diversification in <em>Oophaga</em> poison frogs</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://onlinelibrary.wiley.com/doi/10.1111/jbi.12802" target="_blank">Read article</a>
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Complex niche divergence underlies lineage diversification in &lt;em&gt;Oophaga&lt;/em&gt; poison frogs" target="_blank">Google Scholar</a>
+  </div>
+  <p class="authors">Posso-Terranova, A., &amp; Andres, J.</p>
+  <p class="venue">Journal of Biogeography, 43(10), 2002–2015.</p>
+  <div class="tags"><span class="tag">Niche divergence</span><span class="tag">Biogeography</span><span class="tag">Poison frogs</span></div>
+</article>
+<div class="year-marker"><span>2013</span></div>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2013</span></div>
+  <h3>Molecular characterization of the <em>Guadua angustifolia</em> national germplasm bank using molecular markers</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Molecular characterization of the Guadua angustifolia national germplasm bank using molecular markers" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Rugeles, P., Posso-Terranova, A., Londoño, X., &amp; Muñoz Florez, J.E.</p>
+  <p class="venue">Acta Agronomica, 61(4), 325–330.</p>
+  <div class="tags"><span class="tag">Plant genetics</span><span class="tag">Germplasm</span><span class="tag">Bamboo</span></div>
+</article>
+
+<article class="pub-card" data-type="Book chapter">
+  <div class="pub-top"><span class="pub-type">Book chapter</span><span class="pub-year">2013</span></div>
+  <h3>Diversidad genética de <em>Lumbrineris verilli</em> (Polychaete: Lumbrineridae) en condiciones de enriquecimiento orgánico en la bahía de Buenaventura</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Diversidad genética de Lumbrineris verilli (Polychaete: Lumbrineridae) en condiciones de enriquecimiento orgánico en la bahía de Buenaventura" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Serna-Giraldo, N., Posso-Terranova, A., Muñoz-Florez, J.A., Giraldo, A., &amp; Guzmán-Alvis, A.</p>
+  <p class="venue">In Investigación en Ciencias del Mar: aportes de la Universidad Nacional de Colombia. ISBN: 978-958-761-631-6.</p>
+  <div class="tags"><span class="tag">Marine science</span><span class="tag">Genetic diversity</span><span class="tag">Colombia</span></div>
+</article>
+<div class="year-marker"><span>2012</span></div>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2012</span></div>
+  <h3>Allelic and genotypic frequencies of Calpain, Calpastatin and Leptin in Colombian creole cattle</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Allelic and genotypic frequencies of Calpain, Calpastatin and Leptin in Colombian creole cattle" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Cuetia, J., Posso, A.M., Muñoz, J.E., Ariza, M.F., &amp; Álvarez, L.A.</p>
+  <p class="venue">Actas Iberoamericanas de Conservación Animal, 2, 231–234.</p>
+  <div class="tags"><span class="tag">Animal genetics</span><span class="tag">Cattle</span><span class="tag">Colombia</span></div>
+</article>
+<div class="year-marker"><span>2011</span></div>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2011</span></div>
+  <h3>Morphological and molecular description of <em>Blastocrithidia cyrtomeni</em> sp. nov. associated with <em>Cyrtomenus bergi</em> from Colombia</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Morphological and molecular description of Blastocrithidia cyrtomeni sp. nov. associated with Cyrtomenus bergi from Colombia" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Caicedo, A.M., Gallego, G., Muñoz, J.E., Suárez, H., Torres, A.G., Carvajal, H., Caro, F., Posso, A.M., Maslov, D., &amp; Montoya-Lerma, J.</p>
+  <p class="venue">Memórias do Instituto Oswaldo Cruz, 106(3), 301–307.</p>
+  <div class="tags"><span class="tag">Molecular taxonomy</span><span class="tag">Trypanosomatidae</span><span class="tag">Colombia</span></div>
+</article>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2011</span></div>
+  <h3>Genetic diversity of accessions of <em>Trichanthera gigantea</em> (Humb. &amp; Bonpl.) Nees.</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Genetic diversity of accessions of Trichanthera gigantea (Humb. &amp;amp; Bonpl.) Nees." target="_blank">Search online</a>
+  </div>
+  <p class="authors">Posso, A.M., Cardenas, H., Murgueitio, E., Leterme, P., &amp; Muñoz, J.</p>
+  <p class="venue">Acta Agronómica, 60(2), 120–131.</p>
+  <div class="tags"><span class="tag">Plant genetics</span><span class="tag">Genetic diversity</span></div>
+</article>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2011</span></div>
+  <h3>Diversidad y estructura genética de <em>Guadua angustifolia</em> en la Ecorregión Cafetera colombiana</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Diversidad y estructura genética de Guadua angustifolia en la Ecorregión Cafetera colombiana" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Muñoz Florez, J.E., Londoño, X., Rugeles, P., Posso-Terranova, A., &amp; Vallejo, F.</p>
+  <p class="venue">Recursos Naturales y Ambiente, 61, 39–46.</p>
+  <div class="tags"><span class="tag">Plant genetics</span><span class="tag">Population structure</span><span class="tag">Colombia</span></div>
+</article>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2011</span></div>
+  <h3>Bovine leukemia virus detection in Creole Colombian breeds using nested-PCR</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Bovine leukemia virus detection in Creole Colombian breeds using nested-PCR" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Hernández-Herrera, D., Posso-Terranova, A.M., Benavides, J., Muñoz-Flórez, J.E., Giovambattista, G., &amp; Álvarez-Franco, L.A.</p>
+  <p class="venue">Acta Agronómica, 60(4), 312–318.</p>
+  <div class="tags"><span class="tag">Animal genetics</span><span class="tag">Nested PCR</span><span class="tag">Cattle</span></div>
+</article>
+<div class="year-marker"><span>2010</span></div>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2010</span></div>
+  <h3>Screening of <em>Capsicum spp.</em> to the deforming mosaic virus (PepDMV)</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Screening of Capsicum spp. to the deforming mosaic virus (PepDMV)" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Pardey, C., Posso T., A., &amp; García, M.</p>
+  <p class="venue">Acta Agronómica, 59(1), 97–102.</p>
+  <div class="tags"><span class="tag">Plant pathology</span><span class="tag">Capsicum</span><span class="tag">Virus resistance</span></div>
+</article>
+<div class="year-marker"><span>2008</span></div>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2008</span></div>
+  <h3>Establecimiento de una colección de trabajo de uchuva del suroccidente colombiano</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://www.scielo.org.co/scielo.php?script=sci_arttext&pid=S0120-28122008000200002" target="_blank">Read article</a>
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Establecimiento+de+una+colección+de+trabajo+de+uchuva+del+suroccidente+colombiano" target="_blank">Google Scholar</a>
+  </div>
+  <p class="authors">Espinosa Piedrahíta, K., Posso Terranova, A.M., Vásquez, H., &amp; Muñoz Flórez, J.E.</p>
+  <p class="venue">Acta Agronómica, 57(2), 95–99.</p>
+  <div class="tags"><span class="tag">Cape gooseberry</span><span class="tag">Germplasm</span><span class="tag">Colombia</span></div>
+</article>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2008</span></div>
+  <h3>Molecular characterization of 43 accessions of Cape gooseberry from six departments of Colombia</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://www.scielo.org.co/scielo.php?script=sci_arttext&pid=S0120-28122008000200004" target="_blank">Read article</a>
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Molecular+characterization+of+43+accessions+of+Cape+gooseberry+from+six+departments+of+Colombia" target="_blank">Google Scholar</a>
+  </div>
+  <p class="authors">Espinosa Piedrahíta, K., Posso Terranova, A.M., Vásquez, H., &amp; Muñoz Flórez, J.E.</p>
+  <p class="venue">Acta Agronómica, 57(2), 109–115.</p>
+  <div class="tags"><span class="tag">Cape gooseberry</span><span class="tag">Molecular markers</span><span class="tag">Genetic diversity</span></div>
+</article>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2008</span></div>
+  <h3>Morphologic characterization of 24 accessions of Cape gooseberry from the National University at Palmira’s campus germplasm bank</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://www.scielo.org.co/scielo.php?script=sci_arttext&pid=S0120-28122008000200003" target="_blank">Read article</a>
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Morphologic+characterization+of+24+accessions+of+Cape+gooseberry+from+the+National+University+at+Palmira+campus+germplasm+bank" target="_blank">Google Scholar</a>
+  </div>
+  <p class="authors">Bonilla Betancourt, M.L., Espinosa Piedrahíta, K., Posso Terranova, A.M., Vásquez, H., &amp; Muñoz Flórez, J.E.</p>
+  <p class="venue">Acta Agronómica, 57(2), 101–108.</p>
+  <div class="tags"><span class="tag">Cape gooseberry</span><span class="tag">Morphology</span><span class="tag">Germplasm bank</span></div>
+</article>
+
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2008</span></div>
+  <h3>Molecular characterization of 15 strains of <em>Beauveria bassiana</em> associated with Cosmopolites and Metamasius in plantain and banana in three regions of Colombia</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Molecular characterization of 15 strains of Beauveria bassiana associated with Cosmopolites and Metamasius in plantain and banana in three regions of Colombia" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Marmolejo, D., Mejía, R., Hurtado, I., Posso, A., &amp; Muñoz, J.E.</p>
+  <p class="venue">Acta Agronómica, 57(3), 199–204.</p>
+  <div class="tags"><span class="tag">Molecular characterization</span><span class="tag">Fungi</span><span class="tag">Crop pests</span></div>
+</article>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2008</span></div>
+  <h3>Genetic variation of Hartón del Valle Creole cattle using RAMs</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Genetic variation of Hartón del Valle Creole cattle using RAMs" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Piedrahita, A.M., Posso, A.M., Muñoz, J.E., &amp; Álvarez, L.A.</p>
+  <p class="venue">Acta Agronómica, 57(1), 71–76.</p>
+  <div class="tags"><span class="tag">Animal genetics</span><span class="tag">Cattle</span><span class="tag">RAMs</span></div>
+</article>
+
+<div class="year-marker"><span>2007</span></div>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2007</span></div>
+  <h3>Molecular characterization of Colombian Creole ducks</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Molecular characterization of Colombian Creole ducks" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Hernández, D., Muñoz, D., Posso, A., Valencia, N., &amp; Muñoz, J.E.</p>
+  <p class="venue">Acta Agronómica, 56(3), 141–145.</p>
+  <div class="tags"><span class="tag">Animal genetics</span><span class="tag">Ducks</span><span class="tag">Colombia</span></div>
+</article>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2007</span></div>
+  <h3>Detection of a single mutation point in Ryanodine receptor Gene (Ryr1) in Colombian Creole pigs</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Detection of a single mutation point in Ryanodine receptor Gene (Ryr1) in Colombian Creole pigs" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Hernández, D., Posso, A., &amp; Muñoz, J.E.</p>
+  <p class="venue">Acta Agronómica, 57(4), 275–278.</p>
+  <div class="tags"><span class="tag">Animal genetics</span><span class="tag">Pigs</span><span class="tag">Ryr1</span></div>
+</article>
+<div class="year-marker"><span>2006</span></div>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2006</span></div>
+  <h3>Molecular characterization of Colombian Creole pigs using RAMs (Random Amplified Microsatellites)</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Molecular characterization of Colombian Creole pigs using RAMs (Random Amplified Microsatellites)" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Oslinger, A., Muñoz, J.E., Álvarez, L.A., Moreno, F., &amp; Posso, A.</p>
+  <p class="venue">Acta Agronómica, 55(4), 45–50.</p>
+  <div class="tags"><span class="tag">Animal genetics</span><span class="tag">Pigs</span><span class="tag">RAMs</span></div>
+</article>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2006</span></div>
+  <h3>Detection of allelic variants of K-casein in Hartón del Valle Creole cattle</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Detection of allelic variants of K-casein in Hartón del Valle Creole cattle" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Naranjo, J., Posso, A., &amp; Muñoz, J.</p>
+  <p class="venue">Acta Agronómica, 56(1), 43–47.</p>
+  <div class="tags"><span class="tag">Animal genetics</span><span class="tag">Kappa-casein</span><span class="tag">Cattle</span></div>
+</article>
+<div class="year-marker"><span>2005</span></div>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2005</span></div>
+  <h3>Molecular Characterization of Hartón del Valle Creole cattle using RAMs</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Molecular Characterization of Hartón del Valle Creole cattle using RAMs" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Piedrahita, A., Muñoz, J., Álvarez, A., &amp; Posso, A.</p>
+  <p class="venue">Biotecnología en el Sector Agropecuario y Agroindustrial, 3(1), 15–26.</p>
+  <div class="tags"><span class="tag">Animal genetics</span><span class="tag">Cattle</span><span class="tag">RAMs</span></div>
+</article>
+
+<article class="pub-card" data-type="Journal article">
+  <div class="pub-top"><span class="pub-type">Journal article</span><span class="pub-year">2005</span></div>
+  <h3>Detection of allelic kappa-casein variants in dairy cattle using PCR-SSCP</h3>
+  <div class="paper-links">
+    <a class="paper-btn" href="https://scholar.google.com/scholar?q=Detection of allelic kappa-casein variants in dairy cattle using PCR-SSCP" target="_blank">Search online</a>
+  </div>
+  <p class="authors">Naranjo, J., Muñoz, J., &amp; Posso, A.</p>
+  <p class="venue">Biotecnología en el Sector Agropecuario y Agroindustrial, 3(1), 94–97.</p>
+  <div class="tags"><span class="tag">Animal genetics</span><span class="tag">Kappa-casein</span><span class="tag">PCR-SSCP</span></div>
+</article>
+</div></section></main>
+<footer>
+  <div class="container footer-grid">
+    <div>
+      <strong>Dr. Andres Posso-Terranova</strong><br>
+      Genetics • Evolution • Interactive Biology Education
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Main site</a>
+      <a href="publications_v1.html">Publications</a>
+      <a href="virtual_lab.html">Genetics Virtual Lab</a>
+      <a href="poison_frogs_v1.html">Poison frogs</a>
+      <a href="mailto:andres.posso@usask.ca">Email</a>
+    </div>
+  </div>
+</footer>
+<script>
+function filterPublications(){const q=document.getElementById("searchBox").value.toLowerCase().trim();const type=document.getElementById("typeFilter").value;const cards=[...document.querySelectorAll(".pub-card")];const years=[...document.querySelectorAll(".year-marker")];cards.forEach(c=>{const okQ=!q||c.textContent.toLowerCase().includes(q);const okT=type==="all"||c.dataset.type===type;c.classList.toggle("hidden",!(okQ&&okT));});years.forEach(y=>{let n=y.nextElementSibling,vis=false;while(n&&!n.classList.contains("year-marker")){if(n.classList.contains("pub-card")&&!n.classList.contains("hidden")){vis=true;break;}n=n.nextElementSibling;}y.classList.toggle("hidden",!vis);});}
+</script></body></html>

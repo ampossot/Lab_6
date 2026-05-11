@@ -27,11 +27,11 @@
     .genes{display:grid;gap:10px}.geneBox{padding:12px;border:1px dashed #d8c9b4;border-radius:16px;background:#fffaf0}.geneTitle{font-weight:900;display:flex;justify-content:space-between;gap:8px}.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;background:#f1e8d9;padding:5px 9px;font-size:.78rem;font-weight:800;color:#64401a}.pill.x{background:#e5f3f5;color:#235b5f}.pill.dom{background:#fff1c7;color:#7c4a03}
     .parents{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}.parentSlot{min-height:110px;border:2px dashed #d5c8b7;border-radius:18px;padding:10px;text-align:center;background:#fffaf1}.parentSlot.ready{border-style:solid;border-color:var(--accent2);background:#edf8f8}.parentSlot h3{margin:0 0 8px;font-size:.95rem;color:var(--muted)}
     .toolbar{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}.stats{display:flex;gap:8px;flex-wrap:wrap}.stat{background:white;border:1px solid var(--line);border-radius:14px;padding:8px 10px;font-weight:800;color:#344055}.flyGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:10px;max-height:620px;overflow:auto;padding:4px}
-    .fly{position:relative;border:2px solid transparent;border-radius:16px;min-height:70px;background:white;box-shadow:0 4px 12px rgba(0,0,0,.07);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:.12s transform,.12s border,.12s background}.fly:hover{transform:translateY(-2px)}.fly.selectedFemale{border-color:#d53f8c;background:#fff0f7}.fly.selectedMale{border-color:#3182ce;background:#ebf8ff}.fly.dim{opacity:.28}.fly .sex{font-size:.8rem;font-weight:900}.fly .id{font-size:.65rem;color:var(--muted)}
+    .fly{position:relative;border:2px solid transparent;border-radius:16px;min-height:70px;background:white;box-shadow:0 4px 12px rgba(0,0,0,.07);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:.12s transform,.12s border,.12s background}.fly:hover{transform:translateY(-2px)}.fly.selectedFemale{border-color:#d53f8c;background:#fff0f7}.fly.selectedMale{border-color:#3182ce;background:#ebf8ff}.fly.dim{opacity:.28}.fly .sex{font-size:.8rem;font-weight:900}.fly .id{font-size:.65rem;color:var(--muted)}.flyLabel{font-size:.64rem;color:var(--muted);font-weight:800;line-height:1.08;text-align:center;max-width:54px;white-space:normal;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
     .emptyState{border:2px dashed #d8c9b4;border-radius:20px;padding:30px;text-align:center;background:#fffaf1;color:var(--muted);grid-column:1/-1}.emptyState b{color:var(--ink)}
     .flyIcon{width:46px;height:34px;position:relative}.body{position:absolute;left:16px;top:9px;width:18px;height:18px;border-radius:50% 50% 55% 55%;background:#7b4b2a;border:1px solid #4b2b18}.abdomen{position:absolute;left:28px;top:12px;width:17px;height:14px;border-radius:50%;background:#81512f;border:1px solid #4b2b18}.head{position:absolute;left:6px;top:12px;width:14px;height:13px;border-radius:50%;background:#68411f}.wing{position:absolute;top:0;width:22px;height:14px;border-radius:70% 20% 70% 20%;background:rgba(180,210,225,.66);border:1px solid rgba(80,120,140,.35);transform:rotate(-22deg)}.wing.r{left:21px;transform:scaleX(-1) rotate(-22deg)}.eye{position:absolute;width:6px;height:6px;border-radius:50%;top:11px;background:#c53030}.eye.one{left:5px}.eye.two{left:13px}.leg{position:absolute;width:14px;height:1px;background:#3c2b21;top:27px}.leg.a{left:14px;transform:rotate(25deg)}.leg.b{left:25px;transform:rotate(-20deg)}.leg.c{left:31px;transform:rotate(24deg)}
     .phenWhite .eye{background:#f7fafc;border:1px solid #999}.phenVestigial .wing{width:11px;height:8px;top:6px}.phenMiniature .wing{width:14px;height:9px;top:5px}.phenBlack .body,.phenBlack .abdomen,.phenBlack .head{background:#1f2933}.phenCurly .wing{transform:rotate(-70deg);height:18px}.phenCurly .wing.r{transform:scaleX(-1) rotate(-70deg)}.phenSepia .eye{background:#7b341e}.phenYellow .body,.phenYellow .abdomen,.phenYellow .head{background:#d69e2e}
-    table{width:100%;border-collapse:collapse;background:white;border-radius:16px;overflow:hidden}th,td{padding:9px;border-bottom:1px solid #eee;text-align:left;font-size:.9rem}th{background:#f4ead8}.resultGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:900px){.resultGrid{grid-template-columns:1fr}}
+    table{width:100%;border-collapse:collapse;background:white;border-radius:16px;overflow:hidden}th,td{padding:9px;border-bottom:1px solid #eee;text-align:left;font-size:.9rem;vertical-align:top}th{background:#f4ead8}.resultGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:900px){.resultGrid{grid-template-columns:1fr}}
     .offspringPreview{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:8px;max-height:230px;overflow:auto}.offspringPreview .fly{min-height:54px;border-radius:12px}.offspringPreview .flyIcon{transform:scale(.78)}.badge{padding:4px 7px;border-radius:999px;background:#edf2f7;font-weight:900;font-size:.75rem}.warning{background:#fff4e5;border-left:5px solid var(--gold);padding:10px 12px;border-radius:12px;margin-top:10px;color:#5d3b00}.footer{text-align:center;color:var(--muted);padding:20px;font-size:.9rem}
     .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.hide{display:none!important}.locked input,.locked select{background:#f3f0e8;color:#6b7280;cursor:not-allowed}.lockedNotice{background:#edf8f8;border-left:5px solid var(--accent2);padding:10px 12px;border-radius:12px;margin-top:10px;color:#235b5f;font-weight:800}
 
@@ -106,25 +106,25 @@
       <div>
         <label>Initial population size</label>
         <select id="popSize">
-          <option value="100">100</option>
+          <option value="100" selected>100</option>
           <option value="300">300</option>
-          <option value="500" selected>500</option>
+          <option value="500">500</option>
         </select>
       </div>
       <div>
         <label>Offspring per cross</label>
         <select id="offspringN">
-          <option value="100">100</option>
-          <option value="300" selected>300</option>
+          <option value="100" selected>100</option>
+          <option value="300">300</option>
           <option value="500">500</option>
         </select>
       </div>
     </div>
     <label>How many genes?</label>
     <select id="geneCount" onchange="setGeneCount(Number(this.value))">
-      <option value="1">1 gene</option>
+      <option value="1" selected>1 gene</option>
       <option value="2">2 genes</option>
-      <option value="3" selected>3 genes</option>
+      <option value="3">3 genes</option>
     </select>
     <div id="geneSelectors" class="section"></div>
     <div id="genes" class="genes section"></div>
@@ -188,12 +188,10 @@
       </div>
       <div class="resultGrid">
         <div>
-          <h3>Offspring preview</h3>
-          <div id="offspringPreview" class="offspringPreview"></div>
-        </div>
-        <div>
           <h3>Phenotype counts</h3>
           <div id="phenotypeTable"></div>
+        </div>
+        <div>
           <h3 id="genotypeCountsTitle">Genotype counts</h3>
           <div id="genotypeTable"></div>
         </div>
@@ -274,7 +272,7 @@ const geneLibrary = {
   custom: {label:'Custom / manual', name:'custom gene', symbol:'g', chromosome:'auto', wild:'g+', mutant:'g', dominance:'recessive', phenotype:'custom phenotype'}
 };
 
-let selectedGeneKeys = ['white','sepia','curly'];
+let selectedGeneKeys = ['white'];
 
 function clone(x){return JSON.parse(JSON.stringify(x));}
 function geneFromKey(key){ return clone(geneLibrary[key] || geneLibrary.custom); }
@@ -287,8 +285,8 @@ function init(){
   renderBottles();
 }
 function resetGenes(){
-  selectedGeneKeys = ['white','sepia','curly'];
-  document.getElementById('geneCount').value = '3';
+  selectedGeneKeys = ['white'];
+  document.getElementById('geneCount').value = '1';
   genes = selectedGeneKeys.map(geneFromKey);
   population = [];
   selectedFemale = null;
@@ -379,8 +377,12 @@ function newGeneration(shortLabel, longLabel, flies, parents=null){
   return {shortLabel, longLabel, flies, sortMode:'none', selectedFemale:null, selectedMale:null, parents};
 }
 function generationLabelForIndex(index){ return index===0 ? ['P','Parental Population'] : [`F${index}`,`F${index} Population`]; }
+function nextFlyIdStart(){
+  if(!generations.length) return 1;
+  return Math.max(...generations.flatMap(g=>g.flies.map(f=>f.id))) + 1;
+}
 function generatePopulation(){
-  const n = Number(document.getElementById('popSize').value) || 500;
+  const n = Number(document.getElementById('popSize').value) || 100;
   const flies = Array.from({length:n},(_,i)=>makeFly(i+1));
   generations = [newGeneration('P','Parental Population',flies)];
   activeGenerationIndex = 0;
@@ -393,7 +395,7 @@ function generatePopulation(){
 }
 function makeMysteryChallenge(){
   mysteryMode=true; showGenotypes=false;
-  const n = Number(document.getElementById('popSize').value) || 500;
+  const n = Number(document.getElementById('popSize').value) || 100;
   const flies = Array.from({length:n},(_,i)=>makeFly(i+1));
   generations = [newGeneration('P','Parental Population',flies)];
   activeGenerationIndex = 0;
@@ -427,24 +429,34 @@ function phenotypeClasses(fly){
   }});
   return cls.join(' ');
 }
+function whiteEyeEpistatic(fly){
+  const whiteGene = genes.find(g => g.symbol === 'w' || (g.phenotype || '').toLowerCase().includes('white'));
+  if(!whiteGene) return false;
+  return isMutantVisible(fly, whiteGene);
+}
 function phenotypeText(fly){
-  const muts=genes.filter(g=>isMutantVisible(fly,g)).map(g=>g.phenotype||g.name);
+  const muts=genes
+    .filter(g=>isMutantVisible(fly,g))
+    .filter(g=>!(whiteEyeEpistatic(fly) && ((g.phenotype||'').toLowerCase().includes('sepia') || g.symbol === 'se')))
+    .map(g=>g.phenotype||g.name);
   return muts.length?muts.join(', '):'wild type';
 }
 function phenotypeSexText(fly){
   return `${phenotypeText(fly)} ${fly.sex === 'female' ? 'females' : 'males'}`;
 }
-function alleleDisplay(arr){
+function alleleDisplay(arr, g=null){
   const copy = [...arr];
   copy.sort((a,b)=>{
     if(a==='Y' && b!=='Y') return 1;
     if(b==='Y' && a!=='Y') return -1;
+    if(g && a===g.wild && b!==g.wild) return -1;
+    if(g && b===g.wild && a!==g.wild) return 1;
     return 0;
   });
   return copy.join('/');
 }
 function genotypeText(fly){
-  return genes.map(g=>`${g.symbol}: ${alleleDisplay(fly.genotype[g.symbol])}`).join(' | ');
+  return genes.map(g=>`${g.symbol}: ${alleleDisplay(fly.genotype[g.symbol], g)}`).join(' | ');
 }
 function flyHTML(fly,mini=false){
   return `<div class="flyIcon ${phenotypeClasses(fly)}"><span class="wing"></span><span class="wing r"></span><span class="head"></span><span class="body"></span><span class="abdomen"></span><span class="eye one"></span><span class="eye two"></span><span class="leg a"></span><span class="leg b"></span><span class="leg c"></span></div>${mini?'':`<div class="sex">${fly.sex==='female'?'♀':'♂'}</div><div class="id">#${fly.id}</div>`}`;
@@ -535,8 +547,10 @@ function renderPopulation(){
       lastGroup = groupName;
     }
     const d=document.createElement('div'); d.className='fly '+(f===gen.selectedFemale?'selectedFemale ':'')+(f===gen.selectedMale?'selectedMale ':'');
-    d.title = `${gen.shortLabel} #${f.id} | ${f.sex} | ${phenotypeText(f)}${showGenotypes&&!mysteryMode?' | '+genotypeText(f):''}`;
-    d.innerHTML=flyHTML(f)+`<div class="id">${gen.shortLabel} #${f.id}</div><div class="id">${phenotypeText(f).slice(0,18)}</div>`;
+    d.title = showGenotypes && !mysteryMode
+      ? genotypeText(f)
+      : '';
+    d.innerHTML=flyHTML(f,true)+`<div class="flyLabel">${gen.shortLabel} #${f.id}<br>${phenotypeText(f).slice(0,24)}</div>`;
     d.onclick=()=>selectFly(f); grid.appendChild(d);
   });
   const females=gen.flies.filter(f=>f.sex==='female').length, males=gen.flies.length-females;
@@ -606,8 +620,9 @@ function childFrom(mom,dad,id){
 function crossSelected(){
   const parentGen = activeGeneration();
   if(!parentGen || !parentGen.selectedFemale || !parentGen.selectedMale){ alert('Select one female and one male first.'); return; }
-  const n=Number(document.getElementById('offspringN').value) || 300;
-  const offspring=Array.from({length:n},(_,i)=>childFrom(parentGen.selectedFemale,parentGen.selectedMale,i+1));
+  const n=Number(document.getElementById('offspringN').value) || 100;
+  const startId = nextFlyIdStart();
+  const offspring=Array.from({length:n},(_,i)=>childFrom(parentGen.selectedFemale,parentGen.selectedMale,startId+i));
   const newIndex = generations.length;
   const labels = generationLabelForIndex(newIndex);
   const newGen = newGeneration(labels[0], labels[1], offspring, {from:parentGen.shortLabel, female:parentGen.selectedFemale.id, male:parentGen.selectedMale.id});
@@ -642,8 +657,6 @@ function renderActiveSummary(){
   document.getElementById('resultsCard').classList.remove('hide');
   const parentTxt = gen.parents ? `${gen.parents.from}: ♀ #${gen.parents.female} × ♂ #${gen.parents.male}` : 'Cross result';
   document.getElementById('crossTitle').textContent=`${gen.shortLabel}: ${parentTxt} → ${gen.flies.length} offspring`;
-  const prev=document.getElementById('offspringPreview'); prev.innerHTML='';
-  gen.flies.slice(0,120).forEach(f=>{ const d=document.createElement('div'); d.className='fly'; d.title=`${gen.shortLabel} #${f.id} | ${f.sex} | ${phenotypeText(f)}${showGenotypes&&!mysteryMode?' | '+genotypeText(f):''}`; d.innerHTML=flyHTML(f,true); prev.appendChild(d); });
   makeTable('phenotypeTable', countBy(gen.flies, phenotypeSexText));
   if(mysteryMode && gen.shortLabel === 'F1'){
     document.getElementById('genotypeCountsTitle').classList.add('hide');

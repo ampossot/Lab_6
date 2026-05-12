@@ -608,7 +608,7 @@ function makeGamete(parent){
   return gamete;
 }
 function childFrom(mom,dad,id){
-  const egg=makeGamete(mom), sperm=makeGamete(dad); const genotype={}; let sex='female';
+  const egg=makeGamete(mom), sperm=makeGamete(dad); const genotype={}; let sex=genes.some(g=>g.chromosome==='X') ? 'female' : (Math.random()<0.5 ? 'female' : 'male');
   genes.forEach(g=>{
     if(g.chromosome==='X'){
       genotype[g.symbol]=[egg[g.symbol], sperm[g.symbol]];

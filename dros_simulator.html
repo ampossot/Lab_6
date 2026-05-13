@@ -120,6 +120,11 @@
         </select>
       </div>
     </div>
+    <label class="inline" style="font-weight:800;margin-top:12px">
+      <input type="checkbox" id="ensureRareGenotypes" checked>
+      Ensure rare genotypes are represented
+    </label>
+    <p class="small" style="margin:4px 0 0">Teaching mode: after random generation, the app adds at least one missing rare genotype class when possible.</p>
     <label>How many genes?</label>
     <select id="geneCount" onchange="setGeneCount(Number(this.value))">
       <option value="1" selected>1 gene</option>
@@ -373,6 +378,77 @@ function makeFly(id){
   });
   return {id, sex, genotype};
 }
+
+function possibleGenotypesForGene(g, sex){
+  if(g.chromosome === 'X'){
+    if(sex === 'male') return [[g.wild, 'Y'], [g.mutant, 'Y']];
+    return [[g.wild, g.wild], [g.wild, g.mutant], [g.mutant, g.mutant]];
+  }
+  return [[g.wild, g.wild], [g.wild, g.mutant], [g.mutant, g.mutant]];
+}
+function cartesianProduct(arrays){
+  return arrays.reduce((acc, current)=>acc.flatMap(a=>current.map(b=>a.concat([b]))), [[]]);
+}
+function makeFlyFromGenotypeClass(id, genotypeClass){
+  const genotype = {};
+  genotypeClass.parts.forEach(part=>{ genotype[part.symbol] = [...part.alleles]; });
+  return {id, sex:genotypeClass.sex, genotype};
+}
+function genotypeClassKeyFromParts(sex, parts){
+  return `${sex}::` + parts.map(part=>{
+    const g = genes.find(x=>x.symbol === part.symbol);
+    return `${part.symbol}:${alleleDisplay(part.alleles, g)}`;
+  }).join('|');
+}
+function genotypeClassKey(fly){
+  const parts = genes.map(g=>({symbol:g.symbol, alleles:fly.genotype[g.symbol]}));
+  return genotypeClassKeyFromParts(fly.sex, parts);
+}
+function expectedGenotypeClasses(){
+  const sexes = ['female','male'];
+  const classes = [];
+  sexes.forEach(sex=>{
+    const perGene = genes.map(g=>possibleGenotypesForGene(g, sex).map(alleles=>({symbol:g.symbol, alleles})));
+    cartesianProduct(perGene).forEach(parts=>{
+      classes.push({sex, parts, key:genotypeClassKeyFromParts(sex, parts)});
+    });
+  });
+  return classes;
+}
+function ensureRareGenotypesRepresented(flies){
+  const option = document.getElementById('ensureRareGenotypes');
+  if(!option || !option.checked) return flies;
+
+  const classes = expectedGenotypeClasses();
+  if(classes.length >= flies.length) return flies;
+
+  const present = new Set(flies.map(genotypeClassKey));
+  const missing = classes.filter(c=>!present.has(c.key));
+  if(!missing.length) return flies;
+
+  const counts = {};
+  flies.forEach(f=>{ const k = genotypeClassKey(f); counts[k] = (counts[k] || 0) + 1; });
+
+  missing.forEach(cls=>{
+    let replaceIndex = -1;
+    let bestCount = 1;
+    for(let i=0; i<flies.length; i++){
+      const key = genotypeClassKey(flies[i]);
+      if((counts[key] || 0) > bestCount){
+        bestCount = counts[key];
+        replaceIndex = i;
+      }
+    }
+    if(replaceIndex >= 0){
+      const oldKey = genotypeClassKey(flies[replaceIndex]);
+      counts[oldKey]--;
+      flies[replaceIndex] = makeFlyFromGenotypeClass(flies[replaceIndex].id, cls);
+      counts[cls.key] = 1;
+      present.add(cls.key);
+    }
+  });
+  return flies;
+}
 function newGeneration(shortLabel, longLabel, flies, parents=null){
   return {shortLabel, longLabel, flies, sortMode:'none', selectedFemale:null, selectedMale:null, parents};
 }
@@ -383,7 +459,7 @@ function nextFlyIdStart(){
 }
 function generatePopulation(){
   const n = Number(document.getElementById('popSize').value) || 100;
-  const flies = Array.from({length:n},(_,i)=>makeFly(i+1));
+  const flies = ensureRareGenotypesRepresented(Array.from({length:n},(_,i)=>makeFly(i+1)));
   generations = [newGeneration('P','Parental Population',flies)];
   activeGenerationIndex = 0;
   population = flies;
@@ -396,7 +472,7 @@ function generatePopulation(){
 function makeMysteryChallenge(){
   mysteryMode=true; showGenotypes=false;
   const n = Number(document.getElementById('popSize').value) || 100;
-  const flies = Array.from({length:n},(_,i)=>makeFly(i+1));
+  const flies = ensureRareGenotypesRepresented(Array.from({length:n},(_,i)=>makeFly(i+1)));
   generations = [newGeneration('P','Parental Population',flies)];
   activeGenerationIndex = 0;
   population = flies;
@@ -495,7 +571,7 @@ function lockSetup(){
   setupLocked = true;
   const panel = document.getElementById('setupPanel');
   panel.classList.add('locked');
-  ['popSize','geneCount','generatePopulationBtn','mysteryModeBtn'].forEach(id=>document.getElementById(id).disabled = true);
+  ['popSize','geneCount','ensureRareGenotypes','generatePopulationBtn','mysteryModeBtn'].forEach(id=>document.getElementById(id).disabled = true);
   document.querySelectorAll('#geneSelectors select, #genes input, #genes select').forEach(el=>el.disabled = true);
   if(!document.getElementById('lockedNotice')){
     const notice=document.createElement('div');
@@ -509,7 +585,7 @@ function unlockSetup(){
   setupLocked = false;
   const panel = document.getElementById('setupPanel');
   panel.classList.remove('locked');
-  ['popSize','geneCount','generatePopulationBtn','mysteryModeBtn'].forEach(id=>document.getElementById(id).disabled = false);
+  ['popSize','geneCount','ensureRareGenotypes','generatePopulationBtn','mysteryModeBtn'].forEach(id=>document.getElementById(id).disabled = false);
   document.querySelectorAll('#geneSelectors select, #genes input, #genes select').forEach(el=>el.disabled = false);
   const notice=document.getElementById('lockedNotice');
   if(notice) notice.remove();

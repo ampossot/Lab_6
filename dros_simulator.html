@@ -493,16 +493,27 @@ function isMutantVisible(fly,g){
 }
 function phenotypeClasses(fly){
   let cls=[];
-  genes.forEach(g=>{ if(isMutantVisible(fly,g)){
-    const ph=(g.phenotype||'').toLowerCase();
-    if(ph.includes('white')) cls.push('phenWhite');
-    if(ph.includes('vestigial')) cls.push('phenVestigial');
-    if(ph.includes('miniature')) cls.push('phenMiniature');
-    if(ph.includes('black')) cls.push('phenBlack');
-    if(ph.includes('curly')) cls.push('phenCurly');
-    if(ph.includes('sepia')) cls.push('phenSepia');
-    if(ph.includes('yellow')) cls.push('phenYellow');
-  }});
+  const whiteEpistasis = whiteEyeEpistatic(fly);
+
+  genes.forEach(g=>{ 
+    if(isMutantVisible(fly,g)){
+
+      if(whiteEpistasis && ((g.phenotype||'').toLowerCase().includes('sepia') || g.symbol === 'se')){
+        return;
+      }
+
+      const ph=(g.phenotype||'').toLowerCase();
+
+      if(ph.includes('white')) cls.push('phenWhite');
+      if(ph.includes('vestigial')) cls.push('phenVestigial');
+      if(ph.includes('miniature')) cls.push('phenMiniature');
+      if(ph.includes('black')) cls.push('phenBlack');
+      if(ph.includes('curly')) cls.push('phenCurly');
+      if(ph.includes('sepia')) cls.push('phenSepia');
+      if(ph.includes('yellow')) cls.push('phenYellow');
+    }
+  });
+
   return cls.join(' ');
 }
 function whiteEyeEpistatic(fly){
@@ -701,7 +712,13 @@ function crossSelected(){
   const offspring=Array.from({length:n},(_,i)=>childFrom(parentGen.selectedFemale,parentGen.selectedMale,startId+i));
   const newIndex = generations.length;
   const labels = generationLabelForIndex(newIndex);
-  const newGen = newGeneration(labels[0], labels[1], offspring, {from:parentGen.shortLabel, female:parentGen.selectedFemale.id, male:parentGen.selectedMale.id});
+  const newGen = newGeneration(labels[0], labels[1], offspring, {
+    from:parentGen.shortLabel,
+    female:parentGen.selectedFemale.id,
+    male:parentGen.selectedMale.id,
+    femaleGenotype:genotypeText(parentGen.selectedFemale),
+    maleGenotype:genotypeText(parentGen.selectedMale)
+  });
   generations.push(newGen);
   activeGenerationIndex = newIndex;
   lastCrossInfo = {childIndex:newIndex, parentShort:parentGen.shortLabel, femaleId:parentGen.selectedFemale.id, maleId:parentGen.selectedMale.id};
@@ -731,7 +748,9 @@ function renderActiveSummary(){
   }
   document.getElementById('populationSummaryCard').classList.add('hide');
   document.getElementById('resultsCard').classList.remove('hide');
-  const parentTxt = gen.parents ? `${gen.parents.from}: ♀ #${gen.parents.female} × ♂ #${gen.parents.male}` : 'Cross result';
+  const parentTxt = gen.parents
+    ? `${gen.parents.from}: ♀ #${gen.parents.female} (${gen.parents.femaleGenotype}) × ♂ #${gen.parents.male} (${gen.parents.maleGenotype})`
+    : 'Cross result';
   document.getElementById('crossTitle').textContent=`${gen.shortLabel}: ${parentTxt} → ${gen.flies.length} offspring`;
   makeTable('phenotypeTable', countBy(gen.flies, phenotypeSexText));
   if(mysteryMode && gen.shortLabel === 'F1'){

@@ -477,6 +477,66 @@ button::after {
   }
 }
 
+
+.main-back-btn{
+  position:absolute;
+  top:18px;
+  left:18px;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 18px;
+  border-radius:18px;
+  text-decoration:none;
+  color:white;
+  background:rgba(7,21,47,0.88);
+  border:1px solid rgba(255,255,255,0.18);
+  box-shadow:0 12px 28px rgba(0,0,0,0.28);
+  backdrop-filter:blur(8px);
+  transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+  font-weight:700;
+}
+
+.main-back-btn:hover{
+  transform:translateY(-3px);
+  box-shadow:0 18px 35px rgba(0,0,0,0.35);
+  background:rgba(11,30,60,0.95);
+}
+
+.main-back-btn .ap-logo{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,#69f0d0,#66c7ff);
+  color:#07152f;
+  font-weight:900;
+  font-size:18px;
+}
+
+.main-back-btn .btn-text{
+  display:flex;
+  flex-direction:column;
+  line-height:1.05;
+}
+
+.main-back-btn .btn-text small{
+  font-size:11px;
+  opacity:.78;
+  font-weight:600;
+}
+
+@media (max-width:600px){
+  .main-back-btn{
+    position:static;
+    margin:12px auto;
+    width:fit-content;
+  }
+}
+
 </style>
 </head>
 
@@ -485,6 +545,15 @@ button::after {
 <div class="page">
 
   <div class="hero-wrap">
+
+<a class="main-back-btn" href="index.html">
+  <span class="ap-logo">AP</span>
+  <span class="btn-text">
+    <span>Back to Main Page</span>
+    <small>ampossot.com</small>
+  </span>
+</a>
+
     <img class="hero" src="genetics_virtual_lab_banner.jpeg" alt="Genetics Virtual Lab banner">
 
     <div class="hero-coffee">
